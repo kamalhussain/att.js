@@ -1,0 +1,21 @@
+{
+  "name": "att-js",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "underscore": "",
+    "async": "",
+    "precommit-hook": "0.1.0",
+    "templatizer": "",
+    "uglify-js": "2.x",
+    "mustache": "",
+    "colors": "",
+    "semi-static": "0.0.2",
+    "express": "3.x",
+    "jade": "",
+    "getconfig": "",
+    "att-express-auth": "",
+    "connect-redis": "",
+    "request": ""
+  }
+}

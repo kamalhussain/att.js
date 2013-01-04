@@ -1,0 +1,7 @@
+/trash/
+/private/
+/deploy/certs
+/deploy/*rsa
+/deploy/*dsa
+node_modules
+.DS_Store
