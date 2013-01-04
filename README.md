@@ -54,5 +54,5 @@ node build.js
 
 ### Developers
 
-[Henrik Joreteg](http://andyet.com/team/henrik/) – [&yet](http://andyet.com)
-Geoff Hollingsworth – Ericsson
+- [Henrik Joreteg](http://andyet.com/team/henrik/) – [&yet](http://andyet.com)
+- Geoff Hollingsworth – Ericsson
