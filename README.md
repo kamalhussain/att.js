@@ -48,6 +48,10 @@ npm install .
 node build.js
 ```
 
-## Authors
+## Credits
+
+[The AT&T Foundry](https://foundry.att.com/)
+
+### Developers
 [Henrik Joreteg](http://andyet.com/team/henrik/) – [&yet](http://andyet.com)
 Geoff Hollingsworth – Ericsson
