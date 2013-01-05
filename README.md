@@ -4,7 +4,7 @@ Client library for turning your browser into a phone.
 
 For more info/demos visit: https://js.att.io
 
-## How to make a Phone Call
+## How to Make a Phone Call
 
 ```js
 var att = $.att({
@@ -24,6 +24,79 @@ var att = $.att({
   }
 });
 
+```
+
+## Configuring att.js
+
+The configuration settings for att.js are:
+
+* `apiKey`: Your OAuth access token. 
+* `ringTone`: A URL of an audio file to use a ring tone for incoming calls.
+* `ringbackTone`: A URL of an audio file to use while waiting for a call to be answered.
+* `log`: Defaults to `true` to include verbose console log output.
+
+Additionally, there are several callback hooks for managing a call's lifecycle:
+
+* `onReady`
+* `onUnReady`
+* `onError`
+* `onCalling`
+* `onCallBegin`
+* `onCallEnd`
+* `onIncomingCalli`
+* `onOutgoingCall`
+
+Each of which is called with a call object.
+
+When specifying the callbacks, you may either include them directly as so:
+
+```js
+var att = $.att({
+  apiKey: "YOUR ACCESS TOKEN",
+  onReady: function () {
+    window.activeCall = att.phone.dial('1-800-444-4444');
+  },
+  onIncomingCall: function (call) {...}
+  onCallEnd: function (call) {...}
+});
+```
+
+or you may follow the convention for the Phono API by putting the
+callbacks in a `phone` dictionary:
+
+```js
+var att = $.att({
+  apiKey: "YOUR ACCESS TOKEN",
+  onReady: function () {
+    window.activeCall = att.phone.dial('1-800-444-4444');
+  },
+  phone: {
+    onIncomingCall: function (call) {...}
+    onCallEnd: function (call) {...}
+  }
+});
+```
+
+## Interacting with a Call
+
+* `call.answer()`: Accept an incoming call.
+* `call.hangup()`: End the call.
+* `call.digit(number)`: The equivalent of pressing a phone key during a call.
+* `call.mute(flag)`: Mute or unmute the call.
+* `call.hold(flag)`: Place the call on hold, or remove it from hold.
+* `call.volume(level)`: Set the volume level for the call.
+* `call.gain(level)`: Set the gain for the call.
+* `call.transferto(phoneNumber)`: Transfer the call to another phone
+* `call.pushToTalk(flag)`: If set to `true`, enable push to talk functionality. You will have to use `call.talk(true)` to enable sending audio, and `call.talk(false)` when done.
+* `call.talk(flag)`: The equivalent of pressing the talk button on a push to talk device.
+
+# Working with Phone Numbers
+
+If you want to clean and sanitize a user provided phone number to the standard format, 
+you can use:
+
+```js
+var number = $.att.phoneNumber.stringify('800555555');
 ```
 
 ## Contributing to this library
