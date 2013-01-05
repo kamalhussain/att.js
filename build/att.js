@@ -431,6 +431,8 @@
             me.version = config.version || _.getQueryParam('version') || me.version;
             config.version = me.version;
     
+            console.log('using API version:', config.version);
+    
             self.emit('user', me);
     
             if (config.version === 'a1' || config.version === 'a2') {
