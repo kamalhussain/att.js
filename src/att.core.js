@@ -328,6 +328,9 @@ Att.prototype.dial = function (phoneNumber, callbackHash) {
     attCall = new AttCall(this, call);
     attCall.bind(callbackHash);
 
+    // FIXME: Short term fix, we auto-generate ring event - see FIXME in vendor/att.a1.js
+    attCall.emit("ring");
+        
     this.emit('outgoingCall', attCall);
     return attCall;
 };
