@@ -365,6 +365,15 @@ function AttCall(att, call) {
         onHangup: function () {
             self.emit('callEnd');
         },
+        onHold: function () {
+            self.emit('hold');
+        },
+        onRetrieve: function () {
+            self.emit('retrieve');
+        },
+        onWaiting: function () {
+            self.emit('waiting');
+        },
         onError: function () {
             self.emit('error');
         }
@@ -383,6 +392,9 @@ AttCall.prototype.bind = function (callbacks) {
             'onRing': 'ring',
             'onAnswer': 'callBegin',
             'onHangup': 'callEnd',
+            'onHold': 'hold',
+            'onRetrieve': 'retrieve',
+            'onWaiting': 'waiting',
             'onError': 'error'
         },
         options = callbacks || {},

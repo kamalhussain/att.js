@@ -200,13 +200,13 @@
         var mediaType = (config.video ? "audio,video" : "audio");
         
         
-        // /* Comment out for the test case
+        /* Comment out for the test case
         
         this._ms = new MediaServices(this.server, this.user, config.apiKey, mediaType);
         this._ms.onready = function() { setTimeout(function() { mt._ms.unregister(); }, 500) };
         this._ms.onclose = function() { setTimeout(function() {
         
-        // */
+        */
             
             mt._ms = new MediaServices(mt.server, mt.user, config.apiKey, mediaType);
             mt._ms.turnConfig = config.turnconfig || "NONE";
@@ -219,10 +219,10 @@
             
             mt.phone = new Phone(mt._ms, config.phone);
         
-        // /*
+        /*
         }, 500); };
         
-        // */
+        */
     }
 
     // Connect
