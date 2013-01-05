@@ -45,6 +45,9 @@
         call.onstatechange = function(e)
         {
         
+            // FIXME: Call.State.RINGING comes in immediately before call.bind() is called from AttCall
+            // In short term we immediately generate the ring event in AttCall.phone.dial since the back end
+            // seems to be doing that anyway...
             if (e.state == Call.State.RINGING && mt.onRing)
             {
                 mt.onRing(e);
@@ -64,6 +67,23 @@
             {
                 mt.onError(e);
                 mt.state = "disconnected";
+            }
+            
+            // Add new features of hold, retrieve and waiting
+            if (e.state == Call.State.HOLDING && mt.onHold)
+            {
+                mt.onHold(e);
+                mt.state = "holding";
+            }
+            if (e.state == Call.State.ONGOING && mt.onRetrieve)
+            {
+                mt.onRetrieve(e);
+                mt.state = "connected";
+            }
+            if (e.state == Call.State.WAITING && mt.onWaiting)
+            {
+                mt.onWaiting(e);
+                mt.state = "waiting";
             }
         }
         
@@ -154,7 +174,7 @@
     function WCGPhono(config)
     {
         this._config = config;
-		
+        
         if(config.apiKey.indexOf("oauth" == -1)) {
           config.apiKey = "oauth " +  config.apiKey;
         }
@@ -180,13 +200,13 @@
         var mediaType = (config.video ? "audio,video" : "audio");
         
         
-        // /* Comment out for the test case
+        /* Comment out for the test case
         
         this._ms = new MediaServices(this.server, this.user, config.apiKey, mediaType);
         this._ms.onready = function() { setTimeout(function() { mt._ms.unregister(); }, 500) };
         this._ms.onclose = function() { setTimeout(function() {
         
-        // */
+        */
             
             mt._ms = new MediaServices(mt.server, mt.user, config.apiKey, mediaType);
             mt._ms.turnConfig = config.turnconfig || "NONE";
@@ -199,10 +219,10 @@
             
             mt.phone = new Phone(mt._ms, config.phone);
         
-        // /*
+        /*
         }, 500); };
         
-        // */
+        */
     }
 
     // Connect
