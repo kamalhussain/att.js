@@ -2,7 +2,8 @@
 (function () {
     // Utils and references
     var root = this,
-        att = {};
+        att = {},
+        cache = {};
 
     // global utils
     var _ = att.util = {
@@ -52,6 +53,99 @@
             return window.navigator.userAgent == "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/536.4 (KHTML, like Gecko) Chrome/19.0.1077.0 Safari/536.4" ||
             window.navigator.userAgent == "Mozilla/5.0 (iPhone; CPU iPhone OS 6_0_1 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10A523" ||
             window.webkitPeerConnection00 && window.navigator.userAgent.indexOf('Chrome/24') !== -1;
+        },
+        getMe: function (token, cb) {
+            var self = this,
+                baseUrl = "https://auth.tfoundry.com",
+                data = {
+                    access_token: token
+                },
+                version;
+
+            // short circuit this if we've already done it
+            if (cache.me) {
+                // the return is important for halting execution
+                return cb(cache.me);
+            }
+
+            // removes domain from number if exists
+            function cleanNumber(num) {
+                return num.split('@')[0];
+            }
+
+            // we try to figure out what endpoint this user
+            // should be using based on a series of checks.
+            console.log(data);
+
+            // first we get the user object
+            $.ajax({
+                data: data,
+                dataType: 'json',
+                url: baseUrl + '/me.json',
+                success: function (user) {
+                    // attempt to grab the external_id
+                    var externalId = function () {
+                        var val;
+                        try {
+                            val = user.identifiers.external_id[0];
+                        } catch (e) {}
+                        return val;
+                    }();
+
+                    // store the user in the config
+                    cache.me = user;
+                    
+                    // attempt to build an imsNumber
+                    user.imsNumber = user.ims_phone_number || externalId;
+
+                    // if we have one, remove the domain.
+                    if (user.imsNumber) {
+                        user.imsNumber = cleanNumber(user.imsNumber);
+                    }
+
+                    // attempt to build a virtualNumber
+                    user.virtualNumber = user.conference_phone_number;
+
+                    // if we have an explicit IMS number or an externalID
+                    // then it's IMS
+                    if (user.ims_phone_number || externalId) {
+                        version = 'a1';
+                    } else if (user.conference_phone_number) {
+                        // if not and we've got a conference number
+                        // we want that as our number and we know we're likely
+                        // using a3/phono.
+                        version = 'a3';
+                    }
+                    // now we check to see if we've got a webrtc.json specified for this
+                    // user.
+                    $.ajax({
+                        data: data,
+                        dataType: 'json',
+                        url: baseUrl + '/users/' + user.uid + '/api_services/webrtc.json',
+                        // if we get a 200
+                        success: function (res) {
+                            // if we've got an explicit version use it.
+                            var explicitVersion = res && res.version;
+                            if (explicitVersion) {
+                                user.version = 'a' + explicitVersion;
+                            } else {
+                                user.version = version || 'a3';
+                            }
+
+                            if (user.version === 'a3') {
+                                // use known phono number or main
+                                user.number = user.virtualNumber || user.phone_number;
+                            } else {
+                                // for 'a1' or 'a2' we should have an IMS number, if not
+                                // fallback to main phone.
+                                user.number = user.imsNumber || user.phone_number;                        
+                            }
+                            
+                            cb(user);
+                        }
+                    });
+                }
+            });
         }
     };
 
@@ -332,10 +426,12 @@
         }
     
         // attempt to get me and determine version
-        this.getMe(function (me) {
+        _.getMe(this.config.apiKey, function (me) {
             // make it possible to override guessed version
             me.version = config.version || _.getQueryParam('version') || me.version;
             config.version = me.version;
+    
+            console.log('using API version:', config.version);
     
             self.emit('user', me);
     
@@ -402,7 +498,7 @@
                 },
                 onReady: function () {
                     self.sessionId = this.sessionId;
-                    self.getMe(function (me) {
+                    _.getMe(config.apiKey, function (me) {
                         self.bindNumberToPhonoSession(me.number, self.sessionId, function () {
                             self.emit('ready'); 
                         });
@@ -410,111 +506,6 @@
                 }
             }));
         }
-    };
-    
-    Att.prototype.getMe = function (cb) {
-        var self = this,
-            baseUrl = "https://auth.tfoundry.com",
-            data = {
-                access_token: this.config.apiKey
-            },
-            version;
-    
-        // short circuit this if we've already done it
-        if (this.config.me) {
-            // the return is important for halting execution
-            return cb(this.config.me);
-        }
-    
-        // removes domain from number if exists
-        function cleanNumber(num) {
-            return num.split('@')[0];
-        }
-    
-        // we try to figure out what endpoint this user
-        // should be using based on a series of checks.
-        
-        console.log('this.config', this.config);
-    
-        console.log(data);
-    
-        // first we get the user object
-        $.ajax({
-            data: data,
-            dataType: 'json',
-            url: baseUrl + '/me.json',
-            success: function (user) {
-                // attempt to grab the external_id
-                var externalId = function () {
-                    var val;
-                    try {
-                        val = user.identifiers.external_id[0];
-                    } catch (e) {}
-                    return val;
-                }();
-    
-                // store the user in the config
-                self.config.me = user;
-                
-                // attempt to build an imsNumber
-                user.imsNumber = user.ims_phone_number || externalId;
-    
-                // if we have one, remove the domain.
-                if (user.imsNumber) {
-                    user.imsNumber = cleanNumber(user.imsNumber);
-                }
-    
-                // attempt to build a virtualNumber
-                user.virtualNumber = user.conference_phone_number;
-    
-                // if we have an explicit IMS number or an externalID
-                // then it's IMS
-                if (user.ims_phone_number || externalId) {
-                    version = 'a1';
-                } else if (user.conference_phone_number) {
-                    // if not and we've got a conference number
-                    // we want that as our number and we know we're likely
-                    // using a3/phono.
-                    version = 'a3';
-                }
-                // now we check to see if we've got a webrtc.json specified for this
-                // user.
-                $.ajax({
-                    data: data,
-                    dataType: 'json',
-                    url: baseUrl + '/users/' + user.uid + '/api_services/webrtc.json',
-                    // if we get a 200
-                    success: function (res) {
-                        // if we've got an explicit version use it.
-                        var explicitVersion = res && res.version;
-                        user.version = 'a' + explicitVersion;
-                        if (user.version === 'a3') {
-                            // use known phono number or main
-                            user.number = user.virtualNumber || user.phone_number;
-                        } else {
-                            // for 'a1' or 'a2' we should have an IMS number, if not
-                            // fallback to main phone.
-                            user.number = user.imsNumber || user.phone_number;                        
-                        }
-                        cb(user);
-                    }, 
-                    // handle the 404 case (which means we don't have an explicit ver.)
-                    error: function () {
-                        // keep any version we guessed from above or set to 'a3'
-                        user.version = version || 'a3';
-                        if (user.version === 'a3') {
-                            // use known phono number or main
-                            user.number = user.virtualNumber || user.phone_number;
-                        } else {
-                            // for 'a1' or 'a2' we should have an IMS number, if not
-                            // fallback to main phone.
-                            user.number = user.imsNumber || user.phone_number;
-                        }
-                        cb(user);
-                    }
-                });
-            }
-        });
     };
     
     Att.prototype.bindNumberToPhonoSession = function (number, session, cb) {
