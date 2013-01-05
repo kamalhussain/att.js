@@ -51,6 +51,7 @@ node build.js
 ## Credits
 
 [The AT&T Foundry](https://foundry.att.com/)
+[Phono](http://phono.com)
 
 ### Developers
 
