@@ -77,7 +77,26 @@ var att = $.att({
 });
 ```
 
-## Interacting with a Call
+## Creating and Interacting with a Call
+
+To start a call, you can use `att.dial()`:
+
+```js
+var att = $.att({...});
+var call = att.dial('18005555555', {
+    onAnswer: function () {...}
+});
+```
+
+You may also pass additional callbacks specific for the call. These are:
+
+* `onRing`
+* `onAnswer`
+* `onHangup`
+* `onError`
+
+Once a call object has been created, you can control and interact with the call
+session using:
 
 * `call.answer()`: Accept an incoming call.
 * `call.hangup()`: End the call.
@@ -87,12 +106,12 @@ var att = $.att({
 * `call.volume(level)`: Set the volume level for the call.
 * `call.gain(level)`: Set the gain for the call.
 * `call.transferto(phoneNumber)`: Transfer the call to another phone
-* `call.pushToTalk(flag)`: If set to `true`, enable push to talk functionality. You will have to use `call.talk(true)` to enable sending audio, and `call.talk(false)` when done.
-* `call.talk(flag)`: The equivalent of pressing the talk button on a push to talk device.
+* `call.pushToTalk(flag)`: If set to `true`, enable push to talk functionality. You will have to use `call.talk(true)` to enable sending audio, and `call.talk(false)` when done. If no value is provided, the function will return `true` if the call is in push to talk mode.
+* `call.talking(flag)`: The equivalent of pressing the talk button on a push to talk device.
 
 # Working with Phone Numbers
 
-If you want to clean and sanitize a user provided phone number to the standard format, 
+If you want to clean and sanitize a user provided phone number to the standard US format, 
 you can use:
 
 ```js
