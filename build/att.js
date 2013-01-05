@@ -455,7 +455,9 @@
             console.log('setting up phono');
             this.phono = $.phono(_.extend(config, {
                 phone: {
-                    onIncomingCall: self._normalizeNonPhonoCallHandlers.bind(self)
+                    onIncomingCall: self._normalizeNonPhonoCallHandlers.bind(self),
+                    ringTone: '',
+                    ringbackTone: ''
                 },
                 onReady: function () {
                     self.sessionId = this.sessionId;
