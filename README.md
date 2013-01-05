@@ -31,8 +31,6 @@ var att = $.att({
 The configuration settings for att.js are:
 
 * `apiKey`: Your OAuth access token. 
-* `ringTone`: A URL of an audio file to use a ring tone for incoming calls.
-* `ringbackTone`: A URL of an audio file to use while waiting for a call to be answered.
 * `log`: Defaults to `true` to include verbose console log output.
 
 Additionally, there are several callback hooks for managing a call's lifecycle:
@@ -100,14 +98,6 @@ session using:
 
 * `call.answer()`: Accept an incoming call.
 * `call.hangup()`: End the call.
-* `call.digit(number)`: The equivalent of pressing a phone key during a call.
-* `call.mute(flag)`: Mute or unmute the call.
-* `call.hold(flag)`: Place the call on hold, or remove it from hold.
-* `call.volume(level)`: Set the volume level for the call.
-* `call.gain(level)`: Set the gain for the call.
-* `call.transferto(phoneNumber)`: Transfer the call to another phone
-* `call.pushToTalk(flag)`: If set to `true`, enable push to talk functionality. You will have to use `call.talk(true)` to enable sending audio, and `call.talk(false)` when done. If no value is provided, the function will return `true` if the call is in push to talk mode.
-* `call.talking(flag)`: The equivalent of pressing the talk button on a push to talk device.
 
 Once you answer a call, you can find the number of the caller in the `call.initiator` field.
 
@@ -118,6 +108,11 @@ you can use:
 
 ```js
 var number = $.att.phoneNumber.stringify('800555555');
+```
+
+You can also parse numbers like so:
+```js
+var number = $.att.phoneNumber.stringify('1 (800) CALL-ATT');
 ```
 
 ## Contributing to this library
