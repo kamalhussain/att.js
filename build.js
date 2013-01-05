@@ -1,4 +1,4 @@
-// Creates the att.chat.js source and att.chat.min.js
+// Creates the att.js source and att.min.js
 
 /*global __dirname*/
 var fileName = 'att.js',
@@ -14,10 +14,7 @@ var fs = require('fs'),
     colors = require('colors');
     
 var template = fs.readFileSync(src + '/template.js', 'utf-8'),
-    h2s = fs.readFileSync(vendor + '/webrtc.js', 'utf-8'),
     socketIO = fs.readFileSync(vendor + '/socket.io.js', 'utf-8'),
-    phono = fs.readFileSync(vendor + '/phono.06.js', 'utf-8'),
-    muc = fs.readFileSync(src + '/muc.js', 'utf-8'),
     emitter = fs.readFileSync(src + '/wildemitter.js', 'utf-8'),
     phoneNumber = fs.readFileSync(src + '/phoneNumber.js', 'utf-8'),
     phone = fs.readFileSync(src + '/att.core.js', 'utf-8');
@@ -41,9 +38,7 @@ var context = {
     emitter: indent(emitter), 
     phone: indent(phone),
     phoneNumber: indent(phoneNumber),
-    socket: socketIO,
-    h2s: h2s,
-    phono: phono
+    socket: socketIO
 };
 
 // some flair
@@ -75,11 +70,6 @@ function writeFiles(name, context) {
 
 // write it to disk
 writeFiles('att', context);
-
-// remove phone stuff
-var plusChat = clone(context);
-plusChat.muc = indent(muc);
-writeFiles('att.pluschat', plusChat);
 
 // phone number only
 writeFiles('att.phonenumber', {phoneNumber: indent(phoneNumber)});
