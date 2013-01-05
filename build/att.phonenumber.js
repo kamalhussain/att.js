@@ -2,7 +2,8 @@
 (function () {
     // Utils and references
     var root = this,
-        att = {};
+        att = {},
+        cache = {};
 
     // global utils
     var _ = att.util = {
@@ -52,6 +53,60 @@
             return window.navigator.userAgent == "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/536.4 (KHTML, like Gecko) Chrome/19.0.1077.0 Safari/536.4" ||
             window.navigator.userAgent == "Mozilla/5.0 (iPhone; CPU iPhone OS 6_0_1 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Mobile/10A523" ||
             window.webkitPeerConnection00 && window.navigator.userAgent.indexOf('Chrome/24') !== -1;
+        },
+        getMe: function (token, cb) {
+            var self = this,
+                baseUrl = "https://auth.tfoundry.com",
+                data = {
+                    access_token: token
+                },
+                version;
+
+            // short circuit this if we've already done it
+            if (cache.me) {
+                // the return is important for halting execution
+                return cb(cache.me);
+            }
+
+            // removes domain from number if exists
+            function cleanNumber(num) {
+                return num.split('@')[0];
+            }
+
+            // we try to figure out what endpoint this user
+            // should be using based on a series of checks.
+            console.log(data);
+
+            // first we get the user object
+            $.ajax({
+                data: data,
+                dataType: 'json',
+                url: baseUrl + '/me.json',
+                success: function (user) {
+                    // store the user in the cache
+                    cache.me = user;
+                    // now we check to see if we've got a webrtc.json specified for this
+                    // user.
+                    $.ajax({
+                        data: data,
+                        dataType: 'json',
+                        url: baseUrl + '/users/' + user.uid + '/api_services/webrtc.json',
+                        // if we get a 200
+                        success: function (res) {
+                            // if we've got an explicit version use it.
+                            var explicitVersion = res && res.version,
+                                explicitNumber = res && res.options && res.options.phone_number;
+                            if (explicitVersion) {
+                                user.version = 'a' + explicitVersion;
+                            } else {
+                                user.version = 'a1';
+                            }
+                            user.number = explicitNumber || user.phone_number;                            
+                            cb(user);
+                        }
+                    });
+                }
+            });
         }
     };
 

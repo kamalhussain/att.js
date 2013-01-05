@@ -1,16 +1,282 @@
 /**
- * H2S Javascript Library
- * With WebRTC support for Google Chrome using ROAP only
+ * WCG Javascript Library
+ * With WebRTC support for Google Chrome using JSEP (ROAP is supported but deprecated)
  *
- * @author Philip Mark, Maxime-Alexandre Marchand, Paul Ghanime
- * @version 2.1.0
+ * @version 2.1.26 gh+
+ * Copyright: 2012 Ericsson
+ */
+
+(function($)
+{
+
+  // Geoff added
+  var accessToken = null;
+  var sipdomain = "mon.api.att.net";
+  var server = "https://api.foundry.att.com/a1/webrtc";
+  var turnconfig = "STUN:206.18.171.164:5060";
+  
+    // Random, unique, unpredictable
+    // Both uuidCounter++ are needed and Math.random.
+    // uuidCounter++ ensures unique
+    // Math.random() ensures unpredictable
+    // Prints it out as hex with no other punctuation (looks neater)
+    var uuidCounter = 0;
+    var uuid = function()
+    {
+        return Math.random().toString(16).substring(2) + (uuidCounter++).toString(16);
+    };
+    
+    function PhonoCall(ms, destination, config, oCall)
+    {
+    
+        var call = oCall;
+    
+        if (!call)
+            call = ms.createCall(destination, {audio: true, video: true});
+            
+        if (!config)
+            config = {};
+            
+        $.extend(this, config);
+        
+        this.state = "initial";
+        var mt = this;
+        
+        call.onstatechange = function(e)
+        {
+        
+            // FIXME: Call.State.RINGING comes in immediately before call.bind() is called from AttCall
+            // In short term we immediately generate the ring event in AttCall.phone.dial since the back end
+            // seems to be doing that anyway...
+            if (e.state == Call.State.RINGING && mt.onRing)
+            {
+                mt.onRing(e);
+                mt.state = "ringing";
+            }
+            if (e.state == Call.State.ONGOING && mt.onAnswer)
+            {
+                mt.onAnswer(e);
+                mt.state = "connected";
+            }
+            if (e.state == Call.State.ENDED && mt.onHangup)
+            {
+                mt.onHangup(e);
+                mt.state = "disconnected";
+            }
+            if (e.state == Call.State.ERROR && mt.onError)
+            {
+                mt.onError(e);
+                mt.state = "disconnected";
+            }
+            
+            // Add new features of hold, retrieve and waiting
+            if (e.state == Call.State.HOLDING && mt.onHold)
+            {
+                mt.onHold(e);
+                mt.state = "holding";
+            }
+            if (e.state == Call.State.ONGOING && mt.onRetrieve)
+            {
+                mt.onRetrieve(e);
+                mt.state = "connected";
+            }
+            if (e.state == Call.State.WAITING && mt.onWaiting)
+            {
+                mt.onWaiting(e);
+                mt.state = "waiting";
+            }
+        }
+        
+        call.onaddstream = function(e)
+        {
+            // TODO: Add the stream to an element.
+            // This is not possible (nor useful) in current Chrome
+            if (mt.onAddStream)
+                mt.onAddStream(e);
+        }   
+        
+        this.__defineGetter__("localStreams", function() { return call.localStreams; });
+        this.__defineGetter__("remoteStreams", function() { return call.localStreams; });
+        
+        if (!destination) {
+            this.__defineGetter__("from", function() { return call.recipient; });
+            this.__defineGetter__("initiator", function() { return call.recipient; });
+        }
+        
+        this.id = uuid();
+        this.call = call;
+        
+        if (!oCall)
+            call.ring();
+    }
+    
+    PhonoCall.prototype.answer = function() { this.call.answer(); };
+    PhonoCall.prototype.hangup = function() { this.call.end(); };
+    PhonoCall.prototype.digit = function() { };
+    PhonoCall.prototype.pushToTalk = function() { };
+    PhonoCall.prototype.talking = function() { };
+    PhonoCall.prototype.mute = function() { };
+    PhonoCall.prototype.hold = function(state) { if (state) { this.call.hold() } else { this.call.resume() } };
+    PhonoCall.prototype.volume = function() { };
+    PhonoCall.prototype.gain = function() { };
+
+    PhonoCall.prototype.bind = function(config) {
+    
+      if (config) {
+        for(var key in config) {
+          if (typeof config[key] == 'function') {
+              this[key] = config[key];
+          }
+        }
+      }
+    };
+
+    // Additional feature above phono api
+    PhonoCall.prototype.transferto = function(destination) { 
+      
+      // sip-ify destination
+      var sipDestination = "sip:"+destination + "@" + sipdomain;
+      this.call.transferto(sipDestination)  
+    
+    };
+    
+    function Phone(ms, config)
+    {
+        this._ms = ms;
+        if (!config) config = {};
+        this._config = config;
+        
+        $.extend(this, config);
+        
+        if (!this.onError)
+            this.onError = function(){
+                console.warn("Error occurred with no handler there");
+            };
+    }
+    
+    Phone.prototype.dial = function(destination, config)
+    {
+        if (!config.video)
+            config.video = this.video;
+            
+        var sipDestination = "sip:"+destination + "@" + sipdomain;
+        this.call = new PhonoCall(this._ms, sipDestination, config);
+        
+        return this.call;
+    };
+    
+    Phone.prototype.tones = function(){};
+    Phone.prototype.headset = function(){};
+    Phone.prototype.wideband = function(){};
+    Phone.prototype.ringTone = function(){};
+    Phone.prototype.ringbackTone = function(){};
+
+    function WCGPhono(config)
+    {
+        this._config = config;
+        
+        if(config.apiKey.indexOf("oauth" == -1)) {
+          config.apiKey = "oauth " +  config.apiKey;
+        }
+
+        if (!config.turnconfig)
+            config.turnconfig = turnconfig;
+        
+        if (!config.sipdomain)
+            config.sipdomain = sipdomain;
+        
+        if (!config.server)
+            config.server = server;
+        
+        $.extend(this, config);
+        
+        if (!this.user)
+            this.user = uuid();
+            
+        //this._ms = new MediaServices("http://api.tfoundry.com/a1/H2SConference", uuid(), config.apiKey, "audio");
+        
+        var mt = this;
+        
+        var mediaType = (config.video ? "audio,video" : "audio");
+        
+        
+        /* Comment out for the test case
+        
+        this._ms = new MediaServices(this.server, this.user, config.apiKey, mediaType);
+        this._ms.onready = function() { setTimeout(function() { mt._ms.unregister(); }, 500) };
+        this._ms.onclose = function() { setTimeout(function() {
+        
+        */
+            
+            mt._ms = new MediaServices(mt.server, mt.user, config.apiKey, mediaType);
+            mt._ms.turnConfig = config.turnconfig || "NONE";
+            
+            // preserve "this" for callbacks
+            mt._ms.onclose = function(e) { if (mt.onUnready) mt.onUnready(e); };
+            mt._ms.onerror = function(e) { mt.onerror(e); };
+            mt._ms.oninvite = function(e) { mt.oninvite(e); };
+            mt._ms.onready = function(e) { mt.sessionId = mt._ms.username; if (mt.onReady) mt.onReady(e); };
+            
+            mt.phone = new Phone(mt._ms, config.phone);
+        
+        /*
+        }, 500); };
+        
+        */
+    }
+
+    // Connect
+    WCGPhono.prototype.connect = function (config) {
+      return new WCGPhono(cfg);
+    } 
+    
+    // Disconnect
+    WCGPhono.prototype.disconnect = function () {
+      this._ms.unregister();
+      this.phono = null;
+    } 
+    
+    // Connected?
+    WCGPhono.prototype.connected = function () {
+      return this.phono;
+    } 
+    
+    
+    WCGPhono.prototype.onerror = function(evt)
+    {
+        // TODO: Ensure error event format matches
+        if(this.phone._call && this.phone._call.onerror)
+        {
+            this.phone._call.onerror(evt);
+        }
+        else
+        {
+            this.phone.onerror(evt);
+        }
+    }
+    
+    WCGPhono.prototype.oninvite = function(evt)
+    {
+        if (evt.call && this.phone.onIncomingCall)
+            this.phone.onIncomingCall({call: new PhonoCall(this._ms, null, null, evt.call)});
+    }
+    
+    $.extend({wcgphono: function(cfg) { return new WCGPhono(cfg); }});
+
+})(jQuery);
+
+/**
+ * WCG Javascript Library
+ * With WebRTC support for Google Chrome using JSEP (ROAP is supported but deprecated)
+ *
+ * @version 2.1.26 
  * Copyright: 2012 Ericsson
  */
 
 if (typeof Logs === "undefined") {
     Logs = true;
 }
-    
+        
 (function(parent) {
     // noop logger
     // note that all three functions are present in console and can be used
@@ -26,7 +292,7 @@ if (typeof Logs === "undefined") {
         logger = console;
 
 
-    // H2S URL resources
+    // WCG URL resources
     var SESSION = "session",
         REGISTER_RESOURCE = "register",
         CONFERENCE_RESOURCE = "mediaconf",
@@ -159,14 +425,18 @@ ms.onready = function(evt) {
     MediaServices = function(gwUrl, username, authentication, services) {
         var _state = MediaServices.State.INITIALISED,
             _services = services,
-            _turnConfig = "NONE",
+            // _turnConfig = turnconfig || "NONE";
             _username = username;
         
         /**
         Base URL including session ID ("baseURL"/"sessionID"/)
         @private
         */
+        
         this._gwUrl = (gwUrl.substr(-1) == "/") ? gwUrl : gwUrl + "/";
+        var domainIndex = gwUrl.replace(/https?:\/\/[^\/]*\/?/i, "");
+        this._host = gwUrl.substring(0, gwUrl.indexOf(domainIndex)-1);
+
         
         /**
         Event channel
@@ -175,16 +445,16 @@ ms.onready = function(evt) {
         this._channel = null;
         
         /**
-        Role of the user (Moderator or Normal user)
-        @private
-        */
-        this._isModerator = null;
-        
-        /**
         Current Call object
         @private
         */
         this._call = null;
+        
+        /**
+        Current Transfer Target Call object
+        @private
+        */
+        this._transferTargetCall = null;
         
         /**
         Is user a SIP user or Web user
@@ -229,6 +499,9 @@ ms.onready = function(evt) {
         */
         this._accessToken = (authentication.indexOf("oauth ") == 0) ? authentication.substring(6, authentication.length) : null;
         
+    //Geoff Added
+        accessToken = this._accessToken;    
+
         /**
         @field state
         Object's state
@@ -241,12 +514,13 @@ ms.onready = function(evt) {
             
             set: function(newState)
             {
-                var evt = {type: "statechange", oldState : _state, state: newState};
                 _state = newState;
                 
-                if (typeof(this.onstatechange) == "function")
+                if (typeof(this.onstatechange) == "function") {
+                    var evt = {type: "statechange", oldState : _state, state: newState};
                     this.onstatechange(evt);
-                    
+                }
+                
                 // Dispatch appropriate states
                 if (newState == MediaServices.State.READY && typeof(this.onready) == "function")
                     this.onready(evt);
@@ -333,7 +607,7 @@ ms.onready = function(evt) {
     */
     MediaServices.prototype._getVersion = function() {
         var url = this._gwUrl + "application/version";
-        var req = new _CreateXmlHttpReq(this._accessToken);
+        var req = new _CreateXmlHttpReq();
             
         req.open("GET", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -354,7 +628,7 @@ ms.onready = function(evt) {
     */
     MediaServices.prototype._getInfo = function() {
         var url = this._gwUrl + "application/info";
-        var req = new _CreateXmlHttpReq(this._accessToken);
+        var req = new _CreateXmlHttpReq();
             
         req.open("GET", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -370,7 +644,7 @@ ms.onready = function(evt) {
     };
     
     /**
-    H2S user registration
+    WCG user registration
     @private
     @return void
     @throws {Error} Invalid username
@@ -382,115 +656,122 @@ ms.onready = function(evt) {
         var registerURL = this._gwUrl + REGISTER_RESOURCE;
         
         logger.log("Media service initialised");
-
-        if (typeof(username) != "string" || username == "") {
-            throw new Error(MediaServices.Error.INVALID_CREDENTIALS);
-        //} else if (typeof(authentication) != "string" || authentication == "") {
-        //  throw new Error(MediaServices.Error.INVALID_CREDENTIALS);
-        } else if (typeof(this.mediaType) != "string") {
-            throw new TypeError(MediaServices.Error.INVALID_SERVICES);
-        } else {
-            // Check if user services are valid
-            var _services = [];
+        //if(this._accessToken == null) {
+            if (typeof(username) != "string" || username == "") {
+                throw new Error(MediaServices.Error.INVALID_CREDENTIALS);
+            //} else if (typeof(authentication) != "string" || authentication == "") {
+            //  throw new Error(MediaServices.Error.INVALID_CREDENTIALS);
+            }
+        //}
         
-            var tokens = this.mediaType.toLowerCase().replace(/(\s)/g, "").split(",");
-            
-            for (var i = 0; i < tokens.length; i++) {
-                if (tokens[i] == "audio") {
-                    _services.push("ip_voice_call");
-                } else if (tokens[i] == "video") {
-                    _services.push("ip_video_call");
-                } else if (tokens[i] == "ftp") {
-                    _services.push("file_transfer");
-                } else if (tokens[i] == "chat") {
-                    _services.push("im_chat");
-                }
+        if (typeof(this.mediaType) != "string") {
+            throw new TypeError(MediaServices.Error.INVALID_SERVICES);
+        }
+        
+        // Check if user services are valid
+        var _services = [];
+    
+        var tokens = this.mediaType.toLowerCase().replace(/(\s)/g, "").split(",");
+        
+        for (var i = 0; i < tokens.length; i++) {
+            if (tokens[i] == "audio") {
+                _services.push("ip_voice_call");
+            } else if (tokens[i] == "video") {
+                _services.push("ip_video_call");
+            } else if (tokens[i] == "ftp") {
+                _services.push("file_transfer");
+            } else if (tokens[i] == "chat") {
+                _services.push("im_chat");
             }
-            
-            if (_services.length < 1) {
-                throw new Error("Invalid user services");
-            }
-            
-            var body = null;
+        }
+        
+        if (_services.length < 1) {
+            throw new Error("Invalid user services");
+        }
+        
+        var body = null;
+        //if(this._accessToken == null) {
             if (this._isSipUser) {
                 // Remove "sip:" prefix
-                // username = username.slice(4, username.length);
+                username = username.slice(4, username.length);
             
                 // SIP users supports Address Book and Presence by default
-                //_services.push("ab");
-                //_services.push("presence");
+                _services.push("ab");
+                _services.push("presence");
                 
                 body = {
                     username : username,
                     password : authentication,
-                    mediaType : "rtmp",
+                    mediaType : "rtp",
                     services : _services
                 };
-            } else {
-                body = {
-                    username : username,
-                    mediaType : "rtmp",
-                    services : _services
-                };
-            }
-                
-            // Create and send a register request
-            var req = new _CreateXmlHttpReq(this._accessToken);
-            
-            req.open("POST", registerURL, true);
-            req.setRequestHeader("Content-Type", "application/json");
-            req.setRequestHeader("Accept", "application/json, text/html");
-            req.send(JSON.stringify(body, null, " "));
-            
-            // On response
-            req.onreadystatechange = function() {
-                if (this.readyState == 4) {
-                    mediaService.state = MediaServices.State.REGISTERING;
-                    logger.log("Registering...");
+        //  }
+        } else {
+            body = {
+                username : username,
+                mediaType : "rtp",
+                services : _services
+            };
+        }
+
+        // Create and send a register request
+        var req = new _CreateXmlHttpReq(this._accessToken);
+        
+        req.open("POST", registerURL, true);
+        req.setRequestHeader("Content-Type", "application/json");
+        req.setRequestHeader("Accept", "application/json, text/html");
+        req.send(JSON.stringify(body, null, " "));
+        
+        // On response
+        req.onreadystatechange = function() {
+            if (this.readyState == 4) {
+                mediaService.state = MediaServices.State.REGISTERING;
+                logger.log("Registering...");
+
+                // Success response 201 Created
+                if (this.status == 201) {
+                    // Extract the sessionID from JSON body
+                    var json = JSON.parse(this.responseText);
+                    var tokens = json.resourceURL.split("/");
+                    var index = tokens.indexOf("session");
+
+                    mediaService._sessionID = tokens[index + 1];
+                    mediaService._gwUrl += SESSION + '/' + mediaService._sessionID + '/';
                     
-                    // Success response 201 Created
-                    if (this.status == 201) {
-                        // Extract the sessionID from JSON body
-                        var json = JSON.parse(this.responseText);
-                        var tokens = json.resourceURL.split("/");
-                        var index = tokens.indexOf("session");
-                        
-                        mediaService._sessionID = tokens[index + 1];
-                        mediaService._gwUrl += SESSION + '/' + mediaService._sessionID + '/';
-                        
-                        // Start polling the event channel
-                        mediaService._channel = new _Channel(mediaService);
-                        mediaService._channel.pollChannel();
-                        
-                        if (false && mediaService._isSipUser) {
-                            // Create a new contact list
-                            mediaService._contactList = new ContactList(mediaService);
-                            mediaService._contactList._url = mediaService._gwUrl;
-                            mediaService._contactList.update();
-                            
-                            // Publish self services
-                            mediaService._publishServices();
-                        }
-                        
-                        logger.log("Registration successful");
-                        
-                        mediaService.state = MediaServices.State.READY;
-                    } else {
-                        logger.log("Registration unsuccessful: " + this.status + " " + this.statusText);
-                        
-                        switch (this.status) {
-                            case 401: // 401 Unauthorized
-                            case 403: // 403 Forbidden
-                                _InternalError(mediaService, MediaServices.Error.INVALID_CREDENTIALS);
-                                break;
-                            default:
-                                _InternalError(mediaService, MediaServices.Error.NETWORK_FAILURE);
-                                break;
-                        }
+                    // Start polling the event channel
+                    mediaService._channel = new _Channel(mediaService);
+                    mediaService._channel.pollChannel();
+
+                    //Following code used if creating a contact list and publishing upon registration is necessary
+                    /**
+                    if (mediaService._isSipUser) {
+                        // Create a new contact list
+                        mediaService._contactList = new ContactList(mediaService);
+                        mediaService._contactList._url = mediaService._gwUrl;
+                        mediaService._contactList.update();
+
+                        // Publish self services
+                         mediaService._publishServices();
+                    }**/
+                    
+                    logger.log("Registration successful");
+                    
+                    mediaService.state = MediaServices.State.READY;
+                } else {
+                    logger.log("Registration unsuccessful: " + this.status + " " + this.statusText);
+                    
+                    switch (this.status) {
+                        case 401: // 401 Unauthorized
+                        case 403: // 403 Forbidden
+                            _InternalError(mediaService, MediaServices.Error.INVALID_CREDENTIALS);
+                            break;
+                        default:
+                            _InternalError(mediaService, MediaServices.Error.NETWORK_FAILURE);
+                            break;
                     }
                 }
             };
-        }
+        };
     };
     
     /**
@@ -606,7 +887,7 @@ ms.unregister();
         this.state = MediaServices.State.UNREGISTERING;
         
         // Create a new logout request
-        var req = new _CreateXmlHttpReq(this._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("DELETE", unregisterURL, true);
         req.setRequestHeader("X-http-method-override", "DELETE");
@@ -616,13 +897,11 @@ ms.unregister();
         // On response
         req.onreadystatechange = function() {
             if (this.readyState == 4) {
+                mediaService._clean();                  
+                mediaService.state = MediaServices.State.CLOSED;
                 // Success response 204 No content
                 if (this.status == 204) {
-                    mediaService._clean();
-                    
                     logger.log("Deregistration successful");
-                    
-                    mediaService.state = MediaServices.State.CLOSED;
                 } else {
                     logger.log("Deregistration unsuccessful: " + this.status + " " + this.statusText);
                     _InternalError(mediaService, MediaServices.Error.NETWORK_FAILURE);
@@ -660,7 +939,7 @@ ms.unregister();
         };
         
         // Create and send a follow contact request
-        var req = new _CreateXmlHttpReq(this._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("POST", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -697,7 +976,7 @@ ms.subscribe();
         logger.log("Subscribing...");
         
         // Create and send a follow contact request
-        var req = new _CreateXmlHttpReq(this._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("POST", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -734,7 +1013,7 @@ ms.subscribe();
         };
         
         // Create and send a follow contact request
-        var req = new _CreateXmlHttpReq(this._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("POST", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -791,7 +1070,7 @@ ms.setAvatar(avatar.files[0], function(evt) {
         body.append("Upload", "Submit Query");
         
         // Create and send a set avatar request
-        var req = new _CreateXmlHttpReq(this._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("POST", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -800,7 +1079,6 @@ ms.setAvatar(avatar.files[0], function(evt) {
         // On response
         req.onreadystatechange = function() {
             if (req.readyState == 4) {
-                var status = false;
                 
                 switch (req.status) {
                     // Success response 201 Created (no previous avatar)
@@ -842,7 +1120,7 @@ ms.deleteAvatar();
         var url = this._gwUrl + CONTENT_RESOURCE + '/' + CONTENT_RESOURCE_DELETEAVATAR;
         
         // Create and send a set avatar request
-        var req = new _CreateXmlHttpReq(this._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("DELETE", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -912,7 +1190,7 @@ ms.deleteAvatar();
         };
         
         // Create and send a publish services request
-        var req = new _CreateXmlHttpReq(this._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("POST", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -997,12 +1275,25 @@ call.ring();
             throw new Error("Recipient must be defined, and must be a string");
         logger.log("MediaServices.prototype.createCall.... " );
         mediaType = _ParseMediaType(this, mediaType);
-        this._isModerator = true;
         
         this._call = new OutgoingCall(this, recipient, mediaType);
+        this._call._isModerator = true;
         this._call._url = this._gwUrl + AUDIOVIDEO_RESOURCE;
         
         return this._call;
+    };
+
+    /**
+    Create transfer call...
+    @private    
+    */
+    MediaServices.prototype._createTransferCall = function(recipient) {
+        logger.log("MediaServices.prototype.createTransferCall.... " );
+        this._transferTargetCall = new OutgoingCall(this, recipient, this._call.mediaType);
+        this._transferTargetCall._url = this._gwUrl + AUDIOVIDEO_RESOURCE;
+        this._transferTargetCall._isModerator = true;
+
+        return this._transferTargetCall;
     };
 
     /**
@@ -1029,7 +1320,7 @@ conf.begin();
         var url = this._gwUrl + CONFERENCE_RESOURCE;
 
         this._call = new Conference(this, confID, url, mediaType);
-        this._isModerator = true;
+        this._call._isModerator = true;
         
         return this._call;
     };
@@ -1080,6 +1371,59 @@ chat.onstatechange = function(evt) {};
         chat._url = this._gwUrl + CHAT_RESOURCE;
         
         return chat;
+    };
+    
+        /**
+    Sends an instant message.
+    @function
+    @param {String} recipient An identifier denoting the recipient of the message. This can be a WebID, a SIP URI or a TEL URI.
+    @param {String} The body of the message.
+    @return void
+    @throws {Error} Invalid recipient
+    @example
+var chat = service.createChat("sip:491728885004@mns.ericsson.ca");
+chat.onbegin = function(evt) {};
+chat.onmessage = function(evt) {};
+chat.oncomposing = function(evt) {};
+chat.onerror = function(evt) {};
+chat.onstatechange = function(evt) {};
+    */
+    MediaServices.prototype.sendIM = function(recipient, body){
+        if (typeof(recipient) != "string" || recipient == "" || recipient == this.username)
+            throw new Error("Invalid recipient");
+
+        if(!body || typeof(body) != "string"){
+            throw new Error("No body");
+        }
+        
+        logger.log("Sending IM...");
+        
+        var messageURL = this._gwUrl + "message/send";
+        
+        // Create and send a create conference request
+        var req = new _CreateXmlHttpReq();  
+        var message = {
+            to : recipient,
+            body : body,
+            contentType : "text/plain",
+            type : "message"
+        };
+            
+        req.open("POST", messageURL, true);
+        req.setRequestHeader("Accept", "application/json, text/html");
+        req.setRequestHeader("Content-Type", "application/json");
+        req.send(JSON.stringify(message, null, " "));
+    
+        // On response
+        req.onreadystatechange = function() {
+            if (req.readyState == 4) {          
+                if (req.status == 204) {
+                    logger.log("Send IM successful");
+                } else {
+                    _InternalError(this, MediaServices.Error.NETWORK_FAILURE);
+                }
+            }
+        };
     };
     
     /**
@@ -1195,6 +1539,18 @@ ms.onstatechange = function(evt) {
     */
     MediaServices.prototype.onstatechange = function(evt){}; // The MediaServices object has changed state
     
+        /**
+    Called when the MediaServices has and instant Message (IM) event.
+    @event 
+    @type function
+    @param evt
+    @example
+ms.onimresult = function(evt) {
+    // Media service is ready to use.
+};
+    */
+    MediaServices.prototype.oninstantmessage = function(evt){}; // The MediaServices object is ready to use
+    
     /**
     Called when the MediaServices object receives a remote media event such as an incoming call, a conference invitation, a file transfer request, a chat message or a group chat request.
     @event
@@ -1245,7 +1601,7 @@ ms.oninvite = function(evt) {
     @param {String} mediaType Media types supported in this call (e.g. "audio", "video" or "audio,video").
     */
     Call = function(mediaServices, recipient, mediaType) {
-        var _state;
+        var _state= Call.State.READY;
         
         /**
         @field mediaType
@@ -1272,12 +1628,13 @@ ms.oninvite = function(evt) {
             
             set: function(newState)
             {
-                var evt = {type: "statechange", oldState : _state, state: newState};
                 _state = newState;
                 
-                if (typeof(this.onstatechange) == "function")
+                var evt = {type: "statechange", oldState : _state, state: newState};
+                if (typeof(this.onstatechange) == "function") {
                     this.onstatechange(evt);
-                    
+                }                   
+                
                 // Dispatch appropriate states
                 switch (newState) {
                     case Call.State.RINGING:
@@ -1285,10 +1642,6 @@ ms.oninvite = function(evt) {
                             var evt = { call: this, conf: null };
                             if (typeof(mediaServices.oninvite) == "function") { mediaServices.oninvite(evt); }
                         }
-                        break;
-                    case Call.State.ENDED:
-                    case Conference.State.ENDED:
-                        if (typeof(this.onend) == "function") { this.onend(evt); }
                         break;
                     case Call.State.ONGOING:
                     case Conference.State.IN_PROGRESS:
@@ -1335,11 +1688,35 @@ ms.oninvite = function(evt) {
         this._mediaServices = mediaServices;
         
         /**
+        is RTC peer connection (JSEP latest)
+        @private
+        */
+        this.isRTCConnection = true;
+        
+        /**
         Base URL including session ID ("baseURL"/"sessionID"/)
         @private
         */
         this._url = null;
         
+        /**
+        Session modification ID
+        @private
+        */
+        this._modID = null;
+                        
+        /**
+        Role of the user (Moderator or Normal user)
+        @private
+        */
+        this._isModerator = null;
+
+        /**
+        Role of the user (Moderator or Normal user)
+        @private
+        */
+        this._isModifModerator = null;
+
         /**
         A reference to the local PeerConnection object. The call re-exposes the relevant elements.
         @private
@@ -1383,6 +1760,7 @@ ms.oninvite = function(evt) {
         @private
         */
         this._DEPRECATEDroap = new _DEPRECATEDRoap();
+        return this;
     };
     
     /**
@@ -1404,6 +1782,21 @@ ms.oninvite = function(evt) {
     Notifies that call object is in progress and media is flowing
     */
     Call.State.ONGOING = 2;
+    
+    /**
+    Notifies that call object is on hold.
+    */
+    Call.State.HOLDING = 5;
+    
+    /**
+    Notifies that call was put on Hold by the other side.
+    */
+    Call.State.WAITING = 6;
+    
+    /**
+    Notifies that call object is in transition.
+    */
+    Call.State.TRANSITION = 7;
     
     /**
     Notifies that call object has ended normally; the call was terminated in an expected and controlled manner
@@ -1434,9 +1827,22 @@ ms.oninvite = function(evt) {
     Webkit media error
     */
     Call.Error.USER_MEDIA = 2;
-
-    Call.prototype.getStringState = function(astate) {
-    switch (astate) {
+    
+    /**
+    Invalid user error
+    */
+    Call.Error.INVALID_USER = 3;    
+    
+    Call.prototype.isConference = function() { return false;};
+    
+    /**
+    Gets the string representing the State ID. This can be called at any time and is useful for debugging
+    @return {String} State A string representing the state of the Call 
+    @example
+call.getStringState();
+    */
+    Call.prototype.getStringState = function() {
+    switch (this.state) {
     case Call.State.READY:
         return "READY";
         break;
@@ -1446,267 +1852,24 @@ ms.oninvite = function(evt) {
     case Call.State.ONGOING:
         return "ONGOING";
         break;
+    case Call.State.HOLDING:
+        return "HOLDING";
+        break;
+    case Call.State.TRANSITION:
+        return "TRANSITIONING";
+        break;
+    case Call.State.WAITING:
+        return "WAITING";
+        break;
     case Call.State.ENDED:
         return "ENDED";
         break;
-
     default:
         return "ERROR";
         break;
     }
     };
-    
-    /**
-    Terminates all media in the call. This can be called at any time
-    @return void
-    @throws {Error} No active call to end
-    @example
-call.end();
-    */
-    Call.prototype.end = function() {
-        var _call = this;
-        var audiovideoURL = this._url + '/' + this._callID;
-        
-        logger.log("Leaving call...");
-        
-        // Create and send a create conference request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
-        
-        req.open("DELETE", audiovideoURL, true);
-        req.setRequestHeader("X-http-method-override", "DELETE");
-        req.send(null);
-    
-        // On response
-        req.onreadystatechange = function() {
-            if (req.readyState == 4) {
-                // Success response 204 No content
-                if (req.status == 204) {
-                    logger.log("Leave call successful");
-                    
-                    // Clear moderator flag
-                    _call._mediaServices._isModerator = null;
-                    
-                    _call.state = Call.State.ENDED;
-                } else {
-                    var json = JSON.parse(req.responseText);
-                    logger.log("Leave call unsuccessful: " + json.reason);
-                    
-                    // 403 Forbidden, Call-ID does not exist
-                    if (req.status == 403) {
-                        throw new Error("No active call to end");
-                    } else {
-                        _InternalError(_call, Call.Error.NETWORK_FAILURE);
-                    }
-                }
-            }
-        };
-        
-        if (this._pc && this._pc.close)
-            this._pc.close();
-        this._pc = null;
-    };
-    
-    /**
-    Creates a Peer Connection and triggers signaling when ready
-    @private
-    */
-    Call.prototype._createPeerConnection = function(callback) {
-        var mt = this;
-        logger.log("in createPeerConnection ");
-        
-        if (typeof(webkitPeerConnection00) == "undefined")
-            throw "This is not Chrome 21+";
-            
-        // Get the user's media
-        navigator.webkitGetUserMedia(mt.mediaType, function(stream) {
-            // Create new PeerConnection
-            mt._pc = new webkitPeerConnection00(mt._mediaServices.turnConfig, function(candidate, moreToFollow) {
-                // Get all candidates before signaling
-                if (candidate) {
-                    mt._sdp.sdp.addCandidate(candidate);
-                }
-                
-                if (!moreToFollow && !mt._isSignalingSent) {
-                    mt._sendSignaling(mt._sdp.type, mt._sdp.sdp.toSdp());
-                    
-                    mt._isSignalingSent = true;
-                }
-            });
-            
-            // Add the local stream
-            mt._pc.addStream(stream);
-            
-            // Propagate the event
-            mt._pc.onaddstream = function(evt) { if (typeof(mt.onaddstream) == "function") { evt.call = mt; mt.onaddstream(evt);} };
-            mt._pc.onremovestream = function(evt) { logger.log("ONREMOVESTREAM"); if (typeof(mt.onremovestream) == "function")  { evt.call = mt; mt.onremovestream(evt);} };
-            mt._pc.onclose = function() { mt.onend(); };
-            mt._pc.onopen = function() { mt.state = Call.State.ONGOING; };
-            
-            if (typeof(callback) === "function") {
-                callback();
-            }
-        }, function(error) {
-            logger.log("Error obtaining user media: " + error.toString());
-            
-            var callType = (mt instanceof Conference) ? Conference : Call;
-            _InternalError(callType, callType.Error.USER_MEDIA);
-        });
-    };
-    
-    /**
-    H2S signalling
-    @private
-    */
-    Call.prototype._sendSignaling = function(type, sdp) {
-        var _call = this;
-        var url = this._url;
-        
-        var callType = (_call instanceof Conference) ? Conference : Call;
-        
-        if (type == "OFFER") {
-            logger.log("Sending OFFER");
-            
-            if (this instanceof Conference && !this.confID) {
-                var body = _ParseSDP(null, sdp);
-                
-                // Starting a new conference
-                var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
-                
-                req.open("POST", url, true);
-                req.setRequestHeader("Content-Type", "application/json");
-                req.setRequestHeader("Accept", "application/json, text/html");
-                req.send(JSON.stringify(body, null, " "));
-                req.onreadystatechange = function() {
-                    if (req.readyState == 4) {
-                        
-                        var json = JSON.parse(req.responseText);
-                        
-                        // Success response 202 Accepted
-                        if (req.status == 202) {
-                            // Get the conference ID
-                            var tokens = json.resourceURL.split("/");
-                            var index = tokens.indexOf("mediaconf");
-                            _call.confID = tokens[index + 1];
-                            
-                        } else {
-                            _InternalError(_call, _call.Error.NETWORK_FAILURE);
-                        }
-                    }
-                };
-            } else {
-                // Audio video invite
-                var body = _ParseSDP(this.recipient, sdp);
-                
-                var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
-                //if(!this._mediaServices._isModerator){
-                //  url= url + "/mod";
-                //}             
-                req.open("POST", url, true);
-                req.setRequestHeader("Content-Type", "application/json");
-                req.setRequestHeader("Accept", "application/json, text/html");
-                req.send(JSON.stringify(body, null, " "));
-            
-                // On response
-                req.onreadystatechange = function() {
-                    if (req.readyState == 4) {
-                        var json = JSON.parse(req.responseText);
-                        
-                        // Success response 201 Created
-                        if (req.status == 201) {
-                            logger.log("Audio video invite: " + json.state);
-                        } else if (req.status == 202) {
-                            // TODO: remove eventually, this is what is returned from webrtc_trial branch
-                        } else {
-                            logger.log("Audio video invite unsuccessful: " + json.reason);
-                            
-                            if (req.status == 400) {
-                                throw new Error("User not found");
-                            } else {
-                                _InternalError(_call, _call.Error.NETWORK_FAILURE);
-                            }
-                        }
-                    }
-                };
-            }
-        } else if (type == "ANSWER") {
-            logger.log("Sending ANSWER");
-            
-            if (this instanceof Conference) {
-                url += "/" + this.confID;
-            } else {
-                url += "/" + this._callID;
-            }
-            
-            var body = _ParseSDP(null, sdp);
-            
-            var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
-            
-            req.open("POST", url, true);
-            req.setRequestHeader("Content-Type", "application/json");
-            req.setRequestHeader("Accept", "application/json, text/html");
-            req.send(JSON.stringify(body, null, " "));
-            
-            // On response
-            req.onreadystatechange = function() {
-                if (this.readyState == 4) {
-                    var json = JSON.parse(req.responseText);
-                    
-                    // Success response 200 OK
-                    if (req.status == 200) {
-                        logger.log("Accept invite: " + json.state);
-                    } else {
-                        logger.log("Accept invite unsuccessful: " + json.reason);
-                        
-                        _InternalError(_call, _call.Error.NETWORK_FAILURE);
-                    }
-                }
-            };
-        }
-    };
-    
-    /**
-    Create offer
-    @private
-    */
-    Call.prototype._doOffer = function() {
-        // Create offer
-        var offer = this._pc.createOffer(this.mediaType);
-        this._pc.setLocalDescription(this._pc.SDP_OFFER, offer);
-        
-        // Start Ice
-        this._pc.startIce();
-        
-        this._sdp.type = "OFFER";
-        this._sdp.sdp = offer;
-    };
-    
-    /**
-    Create answer
-    @private
-    */
-    Call.prototype._doAnswer = function() {
-        var sd = new SessionDescription(this._sdp.sdp);
-        
-        // Receive offer
-        this._pc.setRemoteDescription(this._pc.SDP_OFFER, sd);
-        
-        // Create answer
-        var answer = this._pc.createAnswer(this._pc.remoteDescription.toSdp(), this.mediaType);
-        this._pc.setLocalDescription(this._pc.SDP_ANSWER, answer);
-        
-        // Start Ice
-        this._pc.startIce();
-        
-        this._sdp.type = "ANSWER";
-        this._sdp.sdp = answer;
-        
-        // Process Ice candidates
-        for (index in this._candidates) {
-            var candidate = new IceCandidate(this._candidates[index].label, this._candidates[index].candidate);
-            this._pc.processIceMessage(candidate);
-        }
-    };
-    
+
     /**
     Creates a Peer Connection and triggers signaling when ready
     @deprecated Not used for JSEP. To remove when ROAP is no longer supported.
@@ -1715,41 +1878,21 @@ call.end();
     Call.prototype._DEPRECATEDcreatePeerConnection = function(callback, roapMessage) {
         var mt = this;
         
-        console.log("Creating DEPRECATED PC");
-            
-        if (navigator.vendor != "Google Inc.")
-        {
-            console.log("Non-google vendor");
-            mt._pc = new webkitDeprecatedPeerConnection(mt._mediaServices.turnConfig, function(sig) {
-                    logger.log("turnConfig: " + mt._mediaServices.turnConfig + "   sig: " + sig);
-                    mt._DEPRECATEDsendSignaling(sig, function(event) {
-                        if (typeof(callback) == "function") {
-                            callback(event);
-                        }
-                    });
-            });
-        }
-        
-        var gum = function() {
-        navigator.webkitGetUserMedia((mt.mediaType.video ? "audio,video" : "audio"), function(stream) {
+        navigator.webkitGetUserMedia('audio, video', function(stream) {
+            var turnConf= mt._mediaServices.turnConfig.replace('stun:', 'STUN '); 
             try {
-            
-                if (navigator.vendor == "Google Inc.")
-                {
-                console.log("Google vendor");
-                mt._pc = new webkitDeprecatedPeerConnection(mt._mediaServices.turnConfig, function(sig) {
+                mt._pc = new webkitDeprecatedPeerConnection(turnConf, function(sig) {
                 
-                    logger.log("turnConfig: " + mt._mediaServices.turnConfig + "   sig: " + sig);
+                    logger.log("turnConfig: " + turnConf + "   sig: " + sig);
                     mt._DEPRECATEDsendSignaling(sig, function(event) {
                         if (typeof(callback) == "function") {
                             callback(event);
                         }
                     });
                 });
-                }
             } catch (e) {   
-                mt._pc = new webkitPeerConnection00(mt._mediaServices.turnConfig, function(sig) {
-                    logger.log("turnConfig: " + mt._mediaServices.turnConfig + "   sig: " + sig);
+                mt._pc = new webkitPeerConnection00(turnConf, function(sig) {
+                    logger.log("turnConfig: " + turnConf + "   sig: " + sig);
                     mt._DEPRECATEDsendSignaling(sig, function(event) {
                         if (typeof(callback) == "function") {
                             callback(event);
@@ -1757,7 +1900,6 @@ call.end();
                     });
                 });
             }
-            console.log("Add local stream");
             
             // Add the local stream
             mt._pc.addStream(stream);
@@ -1771,7 +1913,6 @@ call.end();
             
             if (roapMessage) {
                 // Signal the ANSWER
-                console.log("Submitting signalling");
                 mt._pc.processSignalingMessage(roapMessage);
             }
         }, function(error) {
@@ -1780,13 +1921,6 @@ call.end();
             var callType = (mt instanceof Conference) ? Conference : Call;
             _InternalError(mt, callType.Error.USER_MEDIA);
         });
-        
-        };
-        
-        if (navigator.vendor != "Google Inc.")
-            setTimeout(gum, 0);
-        else
-            gum();
     };
     
     /**
@@ -1796,6 +1930,7 @@ call.end();
     */
     Call.prototype._DEPRECATEDsendSignaling = function(sig, callback) {
         var _call = this;
+        
         var roap = this._DEPRECATEDroap.parseROAP(sig);
         var url = this._url;
         var callType = (_call instanceof Conference) ? Conference : Call;
@@ -1803,17 +1938,9 @@ call.end();
         if (roap.messageType == "OFFER") {
             logger.log("Got OFFER");
             
-            if (roap.seq == 2)
-            {
-                logger.log("SEQ == 2; should generate auto-answer (I guess?)");
-                var roapMessage = _call._DEPRECATEDroap.processRoapAnswer(_call._mediaServices, _call._DEPRECATEDroap._lastSdp, true);
-                _call._pc.processSignalingMessage(roapMessage);
-                return;
-            }
-            
             if (this instanceof Conference && !this.confID) {
                 // Starting a new conference
-                var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+                var req = new _CreateXmlHttpReq();
                 
                 req.open("POST", url, true);
                 req.setRequestHeader("Content-Type", "application/json");
@@ -1850,28 +1977,27 @@ call.end();
                     t : roap.SDP.sdp.t
                 };
                 
-                var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
-//              if(!this._mediaServices._isModerator){
-//                  //var roapsdp = "v=0\r\no=- 0 0 IN IP4 127.0.0.1\r\ns=\r\nt=0 0\r\n";
-//                  var remotesdp= roap.SDP.sdp;
-//                  for(mediaIndex in roap.SDP.sdp) {
-//                     if(roap.SDP.sdp[mediaIndex].c == ""){
-//                        roap.SDP.sdp[mediaIndex].c= "IN IP4 10.10.0.55";
-//                     }
-//                  }
-//
-//                  body.v= "0";
-//                  body.o= "- 0 0 IN IP4 127.0.0.1";
-//                  body.s= "";
-//                  body.t= "0 0";
-//                  
-//                  url= url + "/" + this._mediaServices._call._callID;// + "/mod";
-//              }               
-//              
+                var req = new _CreateXmlHttpReq();
+                if(!_call._isModerator){
+                    //var wcgSdp = "v=0\r\no=- 0 0 IN IP4 127.0.0.1\r\ns=\r\nt=0 0\r\n";
+                    for(mediaIndex in roap.SDP.sdp) {
+                       if(roap.SDP.sdp[mediaIndex].c == ""){
+                          roap.SDP.sdp[mediaIndex].c= "IN IP4 10.10.0.55";
+                       }
+                    }
+
+                    body.v= "0";
+                    body.o= "- 0 0 IN IP4 127.0.0.1";
+                    body.s= "";
+                    body.t= "0 0";
+                    
+                    url= url + "/mod";
+                }               
+                
                 var stringBody= JSON.stringify(body, null, " ");
-//              stringBody= stringBody.replace("RTP/AVPF", "RTP/AVP");
-//              stringBody= stringBody.replace("ulpfec", "H264");
-//              logger.log("about to send SDP: " + stringBody);
+                stringBody= stringBody.replace("RTP/AVPF", "RTP/AVP");
+                stringBody= stringBody.replace("ulpfec", "H264");
+                logger.log("about to send SDP: " + stringBody);
 
                 req.open("POST", url, true);
                 req.setRequestHeader("Content-Type", "application/json");
@@ -1901,23 +2027,17 @@ call.end();
         } else if (roap.messageType == "ANSWER") {
             logger.log("Got ANSWER");
             
-            if (this instanceof Conference) {
-                url += "/" + this.confID;
-            } else {
-                url += "/" + this._callID;
-            }
-            
             if (this._modID) {
-                    url += "/mod/" + this._modID;
+                url += "/mod/" + this._modID;
             }
             
-            var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+            var req = new _CreateXmlHttpReq();
                             
             var stringBody= JSON.stringify(roap.SDP, null, " ");
-//          stringBody= stringBody.replace("RTP/AVPF", "RTP/AVP");
-//          stringBody= stringBody.replace("ulpfec", "H264");
-//          logger.log("about to send SDP: " + stringBody);
-//
+            stringBody= stringBody.replace("RTP/AVPF", "RTP/AVP");
+            stringBody= stringBody.replace("ulpfec", "H264");
+            logger.log("about to send SDP: " + stringBody);
+
             req.open("POST", url, true);
             req.setRequestHeader("Content-Type", "application/json");
             req.setRequestHeader("Accept", "application/json, text/html");
@@ -1951,6 +2071,615 @@ call.end();
             throw new Error("Failed to setup peer connection");
         }
     };
+
+    /**
+    Terminates all media in the call. This can be called at any time
+    @return void
+    @throws {Error} No active call to end
+    @example
+call.end();
+    */
+    Call.prototype.end = function() {
+        var _call = this;
+        var audiovideoURL = this._url;
+        
+        // FIXME - Remove the below call as soon as architects allow..
+        audiovideoURL = this._apigeeFix(audiovideoURL);
+        
+        logger.log("Leaving call...");
+        
+        // Create and send a create conference request
+        var req = new _CreateXmlHttpReq();
+        
+        req.open("DELETE", audiovideoURL, true);
+        req.setRequestHeader("X-http-method-override", "DELETE");
+        req.send(null);
+    
+        // On response
+        req.onreadystatechange = function() {
+            if (req.readyState == 4) {
+                // Success response 204 No content
+                if (req.status == 204) {
+                    logger.log("Leave call successful");
+                    
+                    // Clear moderator flag
+                    _call._isModerator = null;
+                    _call._callID = null;
+
+                    _call.state = Call.State.ENDED;
+                    if (typeof(_call.onend) == "function") { 
+                        _call.onend({reason: "Call terminated"}); 
+                    }
+                      
+                } else {
+                    var json = JSON.parse(req.responseText);
+                    logger.log("Leave call unsuccessful: " + json.reason);
+                    
+                    // 403 Forbidden, Call-ID does not exist
+                    if (req.status == 403) {
+                        throw new Error("No active call to end");
+                    } else {
+                        _InternalError(_call, Call.Error.NETWORK_FAILURE);
+                    }
+                }
+            }
+        };
+        
+        _call._modID= null;
+        if (this._pc && this._pc.close)
+            this._pc.close();
+        this._pc = null;
+    };
+    
+    function _updateSdp(sdp, oldString, newString) {    
+        var indexof= sdp.indexOf(oldString);
+        if(indexof > 0){
+            var prefix= sdp.substr(0, indexof);
+            var remaining= sdp.substr(indexof + oldString.length);
+            return prefix + newString + remaining;
+        } else {
+            return sdp;
+        }
+    };
+
+    /**
+    Put the call on hold. This can be called at any time
+    @return void
+    @throws {Error} No active call to hold
+    @example
+call.hold();
+    */
+    Call.prototype.hold = function() {
+        if(this.state == Call.State.ONGOING){
+            logger.log("Put call on hold...");
+            this._modify("hold");
+        }
+    };
+    
+    /**
+    Resume the call. This can be called at any time
+    @return void
+    @throws {Error} No active call to resume
+    @example
+call.resume();
+    */
+    Call.prototype.resume = function() {
+        if(this.state == Call.State.HOLDING){
+            logger.log("Resume the call...");
+            this._modify("resume");
+        }
+    };
+    
+    /**
+    Modify the call.
+    @private
+    */
+    Call.prototype._modify = function(action) {
+
+        var _call = this;
+        var audiovideoURL = this._url + '/mod';
+        _call._pc.createOffer(function(sdp){
+            console.log("Mod SDP offer from Browser = " + sdp.sdp);
+            _call._sdp.sdp = sdp.sdp;
+
+            _call._isModifModerator= true;
+            var req = new _CreateXmlHttpReq();
+            var newsdp;
+
+            if(action == "resume"){
+                newsdp= _updateSdp(_call._sdp.sdp, "sendonly", "sendrecv"); //audio
+                newsdp= _updateSdp(newsdp, "sendonly", "sendrecv"); //video
+            } else {
+                newsdp= _updateSdp(_call._sdp.sdp, "sendrecv", "sendonly"); //audio
+                newsdp= _updateSdp(newsdp, "sendrecv", "sendonly"); //video
+            }
+            
+            if(_call.mediaType.video){
+                //keep video
+            } else {
+                newsdp= _stripVideoPart(newsdp);
+            }
+
+            _call._sdp.sdp = newsdp;
+            var descriptor = {
+                sdp: newsdp,
+                type: "offer"
+            };
+            
+            var modifyLocalDescriptor= new RTCSessionDescription(descriptor,
+                function(){ console.log("Success Local RTCSessionDescription");},
+                function(err){ console.log("Err Local RTCSessionDescription " + err);});                                        
+                    
+            _call._pc.setLocalDescription(modifyLocalDescriptor);
+            var body = _ParseSDP(null, newsdp);
+                  
+            req.open("POST", audiovideoURL, true);
+            req.setRequestHeader("Content-Type", "application/json");
+            req.setRequestHeader("Accept", "application/json, text/html");
+            req.send(JSON.stringify(body, null, " "));
+        
+            // On response
+            req.onreadystatechange = function() {
+                if (req.readyState == 4) {
+                    // Success response 204 No content
+                    if (req.status >= 200 && req.status <= 204) {
+                    logger.log(action + " call in transition...waiting for ack");   
+                    _call.state = Call.State.TRANSITION;
+                    
+                    /**if(action == "resume"){
+                        _call._pc.localStreams[0].audioTracks[0].enabled = true;
+                        if(_call._pc.localStreams[0].videoTracks && _call._pc.localStreams[0].videoTracks.length > 0){
+                            _call._pc.localStreams[0].videoTracks[0].enabled = true;
+                        }
+                    } else {
+                        
+                        _call._pc.localStreams[0].audioTracks[0].enabled = false;
+                        if(_call._pc.localStreams[0].videoTracks && _call._pc.localStreams[0].videoTracks.length > 0){
+                            _call._pc.localStreams[0].videoTracks[0].enabled = false;
+                        }
+                    }**/
+                    
+                    
+                    } else {
+                        var json = JSON.parse(req.responseText);
+                        logger.log(action + " call unsuccessful: " + json.reason);
+                        
+                        // 403 Forbidden, Call-ID does not exist
+                        if (req.status == 403) {
+                            throw new Error("No active call to end");
+                        } else {
+                            _InternalError(_call, Call.Error.NETWORK_FAILURE);
+                        }
+                    }
+                }
+            };
+                
+            }, 
+            function(err){ console.log("Err answer " + err);}, 
+            _call.mediaType);
+    };
+    
+    function incrementSdpVersion(sdp){
+        var oLineBeginIndex= sdp.indexOf("o=");
+        var before= sdp.substr(0, oLineBeginIndex);
+        var oLine= sdp.substr(oLineBeginIndex);
+        var oLineEndIndex= oLine.indexOf("\r\n");
+        var after= oLine.substr(oLineEndIndex);
+        oLine= oLine.substr(0, oLineEndIndex);
+        var o_values = oLine.split(" ");
+        o_values[2] ++;
+        return before + o_values.join(" ") + after;
+    }
+    
+    function delayTransferBecauseOfMTASBug(_call, transferToCall, event){
+        console.log("Performing transfer from " + _call._callID  + " to " + transferToCall._callID);
+        var audiovideoURL = _call._url + '/transfer/' + transferToCall._callID;
+        
+        var req = new _CreateXmlHttpReq();
+        req.open("POST", audiovideoURL, true);
+        req.setRequestHeader("Accept", "application/json, text/html");
+        req.send(null);
+    
+        // On response
+        req.onreadystatechange = function() {
+            if (req.readyState == 4) {
+                // Success response 204 No content
+                if (req.status >= 200 && req.status <= 204) {
+                    logger.log("Sending transfer request");                 
+                } else {
+                    var reason= "unknown, status= " + req.status;
+                    if(req.responseText != "") {reason = JSON.parse(req.responseText).reason;}                      
+                    logger.log("Transfer call unsuccessful: " + reason);
+                    transferToCall.end();
+                    throw new Error("Fail to transfer the call to " + transferaddress);
+                }
+            }
+        };
+    }
+    
+    /**
+    Transfer the call to another address. This can be called at any time
+    @return void
+    @throws {Error} No active call to transfer
+    @example
+call.transferto(transferaddress);
+    */
+    Call.prototype.transferto = function(transferaddress) {
+
+        var _call = this;
+        if(_call.state != Call.State.HOLDING){
+            console.log("Call is not on hold cannot transfer.");
+        }
+        
+        //Make second call to transferaddress
+        transferToCall = _call._mediaServices._createTransferCall(transferaddress);
+        transferToCall.onaddstream = function (event) {console.log("Got transferTarget media stream");};
+        transferToCall.onbegin = function (event) {
+            console.log("TransferTarget connected");
+            setTimeout(delayTransferBecauseOfMTASBug, 6000, _call, transferToCall, event);
+        };
+        transferToCall.onend = function (event) {console.log("TransferTarget call has ended.");};
+        transferToCall.onerror = function (event) {console.log("TransferTarget call error ending transfer."); transferToCall.end();};
+        transferToCall.onremovestream = function(event){};
+        transferToCall.onstatechange =  function(event){console.log("TransferTarget new state " + transferToCall.getStringState());};
+        transferToCall.ring();
+    };
+
+    function _stripVideoPart(sdp) { 
+        var indexof= sdp.indexOf("m=video");
+        if(indexof > 0){
+            return sdp.substr(0, indexof);
+        } else return sdp;
+    }
+    
+    var nCand = 0;
+    var sendTimer = -1;
+    function sendSdp(mt) {
+        if (!mt._isSignalingSent) {
+            mt._isSignalingSent = true;
+            console.log("SDP answer from Browser = " +  mt._pc.localDescription.sdp);
+            sendTimer = -1;
+            if(mt.mediaType.video){
+                mt._sdp.sdp= mt._pc.localDescription.sdp;
+            } else {
+                mt._sdp.sdp= _stripVideoPart( mt._pc.localDescription.sdp);
+                var descriptor = {
+                    sdp: mt._sdp.sdp,
+                    type: mt._pc.localDescription.type
+                };
+                
+                var modifyLocalDescriptor= new RTCSessionDescription(descriptor,
+                    function(){ console.log("Success Local RTCSessionDescription");},
+                    function(err){ console.log("Err Local RTCSessionDescription " + err);});                                                    
+                mt._pc.setLocalDescription(modifyLocalDescriptor);
+            }
+            mt._sendSignaling(mt._pc.localDescription.type, mt._sdp.sdp);
+        }
+    }
+
+    /**
+    Creates a Peer Connection and triggers signaling when ready
+    @private
+    */
+    Call.prototype._createPeerConnection = function(callback) {
+        var mt = this;
+        logger.log("in createPeerConnection " + callback);
+        
+        // Get the user's media
+        navigator.webkitGetUserMedia(mt.mediaType, function(stream) {
+            try {
+               console.log("Turnconfig: " + mt._mediaServices.turnConfig);
+                //var pc_config = {"iceServers": [{"url": mt._mediaServices.turnConfig}]};
+                pc_config = {};
+                pc_config.iceServers = [{"url": mt._mediaServices.turnConfig, "credentials" : null}];
+                mt._pc = new webkitRTCPeerConnection(pc_config);
+                mt._pc.onicecandidate= function(event) {
+                    // Get all candidates before signaling
+                    if (event.candidate != null) {
+                        console.log("onicecandidate called: " + JSON.stringify(event.candidate));
+                        nCand++;
+                        console.log("nr of gathered candidates: " + nCand);
+                        if (sendTimer == -1) sendTimer = setTimeout(sendSdp, 5000, mt);
+                    } else if (!mt._isSignalingSent) {
+                        clearTimeout(sendTimer);
+                        sendSdp(mt);
+                    } else {
+                    mt._pc.onicecandidate= {};
+                    }
+                };
+            } catch (e) {
+                console.log("catched exception in webkitGetUserMedia callback function: " + e.message);
+                mt.isRTCConnection= false;
+                var turnConf= mt._mediaServices.turnConfig.replace('stun:', 'STUN ') ;
+                // Create new PeerConnection
+                mt._pc = new webkitPeerConnection00(turnConf, function(candidate, moreToFollow) {
+                    // Get all candidates before signaling
+                    if (candidate) {
+                        mt._sdp.sdp.addCandidate(candidate);
+                    }
+                    
+                    if (!moreToFollow && !mt._isSignalingSent) {
+                        mt._sendSignaling(mt._sdp.type, mt._sdp.sdp.toSdp());                       
+                        mt._isSignalingSent = true;
+                    }
+                });
+
+            }
+
+            // Add the local stream
+            mt._pc.addStream(stream);
+            
+            // Propagate the event
+            mt._pc.onaddstream = function(evt) { if (typeof(mt.onaddstream) == "function") { evt.call = mt; mt.onaddstream(evt);} };
+            mt._pc.onremovestream = function(evt) { logger.log("ONREMOVESTREAM"); if (typeof(mt.onremovestream) == "function")  { evt.call = mt; mt.onremovestream(evt);} };
+            mt._pc.onclose = function() { mt.onend({reason: "Terminated"}); };
+            mt._pc.onconnecting = function() { console.log("peer connecting !"); };
+            mt._pc.onopen = function() { if(mt.state != Call.State.WAITING && mt.state != Call.State.HOLDING && mt.state != Call.State.TRANSITION) mt.state = Call.State.ONGOING;};
+            
+            if (typeof(callback) === "function") {
+                callback();
+            }
+        }, function(error) {
+            logger.log("Error obtaining user media: " + error.toString());
+            
+            var callType = (mt instanceof Conference) ? Conference : Call;
+            _InternalError(mt, callType.Error.USER_MEDIA);
+        });
+    };
+    
+    // FIXME
+    // GEOFF HACK TO FIX direct wcg event coming from apigee g/w
+    // DO NOT LEAVE AS IS
+    // Replace "https://api.foundry.att.com/HaikuServlet/rest/v2/session/xxx/audiovideo/yyy with
+    // Replace "APIGEE SERVER/session/xxx/audiovideo/yyy 
+    Call.prototype._apigeeFix = function(url, uniqueSessionUrl) {
+      if(url.indexOf("HaikuServlet") != -1) {
+        logger.log("Rewriting url from: " + url);
+        url = url.replace(/^.*\/session\/.+?\//, this._mediaServices._gwUrl);
+        logger.log("to: " + url);
+      }
+      return url;
+    }
+
+    /**
+    WCG signalling
+    @private
+    */
+    Call.prototype._sendSignaling = function(type, sdp) {
+        var _call = this;
+
+        // FIXME - Remove the below call as soon as architects allow..
+        this._url = this._apigeeFix(this._url);
+        var url = this._url;
+
+    //
+    // GEOFF HACK TO FIX direct wcg event coming from apigee g/w
+    // DO NOT LEAVE AS IS
+    // Replace "https://api.foundry.att.com/HaikuServlet/rest/v2/session/xxx/audiovideo/yyy with
+    // Replace "APIGEE SERVER/session/xxx/audiovideo/yyy 
+     /*
+    if(url.indexOf("HaikuServlet") != -1) {
+      logger.log("Rewriting url from: " + url);
+      url = url.replace(/^.*\/session\/.+?\//, _call._mediaServices._gwUrl);
+      logger.log("to: " + url);
+      this._url = url;
+    }
+    */
+
+        console.log("Sending " + type + " with SDP: " + sdp);
+        if (type == "OFFER" || type == "offer") {
+            if(this._modID != null){
+                logger.log("Sending MOD OFFER");
+                url += "/mod/" + this._modID;
+            } else {
+                logger.log("Sending OFFER");
+            }
+            
+            if (this instanceof Conference && !this.confID) {
+                var body = _ParseSDP(null, sdp);
+                
+                // Starting a new conference
+                var req = new _CreateXmlHttpReq();
+                
+                req.open("POST", url, true);
+                req.setRequestHeader("Content-Type", "application/json");
+                req.setRequestHeader("Accept", "application/json, text/html");
+                req.send(JSON.stringify(body, null, " "));
+                req.onreadystatechange = function() {
+                    if (req.readyState == 4) {
+                        
+                        var json = JSON.parse(req.responseText);
+                        
+                        // Success response 201 Created
+                        if (req.status == 201) {
+                            var tokens = req.getResponseHeader ("Location").split("/");
+                            var index = tokens.indexOf("mediaconf");
+                            _call.confID = tokens[index + 1];
+                            _call._url+= "/" +  tokens[index + 1];                      
+                        } else {
+                            _InternalError(_call, _call.Error.NETWORK_FAILURE);
+                        }
+                    }
+                };
+            } else {
+                // Audio video invite
+                var body = _ParseSDP(this.recipient, sdp);
+                
+                var req = new _CreateXmlHttpReq();
+                req.open("POST", url, true);
+                req.setRequestHeader("Content-Type", "application/json");
+                req.setRequestHeader("Accept", "application/json, text/html");
+                req.send(JSON.stringify(body, null, " "));
+            
+                // On response
+                req.onreadystatechange = function() {
+                    if (req.readyState == 4) {
+                        var json = JSON.parse(req.responseText);
+                        
+                        // Success response 201 Created
+                        if (req.status >= 200 && req.status <= 204) {
+                            if(_call._callID == null){
+                                var tokens = req.getResponseHeader ("Location").split("/");
+                                var index = tokens.indexOf("audiovideo");
+                                _call._callID=tokens[index + 1];
+                                _call._url+= "/" +  tokens[index + 1];                      
+                            }
+                            logger.log("Audio video invite: " + json.state);
+                        } else {
+                            logger.log("Audio video invite unsuccessful: " + json.reason);
+                            
+                            if (req.status == 400) {
+                                _InternalError(_call, Call.Error.INVALID_USER);
+                            } else {
+                                _InternalError(_call, Call.Error.NETWORK_FAILURE);
+                            }
+                        }
+                    }
+                };
+            }
+        } else if (type == "ANSWER" || type == "answer") {
+            
+            if(this._modID != null){
+                logger.log("Sending MOD ANSWER");
+                url += "/mod/" + this._modID;
+            } else {
+                logger.log("Sending ANSWER");
+            }
+            
+            var body = _ParseSDP(null, sdp);
+            
+            var req = new _CreateXmlHttpReq();
+            
+            req.open("POST", url, true);
+            req.setRequestHeader("Content-Type", "application/json");
+            req.setRequestHeader("Accept", "application/json, text/html");
+            req.send(JSON.stringify(body, null, " "));
+            
+            // On response
+            req.onreadystatechange = function() {
+                if (this.readyState == 4) {
+                    var json = JSON.parse(req.responseText);
+                    
+                    // Success response 200 OK
+                    if (req.status == 200) {
+                        logger.log("Accept invite: " + json.state);
+                    } else {
+                        logger.log("Accept invite unsuccessful: " + json.reason);
+                        
+                        _InternalError(_call, _call.Error.NETWORK_FAILURE);
+                    }
+                }
+            };
+        }
+    };
+    
+    /**
+    Create offer
+    @private
+    */
+    Call.prototype._doOffer = function() {
+        // Create offer
+        var mt= this; //needed for anonymous function
+        if(this.isRTCConnection){   
+              this._pc.createOffer(function(sdp){
+                console.log("SDP offer from Browser = " + sdp.sdp);
+                mt._sdp.sdp = sdp.sdp;
+                mt._sdp.type = "OFFER";
+                mt._pc.setLocalDescription(sdp);
+              }, 
+              function(err){ console.log("Err answer " + err);}, 
+              this.mediaType);
+        }else{
+            var offer = this._pc.createOffer(this.mediaType);
+            this._pc.setLocalDescription(this._pc.SDP_OFFER, offer);
+            
+            // Start Ice
+            this._pc.startIce();
+            this._sdp.type = "OFFER";
+            this._sdp.sdp = offer;
+        }
+    };
+    
+    /**
+    Create answer
+    @private
+    */
+    Call.prototype._doAnswer = function() {
+    
+        var mt= this; //needed for anonymous function
+        console.log("_doAnswer " + this.mediaType);
+        if(this.isRTCConnection){   
+            try{
+                var remoteSdp= {};
+                remoteSdp.type= 'offer';
+                remoteSdp.sdp= mt._sdp.sdp;
+                
+                mt._sdp.type= 'answer';
+                mt._candidates.length= 0;
+                
+                var remoteDesc= new RTCSessionDescription(remoteSdp, 
+                    function(){ console.log("Success Remote RTCSessionDescription");},
+                    function(err){ console.log("Err Remote RTCSessionDescription " + err);});                                       
+                
+                mt._pc.setRemoteDescription(remoteDesc, 
+                function(){ //success
+                    mt._pc.createAnswer(function(sdp){  
+                        console.log("SDP answer from Browser = " + sdp.sdp);
+                        if(mt._sdp.sdp.indexOf("sendonly") != -1){ //remote has sendonly
+                            var newsdp= _updateSdp(sdp.sdp, "sendrecv", "recvonly"); //audio
+                            newsdp= _updateSdp(newsdp, "sendrecv", "recvonly"); //video
+                            sdp.sdp= newsdp;
+                        }
+                        
+                        if(mt._modID != null){                          
+                            if(mt._sdp.sdp.indexOf("sendonly") != -1){ //remote has sendonly
+                                mt.state= Call.State.WAITING;
+                            } else {
+                                mt.state= Call.State.ONGOING;
+                                if(mt._sdp.sdp.indexOf("sendrecv") != -1 && sdp.sdp.indexOf("recvonly") != -1){
+                                    var newsdp= _updateSdp(sdp.sdp, "recvonly", "sendrecv"); //audio
+                                    newsdp= _updateSdp(newsdp, "recvonly", "sendrecv"); //video
+                                    sdp.sdp= newsdp;
+                                }
+                            }
+                        }
+                        mt._pc.setLocalDescription(sdp);
+                        mt._sdp.sdp= sdp.sdp;   
+                        if(mt._modID != null){                          
+                            mt._sendSignaling("ANSWER", sdp.sdp);
+                        }                       
+                    },
+                    function(err){ console.log("Err create answer " + err);}, 
+                    mt.mediaType);
+                }, function(err){ console.log("Err setRemoteDescription " + err);});
+            }catch(e){
+                console.log("error creating answer: " + e);
+            }
+        } else {
+            var sd = new SessionDescription(this._sdp.sdp);
+            
+            // Receive offer
+            this._pc.setRemoteDescription(this._pc.SDP_OFFER, sd);
+            
+            // Create answer
+            var answer = this._pc.createAnswer(this._pc.remoteDescription.toSdp(), this.mediaType);
+            this._pc.setLocalDescription(this._pc.SDP_ANSWER, answer);
+            
+            // Start Ice
+            this._pc.startIce();
+            
+            this._sdp.type = "ANSWER";
+            this._sdp.sdp = answer;
+            
+            // Process Ice candidates
+            for (index in this._candidates) {
+                var candidate = new IceCandidate(this._candidates[index].label, this._candidates[index].candidate);
+                this._pc.processIceMessage(candidate);
+            }
+        }
+    };
+    
+            
     
     /**
     Called when the Call object changes its state.
@@ -2102,10 +2831,9 @@ call.ring();
                 call._doOffer();
             });
         } catch (e) {
-            console.log(e);
             this._DEPRECATEDcreatePeerConnection();
         }
-        //this._DEPRECATEDcreatePeerConnection();
+        
         this.state = Call.State.RINGING;
     };
     
@@ -2117,11 +2845,10 @@ call.ring();
     @param {String} recipient An identifier denoting the recipient; this can be a WebID, a SIP URI, or a tel: URI.
     @param {String} mediaType Media types supported in this conference (i.e. "audio", "video" or "audio,video").
     */
-    IncomingCall = function(mediaServices, recipient, mediaType) {
-        mediaServices._isModerator= false;
+    IncomingCall = function(mediaServices, recipient, mediaType) {      
         // call parent constructor
-        Call.prototype.constructor.call(this, mediaServices, recipient, mediaType);
-        
+        var call = Call.prototype.constructor.call(this, mediaServices, recipient, mediaType);
+        call._isModerator= false;
         /**
         Remote SDP
         @deprecated Not used for JSEP. To remove when ROAP is no longer supported.
@@ -2150,6 +2877,7 @@ service.oninvite = function(evt) {
     */
     IncomingCall.prototype.answer = function() {
         var call = this;
+        
         try {
             this._createPeerConnection(function() {
                 call._doAnswer();
@@ -2243,6 +2971,7 @@ service.oninvite = function(evt) {
     Conference.prototype = new Call;
     Conference.prototype.constructor = Conference;
     
+    Conference.prototype.isConference = function() { return true;};
     /**
     Leaves the conference.
     @function
@@ -2253,12 +2982,12 @@ conf.leave();
     */
     Conference.prototype.leave = function() {
         var _conf = this;
-        var conferenceURL = this._url + '/' + this.confID;
+        var conferenceURL = this._url;
         
         logger.log("Leaving conference: " + this.confID + "...");
                 
         // Create and send a leave conference request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("DELETE", conferenceURL, true);
         req.setRequestHeader("X-http-method-override", "DELETE");
@@ -2273,6 +3002,9 @@ conf.leave();
                     logger.log("End conference successful!");
                     
                     _conf.state = Conference.State.ENDED;
+                    if (typeof(_conf.onend) == "function") { 
+                        _conf.onend({reason: "Conference terminated"}); 
+                    }
                 } else {
                     var json = JSON.parse(req.responseText);
                     logger.log("End conference unsuccessful: " + json.reason);
@@ -2328,8 +3060,7 @@ conf.join(); // Joins conference with confID
 conf.end();
     */
     Conference.prototype.end = function() {
-        // TODO: remove all users from the conference before leaving
-        
+        // TODO: remove all users from the conference before leaving        
         this.leave();
     };
     
@@ -2350,8 +3081,7 @@ conf.removeUser("test2", function(evt) {
 });
     */
     Conference.prototype.removeUser = function(user, callback) {
-        var _conf = this;
-        var conferenceURL = this._url + '/' + this.confID + '/' + CONFERENCE_RESOURCE_REMOVE;
+        var conferenceURL = this._url + '/' + CONFERENCE_RESOURCE_REMOVE;
         
         logger.log("Removing participant " + user + " from conference " + this.confID + "...");
         
@@ -2363,7 +3093,7 @@ conf.removeUser("test2", function(evt) {
             };
             
             // Create and send a remove user request
-            var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+            var req = new _CreateXmlHttpReq();
             
             req.open("POST", conferenceURL, true);
             req.setRequestHeader("Content-Type", "application/json");
@@ -2375,7 +3105,7 @@ conf.removeUser("test2", function(evt) {
                 if (req.readyState == 4) {
                     
                     // Success response 202
-                    if (req.status == 202) {
+                    if (req.status >= 200 && req.status <= 204) {
                         logger.log("Remove participant successful!");
                         
                         if (typeof(callback) == "function") {
@@ -2383,9 +3113,12 @@ conf.removeUser("test2", function(evt) {
                             callback(event);
                         }
                     } else {
-                        var json = JSON.parse(req.responseText);
+                        var reason= "unknown, status= " + req.status;
+                        if(req.responseText != ""){ //TODO EVERYWHERE check the response before parsing json
+                            reason = JSON.parse(req.responseText).reason;
+                        }
                         
-                        logger.log("Remove participant unsuccessful: " + json.reason);
+                        logger.log("Remove participant unsuccessful: " + reason);
                         
                         if (typeof(callback) == "function") {
                             var event = {success : false, failure: true};
@@ -2414,8 +3147,7 @@ conf.addUser("test2", function(evt) {
 });
     */
     Conference.prototype.addUser = function(user, callback) {
-        var _conf = this;
-        var conferenceURL = this._url + '/' + this.confID + '/' + CONFERENCE_RESOURCE_ADD;
+        var conferenceURL = this._url + '/' + CONFERENCE_RESOURCE_ADD;
         
         logger.log("Adding participant " + user + " to conference " + this.confID + "...");
         
@@ -2427,7 +3159,7 @@ conf.addUser("test2", function(evt) {
             };
             
             // Create and send an add participant request
-            var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+            var req = new _CreateXmlHttpReq();
             
             req.open("POST", conferenceURL, true);
             req.setRequestHeader("Content-Type", "application/json");
@@ -2438,7 +3170,7 @@ conf.addUser("test2", function(evt) {
             req.onreadystatechange = function() {
                 if (req.readyState == 4) {
                     // Success response 202
-                    if (req.status == 202) {
+                    if (req.status >= 200 && req.status <= 204) {
                         logger.log("Add participant successful");
                         
                         if (typeof(callback) == "function") {
@@ -2446,9 +3178,12 @@ conf.addUser("test2", function(evt) {
                             callback(event);
                         }
                     } else {
-                        var json = JSON.parse(req.responseText);
-                        logger.log("Add participant unsuccessful: " + json.reason);
+                        var reason= "unknown, status= " + req.status;
+                        if(req.responseText != ""){ //TODO EVERYWHERE check the response before parsing json
+                            reason = JSON.parse(req.responseText).reason;
+                        }
                         
+                        logger.log("Add participant unsuccessful: " + reason);
                         if (typeof(callback) == "function") {
                             var event = {success : false, failure: true};
                             callback(event);
@@ -2522,11 +3257,12 @@ conf.begin(function(evt) {
             },
             set: function(newState)
             {
-                var evt = {type: "statechange", oldState : _state, state: newState};
                 _state = newState;
                 
-                if (typeof(this.onstatechange) == "function")
+                if (typeof(this.onstatechange) == "function") {
+                    var evt = {type: "statechange", oldState : _state, state: newState};
                     this.onstatechange(evt);
+                }
                     
                 switch (newState) {
                     case FileTransfer.State.INVITATION_RECEIVED:
@@ -2584,7 +3320,7 @@ ftp.cancel();
         logger.log("Terminating file transfer...");
         
         // Create and send a cancel file transfer request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("GET", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -2799,14 +3535,14 @@ ftp.sendFile(file.files[0]);
         
         var body = {
             to : this.to,
-            contentdisposition : "attachment",
-            contenttype : this.type,
-            filename : this.name,
-            filesize : this.size
+            contentDisposition : "attachment",
+            contentType : this.type,
+            fileName : this.name,
+            fileSize : this.size
         };
         
         // Create and send a file transfer request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("POST", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -2835,7 +3571,7 @@ ftp.sendFile(file.files[0]);
     };
     
     /**
-    H2S REST request for uploading a file. Upload occurs automatically upon acceptance.
+    WCG REST request for uploading a file. Upload occurs automatically upon acceptance.
     @function
     @return void
     @private
@@ -2856,7 +3592,7 @@ ftp.sendFile(file.files[0]);
         body.append("Upload", "Submit Query");
         
         // Create and send a file upload request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.upload.addEventListener("progress", function(evt) {
             var event = { "loaded": evt.loaded, "total": evt.total };
@@ -2985,7 +3721,7 @@ ms.oninvite = function(evt) {
         logger.log("IncomingFileTransfer accepting...");
         
         // Create and send an accept file transfer request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("GET", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -2995,7 +3731,7 @@ ms.oninvite = function(evt) {
         req.onreadystatechange = function() {
             if (req.readyState == 4) {
                 // Success response 201 Created
-                if (req.status == 201) {
+                if (req.status == 200) {
                     logger.log("IncomingFileTransfer accepted");
                 } else {
                     var json = JSON.parse(req.responseText);
@@ -3008,7 +3744,7 @@ ms.oninvite = function(evt) {
     };
     
     /**
-    H2S REST request for downloading a file. Download occurs automatically when ready.
+    WCG REST request for downloading a file. Download occurs automatically when ready.
     @function
     @return void
     @private
@@ -3023,7 +3759,7 @@ ms.oninvite = function(evt) {
         logger.log("Downloading file...");
         
         // Create and send a download file transfer request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.addEventListener("progress", function(evt) {
             var event = { "loaded": evt.loaded, "total": ft.size };
@@ -3092,11 +3828,12 @@ ms.oninvite = function(evt) {
             
             set: function(newState)
             {
-                var evt = {type: "statechange", oldState : _state, state: newState};
                 _state = newState;
                 
-                if (typeof(this.onstatechange) == "function")
+                if (typeof(this.onstatechange) == "function") {
+                    var evt = {type: "statechange", oldState : _state, state: newState};
                     this.onstatechange(evt);
+                }
                     
                 if ((newState == Chat.State.ACTIVE || newState == GroupChat.State.IN_PROGRESS) && typeof(this.onbegin) == "function")
                     this.onbegin(evt);
@@ -3198,7 +3935,7 @@ chat.send("Hello world!");
         chat._composingWait = false;
         
         // Create and send a create conference request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         var message = null;
         if (this instanceof GroupChat) {
@@ -3222,8 +3959,11 @@ chat.send("Hello world!");
     
         // On response
         req.onreadystatechange = function() {
-            if (req.readyState == 4) {
-                var json = JSON.parse(req.responseText);
+            if (req.readyState == 4) {          
+                var json= "\"\"";
+                if(req.responseText != "") {
+                    json= JSON.parse(req.responseText);
+                }
                 // Success response 200 OK for Chat
                 if (req.status == 200) {
                     logger.log("Send message successful: msgId " + json.msgId);
@@ -3307,7 +4047,7 @@ chat.idle();
         logger.log("Sending is-composing...");
         
         // Create and send a chat is composing request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         var body = null;
         if (this instanceof GroupChat) {
@@ -3402,7 +4142,7 @@ chat.sendMedia(file.files[0]);
         body.append("Upload", "Submit Query");  
         
         // Create and send a create conference request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("POST", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -3441,13 +4181,13 @@ chat.sendMedia(file.files[0]);
     @private
     */
     Chat.prototype._getMedia = function(id, from) {
-        var chat = this;
+        var _chat = this;
         var url = this._url + '/' + CHAT_RESOURCE_GET_MEDIA + id;
         
         logger.log("Getting media message...");
         
         // Create and send an add contact request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("GET", url, true);
         req.overrideMimeType("text/plain; charset=x-user-defined");
@@ -3696,7 +4436,7 @@ groupchat.start();
         var messageURL = this._url + '/' + GROUP_CHAT_CREATE;
         
         // Create and send a create conference request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         var message = {
             members : this.recipient,
@@ -3726,6 +4466,7 @@ groupchat.start();
                     for (var i = 0; i < groupChat.recipient.length; i++) {
                         groupChat.members.push({ entity: groupChat.recipient[i], status: "invited" });
                     }
+                    groupChat.state= GroupChat.State.NEW;
                 } else {
                     var json = JSON.parse(req.responseText);
                     logger.log("Create group chat fail reason: " + json.reason);                        
@@ -3754,7 +4495,7 @@ groupchat.leave();
         logger.log("Leaving group chat...");
         
         // Create and send a create conference request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         var body = {
             confId : this.confID
@@ -3829,7 +4570,7 @@ groupchat.add(["sip:491728885004@mns.ericsson.ca"]);
         var messageURL = this._url + '/' + GROUP_CHAT_ADD;
         
         // Create and send a create conference request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
                 
         var message = {
             confId : this.confID,
@@ -3876,7 +4617,7 @@ groupChat.join();
         var messageURL = this._url + '/' + GROUP_CHAT_JOIN;
         
         // Create and send a create conference request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         var message = {
             confId : this.confID
@@ -3919,7 +4660,7 @@ service.oninvite = function(evt) {
 };
     */
     GroupChat.prototype.accept = function() {
-        var _groupChat = this;
+        var groupChat = this;
         
         if (!this.confID) {
             throw new Error("Unable to join group chat with invalid ID");
@@ -3930,7 +4671,7 @@ service.oninvite = function(evt) {
         var messageURL = this._url + '/' + GROUP_CHAT_ACCEPT;
             
         // Create and send a create conference request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         var message = {
             confId : this.confID
@@ -3945,16 +4686,16 @@ service.oninvite = function(evt) {
         req.onreadystatechange = function() {
             if (req.readyState == 4) {
                 // Success response 200 OK
-                if (req.status == 201) {
+                if (req.status == 200 || req.status == 201) {
                     logger.log("Accept successful");
                     
                     // Put it in the HashMap
-                    _groupChat._mediaServices._chat.put(_groupChat.confID, _groupChat);
+                    groupChat._mediaServices._chat.put(groupChat.confID, groupChat);
                 } else {
                     var json = JSON.parse(req.responseText);
                     logger.log("Accept unsuccessful: " + json.reason);
                     
-                    _InternalError(_groupChat, GroupChat.Error.NETWORK_FAILURE);
+                    _InternalError(groupChat, GroupChat.Error.NETWORK_FAILURE);
                 }
             }
         };
@@ -3984,7 +4725,7 @@ service.oninvite = function(evt) {
         var messageURL = this._url + '/' + GROUP_CHAT_DECLINE;
             
         // Create and send a create conference request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
                 
         var message = {
             confId : this.confID
@@ -4010,7 +4751,7 @@ service.oninvite = function(evt) {
                     var json = JSON.parse(req.responseText);
                     logger.log("Decline group chat invite unsuccessful: " + json.reason);
                     
-                    _InternalError(_groupChat, GroupChat.Error.NETWORK_FAILURE);
+                    _InternalError(groupChat, GroupChat.Error.NETWORK_FAILURE);
                 }
             }
         };
@@ -4108,12 +4849,12 @@ contactList.getAllAvatars();
             },
             set: function(newState)
             {
-                var evt = {type: "statechange", oldState : _state, state: newState};
                 _state = newState;
                 
-                if (typeof(this.onstatechange) == "function")
+                if (typeof(this.onstatechange) == "function"){
+                    var evt = {type: "statechange", oldState : _state, state: newState};
                     this.onstatechange(evt);
-                    
+                }
                 // Dispatch appropriate states
                 if (newState == ContactList.State.READY && typeof(this.onready) == "function")
                     this.onready({ contactList : this });
@@ -4161,7 +4902,7 @@ service.contactList.update();
         logger.log("Updating contact list...");
         
         // Create and send an update contact list request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("GET", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -4360,7 +5101,7 @@ service.contactList.update();
                             if (!this.contact[j].avatar || presence.person.statusIconEtag != this.contact[j].presence.statusIconEtag) {
                                 this.contact[j].presence = presence.person;
                                 
-                                // TODO: there is a bug in H2S that returns the wrong statusIconUrl
+                                // TODO: there is a bug in WCG that returns the wrong statusIconUrl
                                 this.contact[j].presence.statusIconUrl = 
                                     presence.person.statusIconUrl.substring(presence.person.statusIconUrl.indexOf("content/getavatar/"), presence.person.statusIconUrl.length);
                                 this.contact[j].services = presence.services;
@@ -4435,7 +5176,7 @@ contactList.add(contact);
         };
         
         // Create and send an add contact request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("POST", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -4509,7 +5250,7 @@ contactList.remove(contact);
         };
         
         // Create and send an add contact request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("DELETE", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -4555,7 +5296,6 @@ contactList.modify(contact);
         }
         
         var url = this._url + ADDRESSBOOK_RESOURCE + '/' + ADDRESSBOOK_RESOURCE_CONTACTS + '/' + contact._contactId;
-        var cl = this;
         
         logger.log("Modifying contact...");
         
@@ -4572,7 +5312,7 @@ contactList.modify(contact);
         };
         
         // Create and send an add contact request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("POST", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -4762,7 +5502,7 @@ var contact = new Contact(info);
         this._mediaServices = null;
         
         /**
-        H2S URL for Presence list
+        WCG URL for Presence list
         */
         this._url = null;
         
@@ -4800,12 +5540,12 @@ var contact = new Contact(info);
             },
             set: function(newState)
             {
-                var evt = {type: "statechange", oldState : _state, state: newState};
                 _state = newState;
                 
-                // TODO: do we need onstatechange
-                // if (typeof(this.onstatechange) == "function")
-                    // this.onstatechange(evt);
+                if (typeof(this.onstatechange) == "function") {
+                    var evt = {type: "statechange", oldState : _state, state: newState};
+                    this.onstatechange(evt);
+                }
                 
                 if (newState == Contact.State.UPDATING && typeof(this.onupdating) == "function") {
                     this.onupdating({ contact : this });
@@ -4972,7 +5712,7 @@ contact.follow();
         };
         
         // Create and send a follow contact request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("POST", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -5018,7 +5758,7 @@ contact.unfollow();
         };
         
         // Create and send a follow contact request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("POST", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -5067,7 +5807,7 @@ contactList.onpresenceinvite = function(evt) {
         };
         
         // Create and send a follow contact request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("POST", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -5114,7 +5854,7 @@ contact.getAvatar(function(evt) {
         logger.log("Getting avatar of " + this._id); 
         
         // Create and send a get avatar request
-        var req = new _CreateXmlHttpReq(this._mediaServices._accessToken);
+        var req = new _CreateXmlHttpReq();
         
         req.open("GET", url, true);
         req.setRequestHeader("Accept", "application/json, text/html");
@@ -5128,8 +5868,6 @@ contact.getAvatar(function(evt) {
                 if (req.status == 200) {
                     logger.log("Get avatar successful");
                     
-                    // Binary data in req.responseText
-                    var rawData = req.responseText;
                     var imgType = req.getResponseHeader("Content-Type");
                     
                     var newAvatar = 'data:' + imgType + ';base64,' + _Base64encode(req.responseText);
@@ -5298,14 +6036,14 @@ contact.onupdating = function(evt) {
     Determine the type(s) of media in the SDP by inspeting the "m" field of the SDP
     @private
     @param {Object} sdp An object containing SDP attributes.
-    @return {Array} mediaType An array of media types.
+    @return {Object} mediaType An array of media types.
     */
     function _ParseSDPMedia(sdp) {
         // TODO: can know the media type from the a=group:BUNDLE audio video line
         // Find the a=group:BUNDLE line
         // set mediaType.audio = true and/or mediaType.video = true
         
-        var mediaType = {};
+        var mediaType = {audio:false,video:false};
         
         for (var j = 0;; j++) {
             // Inspect the "m" field of the SDP
@@ -5360,15 +6098,17 @@ contact.onupdating = function(evt) {
             }
         }
 
-        if (token) {
+        if (accessToken) {
             xmlhttp.o = xmlhttp.open;
             xmlhttp.open = function(a, b, c)
             {
-                this.o(a,b + "?access_token=" + token,c);
+                this.o(a,b + "?access_token=" + accessToken,c);
+                //this.o(a,b + "?access_token=" + token,c);
                 //this.setRequestHeader('Authorization', 'Bearer ' + token);
             };
         }
-        
+        xmlhttp.withCredentials = true;
+
         return xmlhttp;
     }
     
@@ -5389,7 +6129,7 @@ contact.onupdating = function(evt) {
             logger.log("Querying channel...");
             
             // Create and send a channel query request
-            var req = new _CreateXmlHttpReq(mediaService._accessToken);
+            var req = new _CreateXmlHttpReq();
             
             req.open("GET", channelURL, true);
             req.setRequestHeader('Accept', 'application/json, text/html');
@@ -5420,154 +6160,145 @@ contact.onupdating = function(evt) {
                             
                             var type = eventObject["@type"],
                                 state = eventObject.state,
-                                reason = eventObject.reason,
                                 from = eventObject.from;
                             
                             // Channel Handlers
-                            if (type == "media-conference") {
-                                // TODO: the code below is currently unused, since webrtc media-conference events go through audiovideo
+                            if (type == "audiovideo" || type == "media-conference") {
                                 var sdp = eventObject.sdp,
-                                    resourceURL = eventObject.resourceURL;
+                                    resourceURL = eventObject.resourceURL,
+                                    reason = eventObject.reason;
                                 
                                 // Tokenize the resourceURL
                                 var tokens = resourceURL.split("/");
-                                
-                                if (state.toLowerCase() == "session-open") {
-                                    // Media conference session established
-                                } else if (state.toLowerCase() == "session-terminated") {
-                                    // Media conference session terminated
-                                } else if (state.toLowerCase() == "invitation-received") {
-                                    // conference invitation received
-                                } else if (state.toLowerCase() == "add-failed") {
-                                    // Add participant failed
-                                } else if (state.toLowerCase() == "remove-failed") {
-                                    // Remove participant failed
-                                } else if (state.toLowerCase() == "mod-received") {
-                                    // Reinvite received
-                                } else {
-                                    // Unhandled event
-                                    logger.log("Unhandled media conference channel event: " + type + " " + state);
-                                }
-                            } else if (type == "audiovideo") {
-                                var sdp = eventObject.sdp,
-                                    resourceURL = eventObject.resourceURL;
-                                
-                                // Tokenize the resourceURL
-                                var tokens = resourceURL.split("/");
-                                
+
                                 if (state.toLowerCase() == "session-open" || state.toLowerCase() == "session-modified" ) {
                                     // Audio video call session established
                                     var mediaConfIndex = tokens.indexOf("mediaconf");
                                     var audioVideoIndex = tokens.indexOf("audiovideo");
+                                    var currentCall;
                                     
                                     if (mediaConfIndex != -1) {
+                                        if(typeof(sdp) === "undefined") {
+                                            continue;
+                                        }
                                         _ms._call.confID = tokens[mediaConfIndex + 1];
+                                        currentCall= _ms._call;
                                     } else if (audioVideoIndex != -1) {
-                                        _ms._call._callID = tokens[audioVideoIndex + 1];
+                                        var callId= tokens[audioVideoIndex + 1];
+                                        if(_ms._call._callID == null || _ms._call._callID == callId)    {
+                                            currentCall= _ms._call;
+                                        } 
+                                        else if(_ms._transferTargetCall != null && _ms._transferTargetCall._callID == callId){
+                                            currentCall= _ms._transferTargetCall;
+                                        } else {
+                                            console.log("What to do with call id: " + callId + " ?? ");
+                                        }
+                                        currentCall._callID = callId;
                                     }
-                                    
-                                        // DEPRECATED: to remove this if case
+
+                                    // DEPRECATED: to remove this if case
                                     try {   
-                                        if (_ms._call._pc instanceof webkitDeprecatedPeerConnection) {
+                                        if (typeof(currentCall._pc) == "webkitDeprecatedPeerConnection") {
+                                        //if (currentCall._pc instanceof webkitDeprecatedPeerConnection) { //throws exception
                                             var modIndex = tokens.indexOf("mod");
                                             if (modIndex != -1) {
-                                                _ms._call._modID = tokens[modIndex + 1];
+                                                currentCall._modID = tokens[modIndex + 1];
                                                 
-                                                if (_ms._isModerator) {
+                                                if (currentCall._isModerator) {
                                                     // Nothing
                                                 } else {
-                                                    if (sdp)
-                                                    {
-                                                        var roapMessage = _ms._call._DEPRECATEDroap.processRoapAnswer(_ms, sdp);
-                                                        _ms._call._pc.processSignalingMessage(roapMessage);
-                                                    }
-                                                    else
-                                                    {
-                                                        var roapMessage = _ms._call._DEPRECATEDroap.processRoapOK(_ms);
-                                                        _ms._call._pc.processSignalingMessage(roapMessage);
-                                                    }
+                                                    var roapMessage = currentCall._DEPRECATEDroap.processRoapAnswer(_ms, sdp);
+                                                    currentCall._pc.processSignalingMessage(roapMessage);
                                                 }
                                             } else {
-                                                if (_ms._isModerator || (_ms._call instanceof Conference && !_ms._isModerator)) {
-                                                    var roapMessage = _ms._call._DEPRECATEDroap.processRoapAnswer(_ms, sdp);
-                                                    _ms._call._pc.processSignalingMessage(roapMessage);
+                                                if (currentCall._isModerator || (currentCall instanceof Conference && !currentCall._isModerator)) {
+                                                    var roapMessage = currentCall._DEPRECATEDroap.processRoapAnswer(_ms, sdp);
+                                                    currentCall._pc.processSignalingMessage(roapMessage);
                                                 } else {
-                                                    var roapMessage = _ms._call._DEPRECATEDroap.processRoapOK(_ms);
-                                                    _ms._call._pc.processSignalingMessage(roapMessage);
+                                                    var roapMessage = currentCall._DEPRECATEDroap.processRoapOK(_ms);
+                                                    currentCall._pc.processSignalingMessage(roapMessage);
                                                 }
                                             }
                                         } else {
-                                            if (_ms._isModerator || (_ms._call instanceof Conference && !_ms._isModerator)) {
-                                                var sd = new SessionDescription(_SDPToString(sdp));
-                                                
-                                                // Get Ice candidates
-                                                var candidates = _GetCandidates(sd.toSdp());
-                                                _ms._call._candidates = candidates;
-                                                
-                                                // Receive ANSWER SDP of callee
-                                                _ms._call._pc.setRemoteDescription(_ms._call._pc.SDP_ANSWER, sd);
-                                                
-                                                // Process the Ice Candidates
-                                                for (index in candidates) {
-                                                    var candidate= new IceCandidate(candidates[index].label, candidates[index].candidate);
-                                                    _ms._call._pc.processIceMessage(candidate);
+                                            if (currentCall._isModerator || (currentCall instanceof Conference && !currentCall._isModerator)) {
+                                                var remoteSdp= _SDPToString(eventObject.sdpSessionOrigin, sdp, eventObject.attributes);
+                                                if (currentCall.isRTCConnection) {
+                                                    // Check for emty INVITE
+                                                        //generate Answer
+                                                        var remoteDest= {};
+                                                        remoteDest.type= 'answer';
+                                                        remoteDest.sdp= remoteSdp;
+                                                        console.log("Setting Remote RTCSessionDescription sdp = " + remoteSdp );
+                                                        currentCall._pc.setRemoteDescription(new RTCSessionDescription(remoteDest),
+                                                            function(){ console.log("Success Remote RTCSessionDescription");},
+                                                            function(err){ console.log("Err Remote RTCSessionDescription " + err);});
+                                                } else {
+                                                    var sd = new SessionDescription(remoteSdp);
+                                                    
+                                                    // Get Ice candidates
+                                                    var candidates = _GetCandidates(sd.toSdp());
+                                                    currentCall._candidates = candidates;
+                                                    
+                                                    // Receive ANSWER SDP of callee
+                                                    currentCall._pc.setRemoteDescription(currentCall._pc.SDP_ANSWER, sd);
+                                                    
+                                                    // Process the Ice Candidates
+                                                    for (index in candidates) {
+                                                        var candidate= new IceCandidate(candidates[index].label, candidates[index].candidate);
+                                                        currentCall._pc.processIceMessage(candidate);
+                                                    }
                                                 }
                                             }
                                         }
                                     } catch (e) {
-                                        if (_ms._isModerator || (_ms._call instanceof Conference && !_ms._isModerator)) {
-                                            var sd = new SessionDescription(_SDPToString(sdp));
+                                        if (currentCall._isModerator || (currentCall instanceof Conference && !currentCall._isModerator)) {
+                                            var sd = new SessionDescription(_SDPToString(eventObject.sdpSessionOrigin, sdp, eventObject.attributes));
                                             
                                             // Get Ice candidates
                                             var candidates = _GetCandidates(sd.toSdp());
-                                            _ms._call._candidates = candidates;
+                                            currentCall._candidates = candidates;
                                             
                                             // Receive ANSWER SDP of callee
-                                            _ms._call._pc.setRemoteDescription(_ms._call._pc.SDP_ANSWER, sd);
+                                            currentCall._pc.setRemoteDescription(currentCall._pc.SDP_ANSWER, sd);
                                             
                                             // Process the Ice Candidates
                                             for (index in candidates) {
                                                 var candidate= new IceCandidate(candidates[index].label, candidates[index].candidate);
-                                                _ms._call._pc.processIceMessage(candidate);
+                                                currentCall._pc.processIceMessage(candidate);
                                             }
                                         }
                                     }
                                 } else if (state.toLowerCase() == "session-terminated") {
                                     // Audio video call terminated
-                                    if (_ms._call.state != Call.State.ENDED) {
-                                        // Cleanup the Peer Connection
-                                        if (_ms._call) {
-                                            if (_ms._call._pc && _ms._call._pc.close) {
-                                                _ms._call._pc.close();
-                                                _ms._call._pc = null;
-                                            }
-                                        }
-                                        
-                                        // Clear moderator flag
-                                        _ms._isModerator = null;
-                                        
-                                        _ms._call.state = Call.State.ENDED;                                     
-
+                                    var audioVideoIndex = tokens.indexOf("audiovideo");
+                                    var callId= tokens[audioVideoIndex + 1];
+                                    if(_ms._call._callID == callId) {
+                                        currentCall= _ms._call;
+                                    } 
+                                    else {
+                                        currentCall= _ms._transferTargetCall;
                                     }
+                                    currentTerminatedCall(currentCall,eventObject);                                 
                                 } else if (state.toLowerCase() == "invitation-received") {
                                     // Receive audio video call invitation
                                     var index = tokens.indexOf("audiovideo");
                                     var mediaType = _ParseSDPMedia(sdp);
-                                    _ms._isModerator= false;
                                     
                                     // Set the media type of the call invitation
                                     mediaType = _ParseMediaType(_ms, mediaType);
                                     
                                     // Create a new IncomingCall object and save the remote SDP
                                     _ms._call = new IncomingCall(_ms, from, mediaType);
-                                    _ms._call._url = _ms._gwUrl + AUDIOVIDEO_RESOURCE;
+                                    _ms._call._isModerator= false;
+                                    _ms._call.mediaType= mediaType;
+                                    _ms._call._url = _ms._host + eventObject.resourceURL;
                                     _ms._call._callID = tokens[index + 1];
                                     
                                     // Parse the SDP
                                     _ms._call._sdp.type = "ANSWER";
-                                    _ms._call._sdp.sdp = _SDPToString(sdp);
-                                    logger.log(_ms._call._sdp.sdp);
-                                    
+                                    _ms._call._sdp.sdp = _SDPToString(eventObject.sdpSessionOrigin, sdp, eventObject.attributes);                                   
+                                    logger.log("Network receive sdp offer: " + _ms._call._sdp.sdp);
+
                                     // DEPRECATED: to remove
                                     _ms._call._DEPRECATEDsdp = sdp;
                                     
@@ -5575,16 +6306,88 @@ contact.onupdating = function(evt) {
                                     _ms._call._candidates = _GetCandidates(_ms._call._sdp.sdp);
                                     
                                     _ms._call.state = Call.State.RINGING;
-                                } else if (state.toLowerCase() == "mod-received") {
-                                    // DEPRECATED: to remove (Reinvite received)
-                                    var index = tokens.indexOf("mod");
+                                } else if (state.toLowerCase() == "mod-terminated") {
+                                    var index = tokens.indexOf("mod");                                  
+                                    logger.log("Terminating modification: " + tokens[index + 1]);   
+                                    var currentCall= _ms._call;
+                                    currentCall._modID = null;
+                                    var remoteSdp= _SDPToString(eventObject.sdpSessionOrigin, sdp, eventObject.attributes);
                                     
-                                    _ms._call._modID = tokens[index + 1];
+                                    _ms._call._sdp.sdp = _SDPToString(eventObject.sdpSessionOrigin, sdp, eventObject.attributes);
                                     
-                                    if (_ms._isModerator || (_ms._call instanceof Conference && !_ms._isModerator)) {
-                                        var roapMessage = _ms._call._DEPRECATEDroap.processRoapOffer(_ms, sdp);
-                                        _ms._call._pc.processSignalingMessage(roapMessage);
+                                
+                                    if(_ms._call._sdp.sdp.indexOf("recvonly")!=-1){
+                                    
+                                        _ms._call.state = Call.State.HOLDING;
+                                        _ms._call._pc.localStreams[0].audioTracks[0].enabled = false;
+                                        
+                                        if(_ms._call._pc.localStreams[0].videoTracks && _ms._call._pc.localStreams[0].videoTracks.length > 0){
+                                            _ms._call._pc.localStreams[0].videoTracks[0].enabled = false;
+                                        }
+                                        console.log("Hold call successful...other party is waiting.");
+                                        
+                                    }else if(_ms._call._sdp.sdp.indexOf("sendonly") != -1){
+                                        _ms._call.state = Call.State.WAITING;
+                                        console.log("Hold call successful...waiting for other party to resume.");                                       
+                                    }else if(_ms._call._sdp.sdp.indexOf("sendrecv")!=-1){
+                                    
+                                        _ms._call.state = Call.State.ONGOING;
+                                        _ms._call._pc.localStreams[0].audioTracks[0].enabled = true;
+                                        
+                                        if(_ms._call._pc.localStreams[0].videoTracks && _ms._call._pc.localStreams[0].videoTracks.length > 0){
+                                            _ms._call._pc.localStreams[0].videoTracks[0].enabled = true;
+                                        }
+                                        console.log("Resume call successful...call ongoing.");
                                     }
+                                    
+                                    if (currentCall.isRTCConnection && currentCall._isModifModerator) {
+                                        var remoteDest= {};
+                                        remoteDest.type= 'answer';
+                                        remoteDest.sdp= remoteSdp;
+                                        currentCall._pc.setRemoteDescription(new RTCSessionDescription(remoteDest),
+                                            function(){ console.log("Success Remote RTCSessionDescription");},
+                                            function(err){ console.log("Err Remote RTCSessionDescription " + err);});                                                                                               
+                                    }
+                                    currentCall._isModifModerator=null;
+                                } else if (state.toLowerCase() == "mod-received") {
+                                    var modIndex = tokens.indexOf("mod");                                   
+                                    var callModId= tokens[modIndex + 1];
+                                    var currentCall= _ms._call;                                     
+                                    currentCall._modID= callModId;
+                                    currentCall._sdp.sdp = _SDPToString(eventObject.sdpSessionOrigin, sdp, eventObject.attributes);
+                                    
+                                    if(currentCall._sdp.sdp.indexOf("sendonly")!=-1){
+                                        _ms._call.state = Call.State.TRANSITION;
+                                    }
+                                    
+                                    logger.log("Processing modification: " + currentCall._modID);
+                                    if(typeof(sdp) === "undefined") {
+                                        logger.log("Generate Mod offer");
+                                        currentCall._isModifModerator= true; //offer
+                                        currentCall._pc.createOffer(function(sdp){
+                                            console.log("Mod SDP offer from Browser = " + sdp.sdp);
+                                            currentCall._sdp.sdp = sdp.sdp;
+                                            currentCall._sdp.type = "OFFER";
+                                            currentCall._pc.setLocalDescription(new RTCSessionDescription(sdp),
+                                                function(){ console.log("Generated Modification offer");
+                                                    currentCall._sendSignaling(currentCall._pc.localDescription.type, currentCall._pc.localDescription.sdp);                                    
+                                                },
+                                                function(err){ console.log("Err setLocalDescription " + err);});
+                                          }, 
+                                          function(err){ console.log("Err answer " + err);}, 
+                                          currentCall.mediaType);
+                                    } else {
+                                        currentCall._isModifModerator= false; //answer
+                                        logger.log("Generate Mod answer");
+                                        currentCall._sdp.type = "ANSWER";
+                                        currentCall._sdp.sdp = _SDPToString(eventObject.sdpSessionOrigin, sdp, eventObject.attributes);
+                                        currentCall._doAnswer();
+                                    }
+                                } else if (state.toLowerCase() == "transfer-initiated") {
+                                    console.log("transfer-initiated");
+                                } else if (state.toLowerCase() == "transfer-terminated") {
+                                    console.log("transfer-terminated");
+                                    //Wait for the other leg session-terminated event                                   
                                 } else {
                                     // Unhandled event
                                     logger.log("Unhandled audio video channel event: " + type + " " + state);
@@ -5663,8 +6466,8 @@ contact.onupdating = function(evt) {
                                 }
                             } else if (type == "address-book") {
                                 // An address book update
-                                var contacts = eventObject.contacts,
-                                    abId = eventObject.abId; // TODO: unused
+                                var contacts = eventObject.contacts;
+                                //var abId = eventObject.abId; // TODO: unused ????
                                 
                                 _ms._contactList._syncId = eventObject.syncId;
                                 
@@ -5673,8 +6476,13 @@ contact.onupdating = function(evt) {
                                 }
                             } else if (type == "message") {
                                 var body = eventObject.body,
-                                    contentType = eventObject.contentType,
+                                    //contentType = eventObject.contentType,
                                     typeMessage = eventObject.type;
+                                    var msg = {
+                                        from: from,
+                                        message: body
+                                    };
+                                        
                                 
                                 if (typeMessage == "session-message") {
                                     // Check if it's a new chat session with another user
@@ -5691,11 +6499,6 @@ contact.onupdating = function(evt) {
                                     
                                         _ms.oninvite(evt);
                                         
-                                        var msg = {
-                                            from: from,
-                                            message: body
-                                        };
-                                        
                                         newChat.onmessage(msg);
                                         _ms._chat.put(from, newChat);
                                     } else {
@@ -5705,18 +6508,12 @@ contact.onupdating = function(evt) {
                                         if (ongoingChat.state != Chat.State.ACTIVE) {
                                             ongoingChat.state = Chat.State.ACTIVE;
                                         }
-                                        
-                                        var evt = {
-                                            from: from,
-                                            message: body
-                                        };
-                                        
-                                        ongoingChat.onmessage(evt); 
+
+                                        ongoingChat.onmessage(msg); 
                                     }
                                 } else if (typeMessage == "message") {
-                                    logger.log("PAGER MODE MESSAGE");
-                                    
-                                    // TODO: handle?
+                                    logger.log("PAGER MODE MESSAGE");                                       
+                                    _ms.oninstantmessage(msg);
                                 }
                             } else if (type == "composing") {
                                 var refresh = eventObject.refresh;
@@ -5733,9 +6530,9 @@ contact.onupdating = function(evt) {
                             } else if (type == "media-message") {
                                 // Received a media-message
                                 var from = eventObject.from,
-                                    contentType = eventObject.contentType,
-                                    url = eventObject.url,
-                                    size  = eventObject.size;
+                                    //contentType = eventObject.contentType,
+                                    //size  = eventObject.size,
+                                    url = eventObject.url;
                             
                                 var ongoingChat = _ms._chat.get(from);
                                 ongoingChat.state = Chat.State.ACTIVE;
@@ -5747,7 +6544,7 @@ contact.onupdating = function(evt) {
                                 ongoingChat._getMedia(id, from);
                             } else if (type == "message-failure") {
                                 var to = eventObject.to,
-                                    msgId = eventObject.msgId,
+                                    //msgId = eventObject.msgId,
                                     code = eventObject.code;
                                 
                                 var ongoingChat = _ms._chat.get(to);
@@ -5786,9 +6583,9 @@ contact.onupdating = function(evt) {
                                 // Group chat updated info (users and states)
                                 var userCount = eventObject.userCount,
                                     confId = eventObject.confId,
-                                    users = eventObject.users,
-                                    state = eventObject.state,
-                                    reason = eventObject.reason;
+                                    //state = eventObject.state,
+                                    //reason = eventObject.reason,
+                                    users = eventObject.users;
                                 
                                 var ongoingGroupChat = _ms._chat.get(confId);
                                 
@@ -5853,9 +6650,9 @@ contact.onupdating = function(evt) {
                                 // Group chat media message received
                                 var from = eventObject.from,
                                     confId = eventObject.confId,
-                                    contentType = eventObject.contentType,
-                                    url = eventObject.url,
-                                    size = eventObject.size;
+                                    //contentType = eventObject.contentType,
+                                    //size = eventObject.size,
+                                    url = eventObject.url;
                                 
                                 var ongoingGroupChat = _ms._chat.get(confId);
                                 
@@ -5897,8 +6694,8 @@ contact.onupdating = function(evt) {
                                 }
                             } else if (type == "anonymous-subscription") {
                                 // Event containing individual user with services/isIMSUser
-                                var isIMSUser = eventObject.isIMSUser;
-                                var services = eventObject.services;
+                                //var isIMSUser = eventObject.isIMSUser;
+                                //var services = eventObject.services;
                                 
                                 // TODO: implement if we need anonymous subscribe
                             } else if (type == "watcherlist") {
@@ -5943,6 +6740,7 @@ contact.onupdating = function(evt) {
                                 }
                             } else {
                                 // Unhandled event
+                                state = eventObject.state;
                                 logger.log("Unhandled channel event: " + type + " " + state);
                             }
                         }
@@ -5982,16 +6780,43 @@ contact.onupdating = function(evt) {
         };
     }
     
+    function currentTerminatedCall(currentCall, eventObject){
+        if (currentCall) {
+            if (currentCall.state != Call.State.ENDED) {
+            // Cleanup the Peer Connection
+                if (currentCall._pc && currentCall._pc.close) {
+                    currentCall._pc.close();
+                    currentCall._pc = null;
+                    if(currentCall.localStreams[0] && currentCall.localStreams[0].stop){
+                        currentCall.localStreams[0].stop();
+                    }
+                    if(currentCall.remoteStreams[0] && currentCall.remoteStreams[0].stop){
+                        currentCall.remoteStreams[0].stop();
+                    }
+                }
+            
+                // Clear moderator flag
+                currentCall._isModerator = null;
+                currentCall._callID = null;
+
+                currentCall.state = Call.State.ENDED;
+                if (typeof(currentCall.onend) == "function") { 
+                    var endingReason= (typeof(eventObject.reason) === "undefined")?"Call terminated":eventObject.reason;
+                    currentCall.onend({reason: endingReason}); 
+                }
+            }
+        }   
+    }
+    
     /**
-    Build H2S signaling SDP object from SDP string
+    Build WCG signaling SDP object from SDP string
     @private
     @param {String} recipient The recipient of the call
     @param {String} Offer SDP
-    @return {Object} The SDP in accepted H2S json format
+    @return {Object} The SDP in accepted WCG json format
     */
     function _ParseSDP(recipient, sdp) {
-        var SDP = {};
-        
+        var SDP = {};       
         if (recipient) {
             SDP = {
                 to : recipient,
@@ -6003,36 +6828,38 @@ contact.onupdating = function(evt) {
             };
         }
         
-        var sdp_string = JSON.stringify(sdp);
+        var sdp_string = JSON.stringify(sdp);       
+        var mediaIndex= sdp_string.indexOf("m=");
+        var commonPart= sdp_string.substring(0, mediaIndex);        
+        var mediaPart= sdp_string.substring(mediaIndex);
+
         // Get the v line
         var v_pattern = /v=(.*?)(?=\\r\\n)/g;
-        var v_match = v_pattern.exec(sdp_string);
+        var v_match = v_pattern.exec(commonPart);
 
         // Get the o line
         var o_pattern = /o=(.*?)(?=\\r\\n)/g;
-        var o_match = o_pattern.exec(sdp_string);
+        var o_match = o_pattern.exec(commonPart);
 
         // Get the s line
         var s_pattern = /s=(.*?)(?=\\r\\n)/g;
-        var s_match = s_pattern.exec(sdp_string);
+        var s_match = s_pattern.exec(commonPart);
 
         // Get the t line
         var t_pattern = /t=(.*?)(?=\\r\\n)/g;
-        var t_match = t_pattern.exec(sdp_string);
+        var t_match = t_pattern.exec(commonPart);
 
         // Get the a line
+        //TODO - WCG does not support multiple attributes.. Will be fix in next release
         var a_pattern = /a=(.*?)(?=\\r\\n)/g;
-        var a_match = a_pattern.exec(sdp_string);
-        
-        // Get all media
-        var media_pattern = /m=(.*)/g;
-        var media_match = media_pattern.exec(sdp_string);
-        var media = media_match[1];
+        var a_match = a_pattern.exec(commonPart);
 
         // Split all media
-        var media_line_array = media.split("m=");
+        var media_line_array = mediaPart.split("m=");
         
+        var doCommonPart= true;
         for (var index in media_line_array) {
+            if(media_line_array[index] === "") continue;
             var m = "m=" + media_line_array[index];
             var lines_array = m.split("\\r\\n");
             lines_array.pop();
@@ -6040,17 +6867,30 @@ contact.onupdating = function(evt) {
             // For each media, split all the lines
             // Find the m, the c, and the a
             var m_struct = {};
-            if (index == 0) {
-                m_struct = {
-                    v : v_match[1],
-                    o : o_match[1],
-                    s : s_match[1],
-                    t : t_match[1],
-                    a : a_match[1],
-                    m : "",
-                    c : "",
-                    attributes : []
-                };
+            if (doCommonPart) {
+                doCommonPart= false;
+                if(a_match == null){
+                    m_struct = {
+                        v : v_match[1],
+                        o : o_match[1],
+                        s : s_match[1],
+                        t : t_match[1],
+                        m : "",
+                        c : "",
+                        attributes : []
+                    };
+                } else {
+                    m_struct = {
+                        v : v_match[1],
+                        o : o_match[1],
+                        s : s_match[1],
+                        t : t_match[1],
+                        a : a_match[1],
+                        m : "",
+                        c : "",
+                        attributes : []
+                    };
+                }
             } else {
                 m_struct = {
                     m : "",
@@ -6061,7 +6901,7 @@ contact.onupdating = function(evt) {
             
             for(var i in lines_array) {
                 var line = lines_array[i];
-                        
+                
                 if (line[0] == "m") {
                     m_struct.m = line.substring(2);
                 }
@@ -6071,19 +6911,16 @@ contact.onupdating = function(evt) {
                 }
                 
                 if (line[0] == "a") { 
-                    var a_line = {
-                                            a : line.substring(2)
-                                        }
-
+                    var a_line = { a : line.substring(2) };                 
                     m_struct.attributes.push(a_line);
                 }
-            }
+            }   
             
             SDP.sdp.push(m_struct);
         }
         
-        logger.log(JSON.stringify(SDP,null, " "));
-        
+        logger.log(JSON.stringify(SDP,null, " "));      
+
         return SDP;
     }
     
@@ -6091,22 +6928,33 @@ contact.onupdating = function(evt) {
     /**
     Build SDP string from SDP object
     @private
-    @param {Object} sdp H2S json SDP
+    @param {Object} sdp WCG json SDP
     @returns {String} SDP as string
     */
-    function _SDPToString(sdp) {
-        // TODO: H2S should return v= o= s= t= a= lines, parse them
+    function _SDPToString(origin, sdp, attributes) {
+        // TODO: WCG should return v= o= s= t= a= lines, parse them
         // Hardcode this for now
-        var roapsdp = "v=0\r\no=- 0 0 IN IP4 127.0.0.1\r\ns=\r\nt=0 0\r\na=group:BUNDLE audio video\r\n";
+                
+        var wcgSdp;
+        if(typeof(origin) === "undefined") {        
+            wcgSdp = "v=0\r\no=- 0 0 IN IP4 127.0.0.1\r\ns=\r\nt=0 0\r\n";
+        } else {
+            wcgSdp = "v=0\r\n" + origin + "\r\ns=\r\nt=0 0\r\n";
+        }
+        
+        if(typeof(attributes) != "undefined" && attributes != ""){
+            wcgSdp+= attributes + "\r\n";
+        }
+        
         for (mediaIndex in sdp) {
-            roapsdp += "m=" + sdp[mediaIndex].m + "\r\n";
-            roapsdp += "c=" + sdp[mediaIndex].c + "\r\n";
+            wcgSdp += "m=" + sdp[mediaIndex].m + "\r\n";
+            wcgSdp += "c=" + sdp[mediaIndex].c + "\r\n";
             for(attributeIndex in sdp[mediaIndex].attributes) {
-                roapsdp += "a=" + sdp[mediaIndex].attributes[attributeIndex].a + "\r\n";
+                wcgSdp += "a=" + sdp[mediaIndex].attributes[attributeIndex].a + "\r\n";
             }
         }
         
-        return roapsdp;
+        return wcgSdp;
     }
     
     /**
@@ -6131,15 +6979,14 @@ contact.onupdating = function(evt) {
         
         return candidates;
     }
-    
-    
+
     /**
     ROAP message handling object
     @deprecated Not used for JSEP. To remove when ROAP is no longer supported.
     @private
     */
     function _DEPRECATEDRoap() {
-        // H2S roap object 
+        // WCG roap object 
         var _H2SRoap = {
             messageType : "",
             SDP : [],
@@ -6156,16 +7003,13 @@ contact.onupdating = function(evt) {
         
         // Parse a ROAP message and return an SDP
         this.parseROAP = function(message) {
-            //message = message.replace("RTP/AVPF 103 104 0 8 106 105 13 126", "RTP/AVPF 103 104 0 106 105 13 126");
             var json = JSON.parse(message.slice(message.indexOf("{")), message.lastIndexOf("}"));
-            
             _H2SRoap.reset();
             
             _H2SRoap.messageType = json.messageType;
             _H2SRoap.offererSessionId = json.offererSessionId;
             _H2SRoap.answererSessionId = json.answererSessionId;
             _H2SRoap.SDP = null;
-            _H2SRoap.seq = json.seq;
                 
             if (json.sdp) {
                 var SDP = {
@@ -6229,12 +7073,7 @@ contact.onupdating = function(evt) {
                             m_struct.c = line.substring(2);
                         }
                         if (line[0] == "a") { 
-                            var a_line = {
-                                                    a : line.substring(2)
-                                                }
-                            //if (line.indexOf("PCMA") != -1)
-                            //  continue;
-                                
+                            var a_line = { a : line.substring(2) };
                             m_struct.attributes.push(a_line);
                         }
                         
@@ -6252,12 +7091,10 @@ contact.onupdating = function(evt) {
         // Build the OFFER ROAP message and process it
         this.processRoapOffer = function(mediaServices, sdp) {
             logger.log("Processing an OFFER...");
-            this._lastSdp = sdp;
-            
             var offererSessionId = null;
             var answererSessionId = null;
             var seq = 1;
-            if (mediaServices._isModerator || (mediaServices._call instanceof Conference && !mediaServices._isModerator)) {
+            if (mediaServices._call._isModerator || (mediaServices._call instanceof Conference && !mediaServices._call._isModerator)) {
                 seq = 2;
                 offererSessionId = _H2SRoap.offererSessionId;
                 answererSessionId = _H2SRoap.answererSessionId;
@@ -6271,12 +7108,12 @@ contact.onupdating = function(evt) {
 
             //build the ROAP message
             //the sdp has been set on invitation received
-            var roapsdp = "v=0\r\no=- 0 0 IN IP4 127.0.0.1\r\ns=\r\nt=0 0\r\n";
+            var wcgSdp = "v=0\r\no=- 0 0 IN IP4 127.0.0.1\r\ns=\r\nt=0 0\r\n";
             for (mediaIndex in sdp) {
-                roapsdp += "m=" + sdp[mediaIndex].m + "\r\n";
-                roapsdp += "c=" + sdp[mediaIndex].c + "\r\n";
+                wcgSdp += "m=" + sdp[mediaIndex].m + "\r\n";
+                wcgSdp += "c=" + sdp[mediaIndex].c + "\r\n";
                 for(attributeIndex in sdp[mediaIndex].attributes) {
-                    roapsdp += "a=" + sdp[mediaIndex].attributes[attributeIndex].a + "\r\n";
+                    wcgSdp += "a=" + sdp[mediaIndex].attributes[attributeIndex].a + "\r\n";
                 }
             }
 
@@ -6284,7 +7121,7 @@ contact.onupdating = function(evt) {
                 "messageType" : "OFFER",
                 "offererSessionId" : offererSessionId,
                 "answererSessionId" : answererSessionId,
-                "sdp" : roapsdp,
+                "sdp" : wcgSdp,
                 "seq" : seq,
                 "tieBreaker" : tieBreaker
             };
@@ -6295,14 +7132,13 @@ contact.onupdating = function(evt) {
         };
         
         // Build the ANSWER ROAP message and process it
-        this.processRoapAnswer = function(mediaServices, sdp, reversed) {
+        this.processRoapAnswer = function(mediaServices, sdp) {
             logger.log("Processing an ANSWER...");
-            this._lastSdp = sdp;
             var offererSessionId = null;
             var answererSessionId = null;
             var seq = 2;
 
-            if (mediaServices._isModerator || (mediaServices._call instanceof Conference && !mediaServices._isModerator)) {
+            if (mediaServices._call._isModerator || (mediaServices._call instanceof Conference && !mediaServices._call._isModerator)) {
                 seq = 1;
                 offererSessionId = _H2SRoap.offererSessionId;
                 answererSessionId = this.idGenerator();
@@ -6311,26 +7147,17 @@ contact.onupdating = function(evt) {
                 offererSessionId = _H2SRoap.offererSessionId;
                 answererSessionId = _H2SRoap.answererSessionId;
             }
-            
-            if (reversed)
-            {
-                seq = 2;
-                offererSessionId = _H2SRoap.answererSessionId;
-                answererSessionId = _H2SRoap.offererSessionId;
-                offererSessionId = _H2SRoap.offererSessionId;
-                answererSessionId = _H2SRoap.answererSessionId;
-            }
 
             //build the sdp
 
             //build the ROAP message
             //the sdp has been set on invitation received
-            var roapsdp = "v=0\r\no=- 0 0 IN IP4 127.0.0.1\r\ns=\r\nt=0 0\r\n";
+            var wcgSdp = "v=0\r\no=- 0 0 IN IP4 127.0.0.1\r\ns=\r\nt=0 0\r\n";
             for(mediaIndex in sdp) {
-                roapsdp += "m=" + sdp[mediaIndex].m + "\r\n";
-                roapsdp += "c=" + sdp[mediaIndex].c + "\r\n";
+                wcgSdp += "m=" + sdp[mediaIndex].m + "\r\n";
+                wcgSdp += "c=" + sdp[mediaIndex].c + "\r\n";
                 for(attributeIndex in sdp[mediaIndex].attributes) {
-                    roapsdp += "a=" + sdp[mediaIndex].attributes[attributeIndex].a + "\r\n";
+                    wcgSdp += "a=" + sdp[mediaIndex].attributes[attributeIndex].a + "\r\n";
                 }
             }
 
@@ -6338,7 +7165,7 @@ contact.onupdating = function(evt) {
                 "messageType" : "ANSWER",
                 "offererSessionId" : offererSessionId,
                 "answererSessionId" : answererSessionId,
-                "sdp" : roapsdp,
+                "sdp" : wcgSdp,
                 "seq" : seq
             };
 
@@ -6357,7 +7184,7 @@ contact.onupdating = function(evt) {
             var offererSessionId = _H2SRoap.answererSessionId;
             var answererSessionId = _H2SRoap.offererSessionId;
             var seq = 1;
-            if (mediaServices._isModerator) {
+            if (mediaServices._call._isModerator) {
                 seq = 2;
             } else {
                 seq = 1;
@@ -6439,3 +7266,4 @@ contact.onupdating = function(evt) {
         return obj;
     };
 })(window);
+
