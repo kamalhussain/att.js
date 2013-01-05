@@ -79,7 +79,7 @@ var att = $.att({
 
 ## Creating and Interacting with a Call
 
-To start a call, you can use `att.dial()`:
+To start a call, you can use `att.dial()`, or the equivalent `att.phone.dial()`:
 
 ```js
 var att = $.att({...});
@@ -108,6 +108,8 @@ session using:
 * `call.transferto(phoneNumber)`: Transfer the call to another phone
 * `call.pushToTalk(flag)`: If set to `true`, enable push to talk functionality. You will have to use `call.talk(true)` to enable sending audio, and `call.talk(false)` when done. If no value is provided, the function will return `true` if the call is in push to talk mode.
 * `call.talking(flag)`: The equivalent of pressing the talk button on a push to talk device.
+
+Once you answer a call, you can find the number of the caller in the `call.initiator` field.
 
 # Working with Phone Numbers
 
