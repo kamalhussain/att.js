@@ -87,7 +87,8 @@ function Att(options) {
         // make it possible to override guessed version
         me.version = config.version || _.getQueryParam('version') || me.version;
         config.version = me.version;
-
+        config.myNumber = me.number;
+        
         console.log('using API version:', config.version);
 
         self.emit('user', me);
