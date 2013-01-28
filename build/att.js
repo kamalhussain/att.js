@@ -316,6 +316,7 @@
             },
             availableCallbacks = {
                 'onReady': 'ready',
+                'onUser': 'user',
                 'onUnReady': 'unready',
                 'onError': 'error',
                 'onCallBegin': 'callBegin',
