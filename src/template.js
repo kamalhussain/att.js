@@ -114,6 +114,7 @@
     };
 
 {{{phoneNumber}}}
+{{{message}}}
 {{{emitter}}}
 {{{phone}}}
 {{{chat}}}
