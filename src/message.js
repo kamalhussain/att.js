@@ -1,30 +1,79 @@
 var message = {};
+var sendMessageCallback;
 
-var messageServiceUrl = "https://api.tfoundry.com/a1/messages/messages/?access_token=";
+var messageServiceUrl = "https://api.tfoundry.com/a1/messages/messages/";
 
-success = function(data) {
-	console.log("success"+data);
-}
+sendMessageSuccess = function(data, textStatus, jqXHR) {
+	console.log("success sendMessage. textStatus = "+textStatus);
+};
 
-error = function(data) {
-	console.error("error"+data);
-}
+sendMessageError = function(data, textStatus, jqXHR) {
+	console.error("error sendMessage. textStatus = "+textStatus);
+};
+
+getMessagesSuccess = function(data, textStatus, jqXHR) {
+	console.log("success getMessages. textStatus = "+textStatus);
+	
+	sendMessageCallback(JSON.stringify(data));
+};
+
+getMessagesError = function(data, textStatus, jqXHR) {
+	console.error("error getMessages. textStatus = "+textStatus);
+	
+	var returnData = {};
+	returnData.textStatus = textStatus;
+	sendMessageCallback(JSON.stringify(returnData));
+};
+
+getUrl = function(requestedPath) {
+	var access_token = window.att.config.apiKey;
+	var url = "";
+	
+	if(requestedPath) {
+		url = messageServiceUrl+requestedPath+"/?access_token="+access_token;
+	} else {
+		url = messageServiceUrl+"?access_token="+access_token;		
+	}
+	
+	console.log("url = "+url);
+	
+	return url;	
+};
 
 message.sendMessage = function(recipient, text) {
-	console.log('send message '+text+' to '+recipient);
+	console.log('sending message '+text+' to '+recipient);
+
 	var data = {};
 	data.recipient = recipient;
 	data.text = text;
-	var access_token = window.att.config.apiKey;
-	var url = messageServiceUrl+access_token;
+
 	$.ajax({
 		type : 'POST',
-		url : url,
+		url : getUrl(),
 		data : JSON.stringify(data),
-		success : success,
-		error : error,
+		success : sendMessageSuccess,
+		error : sendMessageError,
 		dataType : 'application/json'
-	})
+	});
+};
+
+message.getMessages = function(callback) {
+	sendMessageCallback = callback;
+	$.ajax({
+		type : 'GET',
+		url : getUrl(),
+		success : getMessagesSuccess,
+		error : getMessagesError
+	});
+};
+
+message.getMessage = function(messageId) {
+	$.ajax({
+		type : 'GET',
+		url : getUrl(messageId),
+		success : getMessagesSuccess,
+		error : getMessagesError
+	});
 }
 
 att.message = message;
