@@ -1,5 +1,7 @@
 var message = {};
-var sendMessageCallback;
+
+//place holder for developer's callback function for getMessages and getMessage method
+var getMessagesCallback;
 
 var messageServiceUrl = "https://api.tfoundry.com/a1/messages/messages/";
 
@@ -14,7 +16,7 @@ sendMessageError = function(data, textStatus, jqXHR) {
 getMessagesSuccess = function(data, textStatus, jqXHR) {
 	console.log("success getMessages. textStatus = "+textStatus);
 	
-	sendMessageCallback(JSON.stringify(data));
+	getMessagesCallback(JSON.stringify(data));
 };
 
 getMessagesError = function(data, textStatus, jqXHR) {
@@ -22,7 +24,7 @@ getMessagesError = function(data, textStatus, jqXHR) {
 	
 	var returnData = {};
 	returnData.textStatus = textStatus;
-	sendMessageCallback(JSON.stringify(returnData));
+	getMessagesCallback(JSON.stringify(returnData));
 };
 
 getUrl = function(requestedPath) {
