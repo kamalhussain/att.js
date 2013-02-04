@@ -63,7 +63,7 @@ function Att(options) {
                 self.emit(value, event);
             };
         }
-    });    
+    });
 
     // support phono api
     if (opts.phone) {
@@ -89,30 +89,34 @@ function Att(options) {
         me.version = config.version || _.getQueryParam('version') || me.version;
         config.version = me.version;
         config.myNumber = me.number;
-        
+
         console.log('using API version:', config.version);
 
         self.emit('user', me);
 
         if (config.version === 'a1' || config.version === 'a2') {
             $.getScript(config.dependencyBaseUrl + '/js/att.' + config.version + '.js', function () {
-                self.fetchDependencies(config.version);    
-            });    
+                self.fetchDependencies(config.version);
+            });
         } else {
             $.getScript(config.dependencyBaseUrl + '/js/phono.06.js', function () {
                 config.token = config.apiKey;
                 config.apiKey = "7826110523f1241fcfd001859a67128d";
                 config.connectionUrl = "http://gw.att.io:8080/http-bind";
-                self.fetchDependencies();    
+                self.fetchDependencies();
             });
-        }        
+        }
     });
 
     return self;
 }
 
 // set our prototype to be a new emitter instance
-Att.prototype = new WildEmitter();
+Att.prototype = Object.create(WildEmitter.prototype, {
+    constructor: {
+        value: Att
+    }
+});
 
 Att.prototype.fetchDependencies = function (version) {
     var self = this,
@@ -123,7 +127,7 @@ Att.prototype.fetchDependencies = function (version) {
         } else {
             console.log('setting up wcgphono');
             // Henrik: I'm of the opinion that we should normalize all handling in this library
-            // rather than in the dynamically loaded ones. That way we maintain one compatibility 
+            // rather than in the dynamically loaded ones. That way we maintain one compatibility
             // layer outside of the included (hopefully unmodified) libraries rather than have to
             // modify each one.
             this.phono = $.wcgphono(_.extend(config, {
@@ -161,7 +165,7 @@ Att.prototype.fetchDependencies = function (version) {
                 self.sessionId = this.sessionId;
                 _.getMe(config.apiKey, function (me) {
                     self.bindNumberToPhonoSession(me.number, self.sessionId, function () {
-                        self.emit('ready'); 
+                        self.emit('ready');
                     });
                 });
             }
@@ -216,7 +220,7 @@ Att.prototype.dial = function (phoneNumber, callbackHash) {
         attCall;
 
     this.emit('calling', phoneNumber);
-    
+
     // for 'a3' we need to set a full sip address
     if (this.config.version === 'a3') {
         call = this.phono.phone.dial('sip:' + callable + '@12.208.176.26', {
@@ -231,7 +235,7 @@ Att.prototype.dial = function (phoneNumber, callbackHash) {
 
     // FIXME: Short term fix, we auto-generate ring event - see FIXME in vendor/att.a1.js
     attCall.emit("ring");
-        
+
     this.emit('outgoingCall', attCall);
     return attCall;
 };
@@ -240,7 +244,7 @@ Att.prototype.dial = function (phoneNumber, callbackHash) {
 // The AttCall Object
 function AttCall(att, call) {
     var self = this;
-    
+
     // store references for convenience
     this._att = att;
     this._call = call;
@@ -283,7 +287,12 @@ function AttCall(att, call) {
     return this;
 }
 
-AttCall.prototype = new WildEmitter();
+// Set up our prototype
+AttCall.prototype = Object.create(WildEmitter.prototype, {
+    constructor: {
+        value: AttCall
+    }
+});
 
 // Support the phono call
 AttCall.prototype.bind = function (callbacks) {
@@ -303,7 +312,7 @@ AttCall.prototype.bind = function (callbacks) {
 
     _.each(phonoCallAPICallbacks, function (key, value) {
         if (_.isFunc(options[key])) {
-            self.on(value, options[key]);     
+            self.on(value, options[key]);
         }
     });
 };
@@ -312,35 +321,35 @@ AttCall.prototype.bind = function (callbacks) {
 AttCall.prototype.answer = function () {
     return this._call.answer();
 };
-  
+
 AttCall.prototype.hangup = function () {
     return this._call.hangup();
 };
-  
+
 AttCall.prototype.digit = function (digit) {
     return this._call.digit(digit);
 };
-  
+
 AttCall.prototype.pushToTalk = function (flag) {
     return this._call.pushToTalk(flag);
 };
-  
+
 AttCall.prototype.talking = function (flag) {
     return this._call.talking(flag);
 };
-  
+
 AttCall.prototype.mute = function (flag) {
     return this._call.mute(flag);
 };
-  
+
 AttCall.prototype.hold = function (flag) {
     return this._call.hold(flag);
 };
-  
+
 AttCall.prototype.volume = function (level) {
     return this._call.volume(level);
 };
-  
+
 AttCall.prototype.gain = function (level) {
     return this._call.gain(level);
 };

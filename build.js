@@ -12,7 +12,7 @@ var fs = require('fs'),
     mustache = require('mustache'),
     uglify = require('uglify-js'),
     colors = require('colors');
-    
+
 var template = fs.readFileSync(src + '/template.js', 'utf-8'),
     socketIO = fs.readFileSync(vendor + '/socket.io.js', 'utf-8'),
     emitter = fs.readFileSync(src + '/wildemitter.js', 'utf-8'),
@@ -25,7 +25,7 @@ function indent(file, indentAmount) {
         actualIndent = indentAmount || '    ',
         i = 0,
         l = split.length;
-    
+
     for (; i < l; i++) {
         split[i] = actualIndent + split[i];
     }
@@ -35,7 +35,7 @@ function indent(file, indentAmount) {
 
 // build our concatenated code
 var context = {
-    emitter: indent(emitter), 
+    emitter: indent(emitter),
     phone: indent(phone),
     phoneNumber: indent(phoneNumber),
     socket: socketIO
@@ -77,7 +77,5 @@ writeFiles('att.phonenumber', {phoneNumber: indent(phoneNumber)});
 
 console.log('The ' + '/build'.bold.blue + ' directory contains the built files.\n');
 
-console.log('Run ' + 'node server'.bold.blue + ' to see example uses.\n');
-
 // yup, we're done
-process.exit(0);    
+process.exit(0);
