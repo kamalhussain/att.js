@@ -364,8 +364,8 @@ AttCall.prototype.transferto = function (phoneNumber) {
 
 // attch it to root
 att.Phone = Att;
-if (root.jQuery) {
-    root.jQuery.att = function (opts) {
+if ($) {
+    $.att = function (opts) {
         return new Att(opts);
     };
 }

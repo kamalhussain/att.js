@@ -3,7 +3,8 @@
     // Utils and references
     var root = this,
         att = {},
-        cache = {};
+        cache = {},
+        $ = root.jQuery;
 
     // global utils
     var _ = att.util = {
@@ -101,7 +102,7 @@
                             } else {
                                 user.version = 'a1';
                             }
-                            user.number = explicitNumber || user.phone_number;                            
+                            user.number = explicitNumber || user.phone_number;
                             cb(user);
                         }
                     });
@@ -138,7 +139,7 @@
                 arr.splice(0, 0, " (");
                 // back fill with spaces
                 arr.splice(4, 0, (new Array(diff + 1).join(' ') + ") "));
-                
+    
                 if (len > 7) {
                     arr.splice(8, 0, '-');
                 }
@@ -181,6 +182,11 @@
     };
     
     att.phoneNumber = phoneNumber;
+    
+    if ($) {
+        $.phoneNumber = phoneNumber;
+    }
+    
 
 
 

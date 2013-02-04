@@ -6,7 +6,8 @@
     // Utils and references
     var root = this,
         att = {},
-        cache = {};
+        cache = {},
+        $ = root.jQuery;
 
     // global utils
     var _ = att.util = {
@@ -104,7 +105,7 @@
                             } else {
                                 user.version = 'a1';
                             }
-                            user.number = explicitNumber || user.phone_number;                            
+                            user.number = explicitNumber || user.phone_number;
                             cb(user);
                         }
                     });

@@ -26,7 +26,7 @@ phoneNumber.stringify = function (text) {
             arr.splice(0, 0, " (");
             // back fill with spaces
             arr.splice(4, 0, (new Array(diff + 1).join(' ') + ") "));
-            
+
             if (len > 7) {
                 arr.splice(8, 0, '-');
             }
@@ -69,3 +69,7 @@ phoneNumber.getCallable = function (input, countryAbr) {
 };
 
 att.phoneNumber = phoneNumber;
+
+if ($) {
+    $.phoneNumber = phoneNumber;
+}
