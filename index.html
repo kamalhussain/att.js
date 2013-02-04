@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Demo</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+        <script src="vendor/phono.06.js"></script>
+        <script src="vendor/wcg.js"></script>
+        <script src="https://js.att.io/js/dialpad.js"></script>
+        <script src="build/att.js"></script>
+        <script src="https://js.att.io/js/dialpad.js"></script>
+        <script src="https://js.att.io/js/candybar.js"></script>
+        <script src="https://js.att.io/js/ringer.js"></script>
+        <link href="https://js.att.io/css/dialpad.css" rel="stylesheet" type="text/css" />
+        <link href="https://js.att.io/css/candybar.css" rel="stylesheet" type="text/css" />
+        <script>
+            if (!localStorage.token) alert('Set an oauth token as localStorage.token');
+            $(function () {
+                // set up our phone
+                window.att = $.att({
+                  apiKey: localStorage.token,
+                  // when the phone is ready, render dialpad
+                  onReady: function () {
+                    $('body').addClass('readyToCall');
+                  },
+                  wcgLibUrl: location.href + '/../vendor/wcg.js',
+                  phonoLibUrl: 'vendor/phono.06.js'
+                });
+
+                // add some ringtones
+                window.ringer = new Ringer(att);
+
+                // init our candybar UI pass it our phone
+                window.candybar = new CandyBar({phone: att});
+                candybar.render();
+
+                // init our dialpad
+                window.dialpad = new Dialpad({
+                  // when the "call" button is clicked
+                  // on the dialer, dial our phone.
+                  onCall: function (number, dialable) {
+                    att.phone.dial(number);
+                    dialpad.hide();
+                  }
+                });
+
+                $('#dialer').html(dialpad.render())
+            });
+        </script>
+    </head>
+    <body>
+        <h1>att.js test</h1>
+        <div id="dialer"></div>
+    </body>
+</html>

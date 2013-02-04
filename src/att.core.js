@@ -8,11 +8,12 @@ function Att(options) {
             log: true,
             ringTone: '',
             ringbackTone: '',
-            dependencyBaseUrl: '//js.att.io',
             msServer: 'https://api.foundry.att.com/a1/webrtc',
             sipDomain: 'mon.api.att.net',
             turnConfig: 'STUN:206.18.171.164:5060',
-            mediaType: 'audio,video'
+            mediaType: 'audio,video',
+            wcgLibUrl: '//js.att.io/js/wcg.js',
+            phonoLibUrl: '//js.att.io/js/phono.06.js'
         },
         availableCallbacks = {
             'onReady': 'ready',
@@ -87,8 +88,11 @@ function Att(options) {
         });
     }
 
+    console.log("HERE");
+
     // attempt to get me and determine version
     _.getMe(this.config.apiKey, function (me) {
+        console.log("HER");
         // make it possible to override guessed version
         me.version = config.version || _.getQueryParam('version') || me.version;
         config.version = me.version;
@@ -99,16 +103,25 @@ function Att(options) {
         self.emit('user', me);
 
         if (config.version === 'a1') {
-            $.getScript(config.dependencyBaseUrl + '/js/wcg.js', function () {
+            if (!window.MediaServices) {
+                $.getScript(config.wcgLibUrl, function () {
+                    self.initLib(config.version);
+                });
+            } else {
                 self.initLib(config.version);
-            });
+            }
         } else {
-            $.getScript(config.dependencyBaseUrl + '/js/phono.06.js', function () {
-                config.token = config.apiKey;
-                config.apiKey = "7826110523f1241fcfd001859a67128d";
-                config.connectionUrl = "http://gw.att.io:8080/http-bind";
+            config.token = config.apiKey;
+            config.apiKey = "7826110523f1241fcfd001859a67128d";
+            config.connectionUrl = "http://gw.att.io:8080/http-bind";
+
+            if ($.phono) {
+                $.getScript(config.phonoLibUrl, function () {
+                    self.initLib();
+                });
+            } else {
                 self.initLib();
-            });
+            }
         }
     });
 
@@ -136,6 +149,7 @@ Att.prototype.initLib = function (version) {
             // layer outside of the included (hopefully unmodified) libraries rather than have to
             // modify each one.
             this.ms = new MediaServices(config.msServer, config.user, msApiKey, config.mediaType);
+            this.ms.turnConfig = config.turnConfig;
             this.ms.onclose = function(e) {
                 self.emit('unready', e);
             };

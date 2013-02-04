@@ -107,6 +107,11 @@
                             }
                             user.number = explicitNumber || user.phone_number;
                             cb(user);
+                        },
+                        error: function () {
+                            user.version = 'a1'
+                            user.number = user.phone_number;
+                            cb(user);
                         }
                     });
                 }
