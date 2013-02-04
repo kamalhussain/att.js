@@ -101,7 +101,7 @@
                             } else {
                                 user.version = 'a1';
                             }
-                            user.number = explicitNumber || user.phone_number;                            
+                            user.number = explicitNumber || user.phone_number;
                             cb(user);
                         }
                     });
@@ -138,7 +138,7 @@
                 arr.splice(0, 0, " (");
                 // back fill with spaces
                 arr.splice(4, 0, (new Array(diff + 1).join(' ') + ") "));
-                
+    
                 if (len > 7) {
                     arr.splice(8, 0, '-');
                 }
@@ -181,6 +181,7 @@
     };
     
     att.phoneNumber = phoneNumber;
+    
     /*
     WildEmitter.js is a slim little event emitter largely based on @visionmedia's Emitter from UI Kit.
     
@@ -189,11 +190,11 @@
     I also wanted support for wildcard emitters. Like:
     
     emitter.on('*', function (eventName, other, event, payloads) {
-        
+    
     });
     
     emitter.on('somenamespace*', function (eventName, payloads) {
-        
+    
     });
     
     Functions triggered by wildcard registered events also get the event name as the first argument.
@@ -206,7 +207,7 @@
     // Listen on the given `event` with `fn`. Store a group name if present.
     WildEmitter.prototype.on = function (event, groupName, fn) {
         var hasGroup = (arguments.length === 3),
-            group = hasGroup ? arguments[1] : undefined, 
+            group = hasGroup ? arguments[1] : undefined,
             func = hasGroup ? arguments[2] : arguments[1];
         func._groupName = group;
         (this.callbacks[event] = this.callbacks[event] || []).push(func);
@@ -248,7 +249,7 @@
     WildEmitter.prototype.off = function (event, fn) {
         var callbacks = this.callbacks[event],
             i;
-        
+    
         if (!callbacks) return this;
     
         // remove all handlers
@@ -302,6 +303,7 @@
         }
         return result;
     };
+    
     function Att(options) {
         var self = this,
             opts = options || {},

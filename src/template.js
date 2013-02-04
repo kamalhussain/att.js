@@ -104,7 +104,7 @@
                             } else {
                                 user.version = 'a1';
                             }
-                            user.number = explicitNumber || user.phone_number;                            
+                            user.number = explicitNumber || user.phone_number;
                             cb(user);
                         }
                     });

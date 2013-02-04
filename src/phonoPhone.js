@@ -19,7 +19,7 @@ function PhonoPhone(options) {
     }
 
     this.phono = $.phono({
-        apiKey: "7826110523f1241fcfd001859a67128d",            
+        apiKey: "7826110523f1241fcfd001859a67128d",
         gateway: 'gw.phono.com',
         connectionUrl: 'http://bosh.spectrum.tfoundry.com:8080/http-bind',
         audio: {
