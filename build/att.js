@@ -319,7 +319,11 @@
                 log: true,
                 ringTone: '',
                 ringbackTone: '',
-                dependencyBaseUrl: '//js.att.io'
+                dependencyBaseUrl: '//js.att.io',
+                msServer: 'https://api.foundry.att.com/a1/webrtc',
+                sipDomain: 'mon.api.att.net',
+                turnConfig: 'STUN:206.18.171.164:5060',
+                mediaType: 'audio,video'
             },
             availableCallbacks = {
                 'onReady': 'ready',
@@ -405,16 +409,16 @@
     
             self.emit('user', me);
     
-            if (config.version === 'a1' || config.version === 'a2') {
-                $.getScript(config.dependencyBaseUrl + '/js/att.' + config.version + '.js', function () {
-                    self.fetchDependencies(config.version);
+            if (config.version === 'a1') {
+                $.getScript(config.dependencyBaseUrl + '/js/wcg.js', function () {
+                    self.initLib(config.version);
                 });
             } else {
                 $.getScript(config.dependencyBaseUrl + '/js/phono.06.js', function () {
                     config.token = config.apiKey;
                     config.apiKey = "7826110523f1241fcfd001859a67128d";
                     config.connectionUrl = "http://gw.att.io:8080/http-bind";
-                    self.fetchDependencies();
+                    self.initLib();
                 });
             }
         });
@@ -429,40 +433,30 @@
         }
     });
     
-    Att.prototype.fetchDependencies = function (version) {
+    Att.prototype.initLib = function (version) {
         var self = this,
-            config = this.config;
+            config = this.config,
+            msApiKey = (config.apiKey.indexOf("oauth" == -1)) ? "oauth " +  config.apiKey : config.apiKey;
         if (version === 'a1') {
-            if (!_.h2sSupport()) {
+            if (false && !_.h2sSupport()) {
                 alert('Please use the special Ericsson build of Chromium. It can be downloaded from: http://js.att.io/browsers');
             } else {
-                console.log('setting up wcgphono');
+                console.log('setting up wcg');
                 // Henrik: I'm of the opinion that we should normalize all handling in this library
                 // rather than in the dynamically loaded ones. That way we maintain one compatibility
                 // layer outside of the included (hopefully unmodified) libraries rather than have to
                 // modify each one.
-                this.phono = $.wcgphono(_.extend(config, {
-                    phone: {
-                        onIncomingCall: self._normalizeNonPhonoCallHandlers.bind(self)
-                    },
-                    onReady: function () {
-                        self.emit('ready');
-                    }
-                }));
-            }
-        } else if (version === 'a2') {
-            if (!_.h2sSupport()) {
-                alert('Please use the special Ericsson build of Chromium. It can be downloaded from: http://js.att.io/browsers');
-            } else {
-                console.log('setting up h2sphono');
-                this.phono = $.h2sphono(_.extend(config, {
-                    phone: {
-                        onIncomingCall: self._normalizeNonPhonoCallHandlers.bind(self)
-                    },
-                    onReady: function () {
-                        self.emit('ready');
-                    }
-                }));
+                this.ms = new MediaServices(config.msServer, config.user, msApiKey, config.mediaType);
+                this.ms.onclose = function(e) {
+                    self.emit('unready', e);
+                };
+                this.ms.onerror = function(e) {
+                    self.emit('error', e);
+                };
+                this.ms.oninvite = self._normalizeNonPhonoCallHandlers.bind(self);
+                this.ms.onready = function(e) {
+                    self.emit('ready');
+                };
             }
         } else {
             console.log('setting up phono');
@@ -538,7 +532,7 @@
                 callerId: self.config.myNumber + '@phono06.tfoundry.com'
             });
         } else {
-            call = this.phono.phone.dial(callable, {});
+            call = new PhonoCall(this.ms, "sip:" + callable + "@" + this.config.sipdomain);
         }
     
         attCall = new AttCall(this, call);
@@ -671,6 +665,115 @@
     AttCall.prototype.transferto = function (phoneNumber) {
         var callable = att.phoneNumber.getCallable(phoneNumber);
         this._call.transferto(callable);
+    };
+    
+    
+    // phono-fy a call
+    function PhonoCall(ms, destination, config, oCall) {
+        var call = oCall,
+            mt = this;
+    
+        if (!call) call = ms.createCall(destination, {audio: true, video: true});
+    
+        config || (config = {});
+    
+        $.extend(this, config);
+    
+        this.state = "initial";
+    
+        call.onstatechange = function(e) {
+            // FIXME: Call.State.RINGING comes in immediately before call.bind() is called from AttCall
+            // In short term we immediately generate the ring event in AttCall.phone.dial since the back end
+            // seems to be doing that anyway...
+            if (e.state == Call.State.RINGING && mt.onRing) {
+                mt.onRing(e);
+                mt.state = "ringing";
+            }
+            if (e.state == Call.State.ONGOING && mt.onAnswer) {
+                mt.onAnswer(e);
+                mt.state = "connected";
+            }
+            if (e.state == Call.State.ENDED && mt.onHangup) {
+                mt.onHangup(e);
+                mt.state = "disconnected";
+            }
+            if (e.state == Call.State.ERROR && mt.onError) {
+                mt.onError(e);
+                mt.state = "disconnected";
+            }
+    
+            // Add new features of hold, retrieve and waiting
+            if (e.state == Call.State.HOLDING && mt.onHold) {
+                mt.onHold(e);
+                mt.state = "holding";
+            }
+            if (e.state == Call.State.ONGOING && mt.onRetrieve) {
+                mt.onRetrieve(e);
+                mt.state = "connected";
+            }
+            if (e.state == Call.State.WAITING && mt.onWaiting) {
+                mt.onWaiting(e);
+                mt.state = "waiting";
+            }
+        }
+    
+        call.onaddstream = function(e) {
+            // TODO: Add the stream to an element.
+            // This is not possible (nor useful) in current Chrome
+            if (mt.onAddStream) {
+                mt.onAddStream(e);
+            }
+        }
+    
+        this.__defineGetter__("localStreams", function() { return call.localStreams; });
+        this.__defineGetter__("remoteStreams", function() { return call.localStreams; });
+    
+        if (!destination) {
+            this.__defineGetter__("from", function() { return call.recipient; });
+            this.__defineGetter__("initiator", function() { return call.recipient; });
+        }
+    
+        this.id = _.uuid();
+        this.call = call;
+    
+        if (!oCall) call.ring();
+    }
+    
+    PhonoCall.prototype.answer = function() {
+        this.call.answer();
+    };
+    PhonoCall.prototype.hangup = function() {
+        this.call.end();
+    };
+    PhonoCall.prototype.digit = function() {};
+    PhonoCall.prototype.pushToTalk = function() {};
+    PhonoCall.prototype.talking = function() {};
+    PhonoCall.prototype.mute = function() {};
+    PhonoCall.prototype.hold = function(state) {
+        if (state) {
+            this.call.hold();
+        } else {
+            this.call.resume();
+        }
+    };
+    PhonoCall.prototype.volume = function() {};
+    PhonoCall.prototype.gain = function() {};
+    PhonoCall.prototype.bind = function(config) {
+        var key;
+        if (config) {
+            for (key in config) {
+                if (typeof config[key] == 'function') {
+                    this[key] = config[key];
+                }
+            }
+        }
+    };
+    
+    // Additional feature above phono api
+    PhonoCall.prototype.transferto = function(destination) {
+        // sip-ify destination
+        var sipDestination = "sip:"+destination + "@" + sipdomain;
+        this.call.transferto(sipDestination)
     };
     
     // attch it to root
