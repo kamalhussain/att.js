@@ -6,11 +6,11 @@ I wanted it standalone.
 I also wanted support for wildcard emitters. Like:
 
 emitter.on('*', function (eventName, other, event, payloads) {
-    
+
 });
 
 emitter.on('somenamespace*', function (eventName, payloads) {
-    
+
 });
 
 Functions triggered by wildcard registered events also get the event name as the first argument.
@@ -23,7 +23,7 @@ function WildEmitter() {
 // Listen on the given `event` with `fn`. Store a group name if present.
 WildEmitter.prototype.on = function (event, groupName, fn) {
     var hasGroup = (arguments.length === 3),
-        group = hasGroup ? arguments[1] : undefined, 
+        group = hasGroup ? arguments[1] : undefined,
         func = hasGroup ? arguments[2] : arguments[1];
     func._groupName = group;
     (this.callbacks[event] = this.callbacks[event] || []).push(func);
@@ -65,7 +65,7 @@ WildEmitter.prototype.releaseGroup = function (groupName) {
 WildEmitter.prototype.off = function (event, fn) {
     var callbacks = this.callbacks[event],
         i;
-    
+
     if (!callbacks) return this;
 
     // remove all handlers

@@ -20,7 +20,7 @@ function PhonoCallControl(phono, options) {
 PhonoCallControl.prototype.init = function () {
     var self = this,
         connection = this.callControlConnection = new Strophe.Connection(this.config.boshService);
-    
+
     // initting connection
     connection.rawInput = function (elem) {
         console.warn('<< ' + elem);
@@ -45,7 +45,7 @@ PhonoCallControl.prototype.init = function () {
                 'attached'
             ];
         console.log('STROPHE STATUS: ' + statusLookup[status]);
-        
+
         if (statusLookup[status] === 'connected') {
             connection.att.sendInitialPresence(app.get('sipAddress'));
         }
@@ -78,7 +78,7 @@ PhonoCallControl.prototype.
 module.exports = {
     init: function () {
         var self = this;
-        
+
         $(document).on('callStatus', _.bind(this.handleRemoteCallStatus, this));
         $(document).on('remoteCall', _.bind(this.handleRemoteCall, this));
 
@@ -88,7 +88,7 @@ module.exports = {
 
         // set up phono
         this.phono = $.phono({
-            apiKey: "7826110523f1241fcfd001859a67128d",            
+            apiKey: "7826110523f1241fcfd001859a67128d",
             gateway: window.settings.phonoGateway,
             connectionUrl: window.settings.phonoConnectionUrl,
             audio: {
@@ -123,7 +123,7 @@ module.exports = {
     initCallControl: function () {
         var self = this,
             connection = app.callControlConnection = new Strophe.Connection(window.settings.boshService);
-        
+
         // initting connection
         connection.rawInput = function (elem) {
             console.warn('<< ' + elem);
@@ -165,17 +165,17 @@ module.exports = {
         this._reset();
         // if we're on the video page, go back
         if (window.location.pathname === '/video') {
-            window.history && window.history.back();    
+            window.history && window.history.back();
         }
     },
 
     answerIncomingCall: function () {
         console.log('answer incoming called');
         var call = app.incomingCall;
-        
+
         if (call.initiator.length > 13) {
             metrics.track('video call answered');
-            app.navigate('video');    
+            app.navigate('video');
         } else {
             metrics.track('call answered');
         }
@@ -224,7 +224,7 @@ module.exports = {
             onHangup: _(self.handleHangup).bind(self)
         });
     },
-    
+
     handleHangup: function () {
         // if we're getting an incoming video call then we
         // assume this is an "upgrade" of the existing call
@@ -240,7 +240,7 @@ module.exports = {
 
         // if we're on the video page, go back
         if (window.location.pathname === '/video') {
-            window.history && window.history.back();    
+            window.history && window.history.back();
         }
     },
 
@@ -249,7 +249,7 @@ module.exports = {
         app.callControlConnection.att.sendPresenceUpdateAvailable(app.get('sipAddress'));
         app.set('callStatus', 'ending');
         if (window.location.pathname === '/video') {
-            window.history && window.history.back();    
+            window.history && window.history.back();
         }
         // after a bit, close it entirely
         _.delay(_.bind(this._reset, this), 500);
@@ -287,7 +287,7 @@ module.exports = {
             self = this;
 
         app.set('callStatus', 'incoming');
-       
+
         if (caller) {
             app.set({
                 currentCaller: caller.fullName(),
@@ -324,7 +324,7 @@ module.exports = {
         console.log('GOT REMOTE CALL STATUS: ' + JSON.stringify(payload));
         // the caller ID comes in as "90902323@sip", this cleans it up a bit
         var contact = app.contacts.findContact(payload.callerId);
-        
+
         console.log((payload.resource === 'mobile' || payload.resource !== app.me.resource()) && payload.show === 'dnd');
 
         // if it's dnd it means we've got a remote call going
@@ -354,7 +354,7 @@ module.exports = {
     startPhoneCall: function (number) {
         var self = this,
             isVideoCall = false,
-            phoneNumber, 
+            phoneNumber,
             contact;
         app.set({
             callStatus: 'calling',
