@@ -118,6 +118,8 @@
 {{{emitter}}}
 {{{phone}}}
 {{{chat}}}
+{{{rester}}}
+{{{addressbook}}}
 
     // attach to window or export with commonJS
     if (typeof exports !== 'undefined') {

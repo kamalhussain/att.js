@@ -682,6 +682,127 @@
     }
     
 
+    // Rester is a helper for doing repetitive ajax calls
+    //
+    // init it like so:
+    // api = new Rester("mytoken", "https://api.foundry.att.com/a4/addressbook");
+    //
+    // then use:
+    // api.get('/contacts', function (err, res) {
+    //
+    // });
+    //
+    function Rester(token, baseUrl) {
+        this.token = token;
+        this.baseUrl = baseUrl;
+    }
+    
+    Rester.prototype.get = function(path, callback) {
+        $.ajax({
+            url: 'http://jsonp.jit.su/?url=' + encodeURI(this.baseUrl + path + '?access_token=' + this.token),
+            success: function (result) {
+                callback(null, result);
+            },
+            error: function (err) {
+                callback(err);
+            }
+        });
+    };
+    
+    Rester.prototype.put = function(path, payloadObj, callback) {
+        $.ajax({
+            url: 'http://jsonp.jit.su/?url=' + encodeURI(this.baseUrl + path + '?access_token=' + this.token),
+            type: 'put',
+            data: payloadObj,
+            success: function (result) {
+                callback(null, result);
+            },
+            error: function (err) {
+                callback(err);
+            }
+        });
+    };
+    
+    Rester.prototype.post = function(path, payloadObj, callback) {
+        $.ajax({
+            url: 'http://jsonp.jit.su/?url=' + encodeURI(this.baseUrl + path + '?access_token=' + this.token),
+            type: 'post',
+            data: payloadObj,
+            success: function (result) {
+                callback(null, result);
+            },
+            error: function (err) {
+                callback(err);
+            }
+        });
+    };
+    
+    Rester.prototype.delete = function(path, callback) {
+        $.ajax({
+            url: 'http://jsonp.jit.su/?url=' + encodeURI(this.baseUrl + path),
+            type: 'delete',
+            success: function (result) {
+                callback(null, result);
+            },
+            error: function (err) {
+                callback(err);
+            }
+        });
+    };
+    
+    function AddressBook(token) {
+        this.api = new Rester(token, 'https://api.foundry.att.com/a4/addressbook');
+    }
+    
+    AddressBook.prototype.getContacts = function (callback) {
+        this.api.get('/contacts', callback);
+    };
+    
+    AddressBook.prototype.getContact = function (id, callback) {
+        this.api.get('/contacts/' + id, callback);
+    };
+    
+    AddressBook.prototype.addContact = function (contactDetails, callback) {
+        this.api.post('/contacts', contactDetails, callback);
+    };
+    
+    AddressBook.prototype.updateContact = function (id, contactDetails, callback) {
+        this.api.put('/contacts/' + id, contactDetails, callback);
+    };
+    
+    AddressBook.prototype.deleteContact = function (id, callback) {
+        this.api.delete('/contacts/' + id, callback);
+    };
+    
+    AddressBook.prototype.getGroups = function (callback) {
+        this.api.get('/groups', callback)
+    };
+    
+    AddressBook.prototype.getGroup = function (id, callback) {
+        this.api.get('/groups/' + id, callback)
+    };
+    
+    AddressBook.prototype.addGroup = function (groupDetails, callback) {
+        this.api.post('/groups', groupDetails, callback);
+    };
+    
+    AddressBook.prototype.updateGroup = function (id, groupDetails, callback) {
+        this.api.post('/groups/' + id, groupDetails, callback);
+    };
+    
+    AddressBook.prototype.deleteGroup = function (id, callback) {
+        this.api.delete('/groups/' + id, callback);
+    };
+    
+    att.AddressBook = AddressBook;
+    
+    if ($) {
+        $.addressBook = function (token) {
+            return new AddressBook(token);
+        };
+    }
+    
+    
 
     // attach to window or export with commonJS
     if (typeof exports !== 'undefined') {

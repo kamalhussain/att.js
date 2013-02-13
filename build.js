@@ -17,6 +17,8 @@ var template = fs.readFileSync(src + '/template.js', 'utf-8'),
     socketIO = fs.readFileSync(vendor + '/socket.io.js', 'utf-8'),
     emitter = fs.readFileSync(src + '/wildemitter.js', 'utf-8'),
     phoneNumber = fs.readFileSync(src + '/phoneNumber.js', 'utf-8'),
+    addressbook = fs.readFileSync(src + '/addressbook.js', 'utf-8'),
+    rester = fs.readFileSync(src + '/rester.js', 'utf-8'),
     phone = fs.readFileSync(src + '/att.core.js', 'utf-8');
 
 // indents each line in a file by 4 spaces or whatever you pass into it
@@ -38,6 +40,8 @@ var context = {
     emitter: indent(emitter),
     phone: indent(phone),
     phoneNumber: indent(phoneNumber),
+    addressbook: indent(addressbook),
+    rester: indent(rester),
     socket: socketIO
 };
 
