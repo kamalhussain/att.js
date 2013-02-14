@@ -1,3 +1,18 @@
 <!DOCTYPE html>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script src="build/att.js"></script>
+
+<p>Open the JS console of your browser in this page. (cmd+option+j if you're in chrome).</p>
+<p>Get a token from here: https://apimatrix.tfoundry.com/services/addressbook</p>
+<p>Then do these one by one:</p>
+<pre>
+ab = new ATT.AddressBook("YOUR TOKEN");
+// the GET
+ab.getContacts(function (err, res) {console.log(res)});
+// the POST
+ab.addContact({name: {familyName: 'Guy', givenName: 'Some'}}, function (err, res) {console.log("the new contact id is: " + res.key)});
+// the PUT
+ab.updateContact("ID FROM LAST LINE", {name: {familyName: 'DUDE', givenName: 'Some'}}, function (err) {if (err) {console.log('this failed');} else {console.log('this worked!');}});
+// the DELETE
+ab.deleteContact("ID FROM PREVIOUS", function (err) {if (err) {console.log('this failed');} else {console.log('this worked!');}})
+</pre>
