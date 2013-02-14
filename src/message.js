@@ -37,7 +37,6 @@ deleteMessageSuccess = function(data, textStatus, jqXHR) {
 
 deleteMessageError = function(data, textStatus, jqXHR) {
 	console.error("error deleteMessage. textStatus = "+textStatus);
-	searchByNumberCallback(JSON.stringify(data));
 };
 
 searchByNumberSuccess = function(data, textStatus, jqXHR) {
