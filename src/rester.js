@@ -15,7 +15,7 @@ function Rester(token, baseUrl) {
 
 Rester.prototype.get = function(path, callback) {
     $.ajax({
-        url: 'http://jsonp.jit.su/?url=' + encodeURI(this.baseUrl + path + '?access_token=' + this.token),
+        url: this.baseUrl + path + '?access_token=' + this.token,
         success: function (result) {
             callback(null, result);
         },
@@ -27,7 +27,7 @@ Rester.prototype.get = function(path, callback) {
 
 Rester.prototype.put = function(path, payloadObj, callback) {
     $.ajax({
-        url: 'http://jsonp.jit.su/?url=' + encodeURI(this.baseUrl + path + '?access_token=' + this.token),
+        url: this.baseUrl + path + '?access_token=' + this.token,
         type: 'put',
         data: payloadObj,
         success: function (result) {
@@ -41,7 +41,7 @@ Rester.prototype.put = function(path, payloadObj, callback) {
 
 Rester.prototype.post = function(path, payloadObj, callback) {
     $.ajax({
-        url: 'http://jsonp.jit.su/?url=' + encodeURI(this.baseUrl + path + '?access_token=' + this.token),
+        url: this.baseUrl + path + '?access_token=' + this.token,
         type: 'post',
         data: payloadObj,
         success: function (result) {
@@ -55,7 +55,7 @@ Rester.prototype.post = function(path, payloadObj, callback) {
 
 Rester.prototype.delete = function(path, callback) {
     $.ajax({
-        url: 'http://jsonp.jit.su/?url=' + encodeURI(this.baseUrl + path),
+        url: this.baseUrl + path,
         type: 'delete',
         success: function (result) {
             callback(null, result);
