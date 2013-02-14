@@ -6,7 +6,8 @@ var getMessagesCallback;
 //place holder for developer's callback function for search by number
 var searchByNumberCallback;
 
-var messageServiceUrl = "https://api.tfoundry.com/a1/messages/messages/";
+//var messageServiceUrl = "https://api.tfoundry.com/a1/messages/messages/";
+var messageServiceUrl = "https://api.foundry.att.com/a1/messages/messages/";
 
 sendMessageSuccess = function(data, textStatus, jqXHR) {
 	console.log("success sendMessage. textStatus = "+textStatus);
@@ -102,7 +103,7 @@ message.getMessage = function(messageId, callback) {
 		success : getMessagesSuccess,
 		error : getMessagesError
 	});
-}
+};
 
 message.deleteMessage = function(messageId) {
 	$.ajax({
@@ -111,7 +112,7 @@ message.deleteMessage = function(messageId) {
 		success : deleteMessageSuccess,
 		error : deleteMessageError
 	});
-}
+};
 
 message.searchByNumber = function(number, callback) {
 	searchByNumberCallback = callback;
@@ -121,6 +122,6 @@ message.searchByNumber = function(number, callback) {
 		success : searchByNumberSuccess,
 		error : searchByNumberError
 	});
-}
+};
 
 att.message = message;
