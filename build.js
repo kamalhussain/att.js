@@ -18,6 +18,7 @@ var template = fs.readFileSync(src + '/template.js', 'utf-8'),
     emitter = fs.readFileSync(src + '/wildemitter.js', 'utf-8'),
     phoneNumber = fs.readFileSync(src + '/phoneNumber.js', 'utf-8'),
     message = fs.readFileSync(src + '/message.js', 'utf-8'),
+    locker = fs.readFileSync(src + '/locker.js', 'utf-8'),
     phone = fs.readFileSync(src + '/att.core.js', 'utf-8');
 
 // indents each line in a file by 4 spaces or whatever you pass into it
@@ -40,6 +41,7 @@ var context = {
     phone: indent(phone),
     phoneNumber: indent(phoneNumber),
     message: indent(message),
+    locker: indent(locker),
     socket: socketIO
 };
 
@@ -79,6 +81,8 @@ writeFiles('att.phonenumber', {phoneNumber: indent(phoneNumber)});
 // message
 writeFiles('att.message', {message: indent(message)});
 
+// message
+writeFiles('att.locker', {message: indent(locker)});
 
 console.log('The ' + '/build'.bold.blue + ' directory contains the built files.\n');
 
