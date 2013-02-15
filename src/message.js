@@ -18,42 +18,46 @@ constructReturnData = function(data, textStatus) {
 };
 
 sendMessageSuccess = function(data, textStatus, jqXHR) {
-	console.log("success sendMessage. textStatus = "+textStatus);
+	console.debug("success sendMessage. textStatus = "+textStatus);
 };
 
 sendMessageError = function(data, textStatus, jqXHR) {
-	console.error("error sendMessage. textStatus = "+textStatus);
+	console.error("error sendMessage. textStatus = " + textStatus);
+	console.error(JSON.stringify(data));
 };
 
 getMessagesSuccess = function(data, textStatus, jqXHR) {
-	console.log("success getMessages. textStatus = "+textStatus);
+	console.debug("success getMessages. textStatus = "+textStatus);
 
-	getMessagesCallback(constructReturnData(data, textStatu));
+	getMessagesCallback(constructReturnData(data, textStatus));
 };
 
 getMessagesError = function(data, textStatus, jqXHR) {
 	console.error("error getMessages. textStatus = "+textStatus);
+	console.error(JSON.stringify(data));
 
-	getMessagesCallback(constructReturnData(data, textStatu));	
+	getMessagesCallback(constructReturnData(data, textStatus));	
 };
 
 deleteMessageSuccess = function(data, textStatus, jqXHR) {
-	console.log("success deleteMessage. textStatus = "+textStatus);
+	console.debug("success deleteMessage. textStatus = "+textStatus);
 };
 
 deleteMessageError = function(data, textStatus, jqXHR) {
 	console.error("error deleteMessage. textStatus = "+textStatus);
+	console.error(JSON.stringify(data));
 };
 
 searchByNumberSuccess = function(data, textStatus, jqXHR) {
-	console.log("success searchByNumber. textStatus = "+textStatus);
+	console.debug("success searchByNumber. textStatus = "+textStatus);
 
 	searchByNumberCallback(constructReturnData(data, textStatus));	
 };
 
 
 searchByNumberError = function(data, textStatus, jqXHR) {
-	console.log("error searchByNumber. textStatus = "+textStatus);
+	console.error("error searchByNumber. textStatus = "+textStatus);
+	console.error(JSON.stringify(data));
 	
 	searchByNumberCallback(constructReturnData(data, textStatus));	
 };
@@ -69,13 +73,13 @@ getUrl = function(requestedPath) {
 		url = messageServiceUrl+"?access_token="+access_token;		
 	}
 	
-	console.log("url = "+url);
+	console.debug("url = "+url);
 	
 	return url;	
 };
 
 message.sendMessage = function(recipient, text) {
-	console.log('sending message '+text+' to '+recipient);
+	console.debug('sending message '+text+' to '+recipient);
 
 	var data = {};
 	data.recipient = recipient;
