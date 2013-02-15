@@ -9,6 +9,14 @@ var searchByNumberCallback;
 //var messageServiceUrl = "https://api.tfoundry.com/a1/messages/messages/";
 var messageServiceUrl = "https://api.foundry.att.com/a1/messages/messages/";
 
+// helper function that creates data returned to developer's callback function
+constructReturnData = function(data, textStatus) {
+	var returnData = {};
+	returnData.status = textStatus;
+	returnData.data = data;
+	return JSON.stringify(returnData);
+};
+
 sendMessageSuccess = function(data, textStatus, jqXHR) {
 	console.log("success sendMessage. textStatus = "+textStatus);
 };
@@ -19,16 +27,14 @@ sendMessageError = function(data, textStatus, jqXHR) {
 
 getMessagesSuccess = function(data, textStatus, jqXHR) {
 	console.log("success getMessages. textStatus = "+textStatus);
-	
-	getMessagesCallback(JSON.stringify(data));
+
+	getMessagesCallback(constructReturnData(data, textStatu));
 };
 
 getMessagesError = function(data, textStatus, jqXHR) {
 	console.error("error getMessages. textStatus = "+textStatus);
-	
-	var returnData = {};
-	returnData.textStatus = textStatus;
-	getMessagesCallback(JSON.stringify(returnData));
+
+	getMessagesCallback(constructReturnData(data, textStatu));	
 };
 
 deleteMessageSuccess = function(data, textStatus, jqXHR) {
@@ -41,17 +47,18 @@ deleteMessageError = function(data, textStatus, jqXHR) {
 
 searchByNumberSuccess = function(data, textStatus, jqXHR) {
 	console.log("success searchByNumber. textStatus = "+textStatus);
-	var returnData = {};
-	returnData.textStatus = textStatus;
-	searchByNumberCallback(JSON.stringify(returnData));
-	
+
+	searchByNumberCallback(constructReturnData(data, textStatus));	
 };
 
 
 searchByNumberError = function(data, textStatus, jqXHR) {
 	console.log("error searchByNumber. textStatus = "+textStatus);
+	
+	searchByNumberCallback(constructReturnData(data, textStatus));	
 };
 
+// helper function that gets URL, appends access token
 getUrl = function(requestedPath) {
 	var access_token = window.att.config.apiKey;
 	var url = "";
