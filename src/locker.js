@@ -244,6 +244,10 @@ locker.getMedia = function(callback) {
    */
 
 locker.renderUploadForm = function(uploadtoken) {
+	if ($('#locker_file_upload').length != 1) {
+		console.error("div with id locker_file_upload not found. please create one");
+		return;
+	}
 	
 	var fileUploadUrl = "https://UCM01-STG1A-DATCHL-ucm.att.com/data/1_0_0/upload/";
 	
@@ -252,12 +256,12 @@ locker.renderUploadForm = function(uploadtoken) {
 	form.setAttribute('id', 'locker_file_upload_form');
 	form.setAttribute('method', 'POST');
 	form.setAttribute('enctype',"multipart/form-data");
+	form.setAttribute('target', "_blank");
 	form.setAttribute('action', fileUploadUrl);
 
     var filenameInput = document.createElement('input');
 	filenameInput.setAttribute('id', 'locker_file_upload_form_filename_input');
 	filenameInput.setAttribute('name', 'Filename');
-	// filenameInput.setAttribute('value', filename);
 	filenameInput.setAttribute('type', 'hidden');
 
 	form.appendChild(filenameInput);
@@ -273,7 +277,6 @@ locker.renderUploadForm = function(uploadtoken) {
     var objectName = document.createElement('input');
 	objectName.setAttribute('id', 'locker_file_upload_form_objectname_input');
 	objectName.setAttribute('name', 'Object-Name');
-	// objectName.setAttribute('value', filename);
 	objectName.setAttribute('type', 'hidden');
 	
 	form.appendChild(objectName);
@@ -289,7 +292,6 @@ locker.renderUploadForm = function(uploadtoken) {
 	var file = document.createElement('input');
 	file.setAttribute('id', 'locker_file_upload_form_file_input');
 	file.setAttribute('name', 'File');
-	// file.setAttribute('value', fileToUpload);
 	file.setAttribute('type', 'file');
 	
 	form.appendChild(file);
@@ -306,7 +308,6 @@ locker.renderUploadForm = function(uploadtoken) {
 
 		$('#locker_file_upload_form_filename_input').val(filename);
 		$('#locker_file_upload_form_objectname_input').val(filename);
-		// $('#locker_file_upload_form_uploadtoken_input').val(uploadToken);
 		return false;
 	};
 
