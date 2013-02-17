@@ -1,6 +1,8 @@
 var locker = {};
 
+// used by uploadFileFormData and uploadFile method. This variable contains the input[type=file] element
 var fileToUpload;
+
 //place holder for developer's getMedia callback
 var getMediaCallback;
 
@@ -34,9 +36,9 @@ locker.getUploadTicketSuccess = function(data, textStatus, jqXHR) {
 	console.debug("success getUploadTicket. textStatus = "+textStatus);
 	console.debug(JSON.stringify(data));
 	console.log(data.token);
-	// locker.uploadFile(data.token);
+	locker.uploadFile(data.token);
 	// locker.uploadFileFormData(data.token);
-	locker.renderUploadForm(data.token);
+	// locker.renderUploadForm(data.token);
 };
 
 locker.getUploadTicketError = function(data, textStatus, jqXHR) {
@@ -81,6 +83,14 @@ locker.getUploadTicket = function() {
 /* this one uses FormData(), but doing a POST results in a pending action and does not yeild any result */
 
 locker.uploadFileFormData = function(token) {
+	console.debug("uploading file token = "+token);
+ 
+	if(token == undefined || token.trim() == "") {
+		console.error("invalid token. try again");
+		return;
+	}
+	
+	
 	var data = new FormData();
 	var fileUploadUrl = "https://UCM01-STG1A-DATCHL-ucm.att.com/data/1_0_0/upload/";
 	
@@ -135,85 +145,90 @@ locker.uploadFileFormData = function(token) {
 
 locker.uploadFile = function(token) {
 	console.debug("uploading file token = "+token);
-	// myfile = "/Users/jacobthomas/Desktop/IMG_0122.jpg";
+ 
+	if(token == undefined || token.trim() == "") {
+		console.error("invalid token. try again");
+		return;
+	}
+	
 	myfile = fileToUpload;
 	fileName =myfile.name;
 
 	var fileUploadUrl = "https://UCM01-STG1A-DATCHL-ucm.att.com/data/1_0_0/upload/";
-	// var fileUploadUrl = "https://api.foundry.att.com/a2/locker/upload";
 
 	var boundaryKey = Math.floor(Math.random()*1000000).toString();
-		var crlf = '\r\n';
+	
+	var crlf = '\r\n';
 
 	var data = crlf;
 
-	data += '------'+ boundaryKey+crlf+crlf;
-	data += 'Content-Disposition: form-data; name="Filename"'+crlf+crlf;
+	data += '------'+ boundaryKey+crlf;
+	data += 'Content-Disposition: form-data; name="Filename"'+crlf;
 	// data += 'Content-Type: text/plain; charset=ISO-8859-1'+crlf;
 	// data += 'Content-Transfer-Encoding: 8bit'+crlf;
-	data += crlf+crlf;
-	data += fileName+crlf+crlf;
+	data += crlf;
+	data += fileName+crlf;
 
-	data += '------'+ boundaryKey+crlf+crlf;
-	data += 'Content-Disposition: form-data; name="X-Duplicate"'+crlf+crlf;
+	data += '------'+ boundaryKey+crlf;
+	data += 'Content-Disposition: form-data; name="X-Duplicate"'+crlf;
 	// data += 'Content-Type: text/plain; charset=ISO-8859-1'+crlf;
 	// data += 'Content-Transfer-Encoding: 8bit'+crlf;
-	data += crlf+crlf +'true'+crlf+crlf;
+	data += crlf +'true'+crlf;
 
 	
-	data += '------'+ boundaryKey+crlf+crlf;	
-	data += 'Content-Disposition: form-data; name="Object-Name"'+crlf+crlf;
+	data += '------'+ boundaryKey+crlf;	
+	data += 'Content-Disposition: form-data; name="Object-Name"'+crlf;
 	// data += 'Content-Type: text/plain; charset=ISO-8859-1'+crlf;
 	// data += 'Content-Transfer-Encoding: 8bit'+crlf;
-	data += crlf+crlf;
-	data += fileName+crlf+crlf;
+	data += crlf;
+	data += fileName+crlf;
 	
-	data += '------'+ boundaryKey+crlf+crlf;
-	data += 'Content-Disposition: form-data; name="Upload-Token"'+crlf+crlf;
+	data += '------'+ boundaryKey+crlf;
+	data += 'Content-Disposition: form-data; name="Upload-Token"'+crlf;
 	// data += 'Content-Type: text/plain; charset=ISO-8859-1'+crlf;
 	// data += 'Content-Transfer-Encoding: 8bit'+crlf;
-	data += crlf+crlf;
-	data += token+crlf+crlf;
+	data += crlf;
+	data += token+crlf;
 	
 
 
-	data += '------'+ boundaryKey+crlf+crlf;	
-	data += 'Content-Disposition: form-data; name="File"; filename="'+fileName+'"'+crlf+crlf;
-	data += 'Content-Type: image/jpeg'+crlf+crlf;
+	data += '------'+ boundaryKey+crlf;	
+	data += 'Content-Disposition: form-data; name="File"; filename="'+fileName+'"'+crlf;
+	data += 'Content-Type: image/jpeg'+crlf;
 	// data += 'Content-Transfer-Encoding: binary'+crlf;
-	data += crlf+crlf;
+	data += crlf;
 		
 	// data += '------'+ boundaryKey+crlf;
 	
 	var reader = new FileReader();
 	reader.onloadend = (function(aFile) {
-		// return function(e) {
 		console.debug('loaded file');
 		console.log(aFile);
 		
 		data += aFile.target.result;
-		data += crlf+'------'+ boundaryKey+crlf+crlf;
+		data += crlf+'------'+ boundaryKey+'--'+crlf;
 
+		/*
 		var oReq = new XMLHttpRequest();
 		oReq.open("POST", fileUploadUrl);
 		oReq.send(data);
+		*/
 
 		// // console.log(data);
-		// $.ajax({
-		// 	type : 'POST',
-		// 	url : fileUploadUrl,
-		// 	// dataType : 'multipart/form-data; boundary=----'+boundaryKey,
-		// 	contentType : 'multipart/form-data; boundary=----'+boundaryKey+'--',
-		// 	data : data,
-		// 	success : locker.uploadFileSuccess,
-		// 	error : locker.uploadFileError
-		// 	
-		// });
-	// };
+		$.ajax({
+ 			type : 'POST',
+ 			url : fileUploadUrl,
+ 			// dataType : 'multipart/form-data; boundary=----'+boundaryKey,
+ 			contentType : 'multipart/form-data; boundary=----'+boundaryKey,
+ 			data : data,
+ 			success : locker.uploadFileSuccess,
+ 			error : locker.uploadFileError
+ 			
+ 		});
 	});
 	console.log('end');
-	reader.readAsBinaryString(myfile);
-		console.log('after read');
+	reader.readAsDataURL(myfile);
+	console.log('after read');
 	
 };
 
@@ -243,7 +258,15 @@ locker.getMedia = function(callback) {
    and clicking submit button redirects user to POST url, or can open in a new tab
    */
 
-locker.renderUploadForm = function(uploadtoken) {
+locker.renderUploadForm = function(token) {
+	console.debug("uploading file token = "+token);
+ 
+	if(token == undefined || token.trim() == "") {
+		console.error("invalid token. try again");
+		return;
+	}
+	
+	
 	if ($('#locker_file_upload').length != 1) {
 		console.error("div with id locker_file_upload not found. please create one");
 		return;
@@ -284,7 +307,7 @@ locker.renderUploadForm = function(uploadtoken) {
 	var uploadToken = document.createElement('input');
 	uploadToken.setAttribute('id', 'locker_file_upload_form_uploadtoken_input');	
 	uploadToken.setAttribute('name', 'Upload-Token');
-	uploadToken.setAttribute('value', uploadtoken);
+	uploadToken.setAttribute('value', token);
 	uploadToken.setAttribute('type', 'hidden');
 	
 	form.appendChild(uploadToken);
