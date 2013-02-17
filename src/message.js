@@ -10,60 +10,60 @@ var searchByNumberCallback;
 var messageServiceUrl = "https://api.foundry.att.com/a1/messages/messages/";
 
 // helper function that creates data returned to developer's callback function
-constructReturnData = function(data, textStatus) {
+message.constructReturnData = function(data, textStatus) {
 	var returnData = {};
 	returnData.status = textStatus;
 	returnData.data = data;
 	return JSON.stringify(returnData);
 };
 
-sendMessageSuccess = function(data, textStatus, jqXHR) {
+message.sendMessageSuccess = function(data, textStatus, jqXHR) {
 	console.debug("success sendMessage. textStatus = "+textStatus);
 };
 
-sendMessageError = function(data, textStatus, jqXHR) {
+message.sendMessageError = function(data, textStatus, jqXHR) {
 	console.error("error sendMessage. textStatus = " + textStatus);
 	console.error(JSON.stringify(data));
 };
 
-getMessagesSuccess = function(data, textStatus, jqXHR) {
+message.getMessagesSuccess = function(data, textStatus, jqXHR) {
 	console.debug("success getMessages. textStatus = "+textStatus);
 
-	getMessagesCallback(constructReturnData(data, textStatus));
+	getMessagesCallback(message.constructReturnData(data, textStatus));
 };
 
-getMessagesError = function(data, textStatus, jqXHR) {
+message.getMessagesError = function(data, textStatus, jqXHR) {
 	console.error("error getMessages. textStatus = "+textStatus);
 	console.error(JSON.stringify(data));
 
-	getMessagesCallback(constructReturnData(data, textStatus));	
+	getMessagesCallback(message.constructReturnData(data, textStatus));	
 };
 
-deleteMessageSuccess = function(data, textStatus, jqXHR) {
+message.deleteMessageSuccess = function(data, textStatus, jqXHR) {
 	console.debug("success deleteMessage. textStatus = "+textStatus);
 };
 
-deleteMessageError = function(data, textStatus, jqXHR) {
+message.deleteMessageError = function(data, textStatus, jqXHR) {
 	console.error("error deleteMessage. textStatus = "+textStatus);
 	console.error(JSON.stringify(data));
 };
 
-searchByNumberSuccess = function(data, textStatus, jqXHR) {
+message.searchByNumberSuccess = function(data, textStatus, jqXHR) {
 	console.debug("success searchByNumber. textStatus = "+textStatus);
 
-	searchByNumberCallback(constructReturnData(data, textStatus));	
+	searchByNumberCallback(message.constructReturnData(data, textStatus));	
 };
 
 
-searchByNumberError = function(data, textStatus, jqXHR) {
+message.searchByNumberError = function(data, textStatus, jqXHR) {
 	console.error("error searchByNumber. textStatus = "+textStatus);
 	console.error(JSON.stringify(data));
 	
-	searchByNumberCallback(constructReturnData(data, textStatus));	
+	searchByNumberCallback(message.constructReturnData(data, textStatus));	
 };
 
 // helper function that gets URL, appends access token
-getUrl = function(requestedPath) {
+message.getUrl = function(requestedPath) {
 	var access_token = window.att.config.apiKey;
 	var url = "";
 	
@@ -87,10 +87,10 @@ message.sendMessage = function(recipient, text) {
 
 	$.ajax({
 		type : 'POST',
-		url : getUrl(),
+		url : message.getUrl(),
 		data : JSON.stringify(data),
-		success : sendMessageSuccess,
-		error : sendMessageError,
+		success : message.sendMessageSuccess,
+		error : message.sendMessageError,
 		dataType : 'application/json'
 	});
 };
@@ -99,9 +99,9 @@ message.getMessages = function(callback) {
 	getMessagesCallback = callback;
 	$.ajax({
 		type : 'GET',
-		url : getUrl(),
-		success : getMessagesSuccess,
-		error : getMessagesError
+		url : message.getUrl(),
+		success : message.getMessagesSuccess,
+		error : message.getMessagesError
 	});
 };
 
@@ -109,18 +109,18 @@ message.getMessage = function(messageId, callback) {
 	getMessagesCallback = callback;
 	$.ajax({
 		type : 'GET',
-		url : getUrl(messageId),
-		success : getMessagesSuccess,
-		error : getMessagesError
+		url : message.getUrl(messageId),
+		success : message.getMessagesSuccess,
+		error : message.getMessagesError
 	});
 };
 
 message.deleteMessage = function(messageId) {
 	$.ajax({
 		type : 'DELETE',
-		url : getUrl(messageId),
-		success : deleteMessageSuccess,
-		error : deleteMessageError
+		url : message.getUrl(messageId),
+		success : message.deleteMessageSuccess,
+		error : message.deleteMessageError
 	});
 };
 
@@ -128,9 +128,9 @@ message.searchByNumber = function(number, callback) {
 	searchByNumberCallback = callback;
 	$.ajax({
 		type : 'GET',
-		url : getUrl("filter/"+number),
-		success : searchByNumberSuccess,
-		error : searchByNumberError
+		url : message.getUrl("filter/"+number),
+		success : message.searchByNumberSuccess,
+		error : message.searchByNumberError
 	});
 };
 
