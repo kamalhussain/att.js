@@ -6,7 +6,7 @@ var fileToUpload;
 //place holder for developer's getMedia callback
 var getMediaCallback;
 
-var lockerServiceUrl = "https://api.foundry.att.com/a2/locker/";
+var lockerServiceUrl = "https://api.foundry.att.com/a2/locker";
 
 // helper function that gets URL, appends access token
 locker.getUrl = function(requestedPath) {
@@ -14,7 +14,7 @@ locker.getUrl = function(requestedPath) {
 	var url = "";
 	
 	if(requestedPath) {
-		url = lockerServiceUrl+requestedPath+"?access_token="+access_token;
+		url = lockerServiceUrl+'/'+requestedPath+"?access_token="+access_token;
 	} else {
 		url = lockerServiceUrl+"?access_token="+access_token;		
 	}
@@ -36,9 +36,9 @@ locker.getUploadTicketSuccess = function(data, textStatus, jqXHR) {
 	console.debug("success getUploadTicket. textStatus = "+textStatus);
 	console.debug(JSON.stringify(data));
 	console.log(data.token);
-	locker.uploadFile(data.token);
+	// locker.uploadFile(data.token);
 	// locker.uploadFileFormData(data.token);
-	// locker.renderUploadForm(data.token);
+	locker.renderUploadForm(data.token);
 };
 
 locker.getUploadTicketError = function(data, textStatus, jqXHR) {
@@ -46,6 +46,15 @@ locker.getUploadTicketError = function(data, textStatus, jqXHR) {
     console.error(JSON.stringify(data));
 };
 
+locker.deleteSuccess = function(data, textStatus, jqXHR) {
+	console.debug("success delete. textStatus = "+textStatus);
+    console.debug(JSON.stringify(data));	
+};
+
+locker.deleteError = function(data, textStatus, jqXHR) {
+	console.error("error delete. textStatus = "+textStatus);
+    console.error(JSON.stringify(data));
+};
 
 locker.getMediaSuccess = function(data, textStatus, jqXHR) {
 	console.debug("success getMedia. textStatus = "+textStatus);
@@ -251,6 +260,20 @@ locker.getMedia = function(callback) {
 	});
 };
 
+locker.delete = function(mediaId) {
+	var url = locker.getUrl('data');
+
+	data = {};
+	data.fileIDs = mediaId;
+	$.ajax({
+		type : 'POST',
+		url : url,
+		data : JSON.stringify(data),
+		success : locker.deleteSuccess,
+		error : locker.deleteError
+	});
+	
+}
 
 
 /* this function creates a form element and uploads file.
