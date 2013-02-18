@@ -260,6 +260,10 @@ locker.getMedia = function(callback) {
 	});
 };
 
+/*  
+ * deletes file(s) from locker. pass ID as string or array of strings
+ */
+
 locker.delete = function(mediaId) {
 	var url = locker.getUrl('data');
 
