@@ -55,7 +55,7 @@ Rester.prototype.post = function(path, payloadObj, callback) {
 
 Rester.prototype.delete = function(path, callback) {
     $.ajax({
-        url: this.baseUrl + path,
+        url: this.baseUrl + path + '?access_token=' + this.token,
         type: 'delete',
         success: function (result) {
             callback(null, result);
