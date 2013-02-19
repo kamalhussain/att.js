@@ -1,6 +1,25 @@
 function AddressBook(token) {
+    var self = this;
     this.api = new Rester(token, 'https://api.foundry.att.com/a4/addressbook');
+
+    // inherit wildemitter properties
+    WildEmitter.call(this);
+
+    // handle errors
+    this.api.errorHandlers[404] = this._badToken.bind(this);
+    this.api.errorHandlers[401] = this._badToken.bind(this);
 }
+
+// set our prototype to be a new emitter instance
+AddressBook.prototype = Object.create(WildEmitter.prototype, {
+    constructor: {
+        value: AddressBook
+    }
+});
+
+AddressBook.prototype._badToken = function () {
+    this.emit('invalidToken');
+};
 
 AddressBook.prototype.getContacts = function (callback) {
     this.api.get('/contacts', callback);
