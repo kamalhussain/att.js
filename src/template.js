@@ -115,6 +115,8 @@
     };
 
 {{{phoneNumber}}}
+{{{message}}}
+{{{locker}}}
 {{{emitter}}}
 {{{phone}}}
 {{{chat}}}

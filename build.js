@@ -19,6 +19,8 @@ var template = fs.readFileSync(src + '/template.js', 'utf-8'),
     phoneNumber = fs.readFileSync(src + '/phoneNumber.js', 'utf-8'),
     addressbook = fs.readFileSync(src + '/addressbook.js', 'utf-8'),
     rester = fs.readFileSync(src + '/rester.js', 'utf-8'),
+    message = fs.readFileSync(src + '/message.js', 'utf-8'),
+    locker = fs.readFileSync(src + '/locker.js', 'utf-8'),
     phone = fs.readFileSync(src + '/att.core.js', 'utf-8');
 
 // indents each line in a file by 4 spaces or whatever you pass into it
@@ -42,6 +44,8 @@ var context = {
     phoneNumber: indent(phoneNumber),
     addressbook: indent(addressbook),
     rester: indent(rester),
+    message: indent(message),
+    locker: indent(locker),
     socket: socketIO
 };
 
@@ -78,6 +82,11 @@ writeFiles('att', context);
 // phone number only
 writeFiles('att.phonenumber', {phoneNumber: indent(phoneNumber)});
 
+// message
+writeFiles('att.message', {message: indent(message)});
+
+// message
+writeFiles('att.locker', {message: indent(locker)});
 
 console.log('The ' + '/build'.bold.blue + ' directory contains the built files.\n');
 
