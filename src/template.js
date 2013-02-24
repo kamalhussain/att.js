@@ -114,14 +114,14 @@
         }
     };
 
-{{{phoneNumber}}}
-{{{message}}}
-{{{locker}}}
+{{{rester}}}
 {{{emitter}}}
+{{{phoneNumber}}}
+{{{locker}}}
 {{{phone}}}
 {{{chat}}}
-{{{rester}}}
 {{{addressbook}}}
+{{{message}}}
 
     // attach to window or export with commonJS
     if (typeof exports !== 'undefined') {

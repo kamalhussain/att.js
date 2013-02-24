@@ -83,9 +83,12 @@ writeFiles('att', context);
 writeFiles('att.phonenumber', {phoneNumber: indent(phoneNumber)});
 
 // message
-writeFiles('att.message', {message: indent(message)});
+writeFiles('att.message', {message: indent(message), rester: indent(rester), emitter: indent(emitter)});
 
-// message
+// address book 
+writeFiles('att.addressbook', {message: indent(addressbook), rester: indent(rester), emitter: indent(emitter)});
+
+// locker 
 writeFiles('att.locker', {message: indent(locker)});
 
 console.log('The ' + '/build'.bold.blue + ' directory contains the built files.\n');

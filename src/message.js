@@ -1,137 +1,50 @@
-var message = {};
+function Messages(token) {
+    var self = this;
+    this.api = new Rester(token, 'https://api.foundry.att.com/a1/messages');
 
-//place holder for developer's callback function for getMessages and getMessage method
-var getMessagesCallback;
+    // inherit wildemitter properties
+    WildEmitter.call(this);
 
-//place holder for developer's callback function for search by number
-var searchByNumberCallback;
+    // handle errors
+    this.api.errorHandlers[404] = this._badToken.bind(this);
+    this.api.errorHandlers[401] = this._badToken.bind(this);
+}
 
-//var messageServiceUrl = "https://api.tfoundry.com/a1/messages/messages/";
-var messageServiceUrl = "https://api.foundry.att.com/a1/messages/messages/";
+// set our prototype to be a new emitter instance
+Messages.prototype = Object.create(WildEmitter.prototype, {
+    constructor: {
+        value: Messages 
+    }
+});
 
-// helper function that creates data returned to developer's callback function
-message.constructReturnData = function(data, textStatus) {
-	var returnData = {};
-	returnData.status = textStatus;
-	returnData.data = data;
-	return JSON.stringify(returnData);
+Messages.prototype._badToken = function () {
+    this.emit('invalidToken');
 };
 
-message.sendMessageSuccess = function(data, textStatus, jqXHR) {
-	console.debug("success sendMessage. textStatus = "+textStatus);
+Messages.prototype.sendMessage = function (contact, text, callback) {
+    this.api.post('/messages', {recipient: contact, text: text}, callback);
 };
 
-message.sendMessageError = function(data, textStatus, jqXHR) {
-	console.error("error sendMessage. textStatus = " + textStatus);
-	console.error(JSON.stringify(data));
+Messages.prototype.getMessages = function (callback) {
+    this.api.get('/messages', callback);
 };
 
-message.getMessagesSuccess = function(data, textStatus, jqXHR) {
-	console.debug("success getMessages. textStatus = "+textStatus);
-
-	getMessagesCallback(message.constructReturnData(data, textStatus));
+Messages.prototype.getMessage = function (id, callback) {
+    this.api.get('/messages/' + id, callback);
 };
 
-message.getMessagesError = function(data, textStatus, jqXHR) {
-	console.error("error getMessages. textStatus = "+textStatus);
-	console.error(JSON.stringify(data));
-
-	getMessagesCallback(message.constructReturnData(data, textStatus));	
+Messages.prototype.deleteMessage = function (id, callback) {
+    this.api.delete('/messages/' + id, callback);
 };
 
-message.deleteMessageSuccess = function(data, textStatus, jqXHR) {
-	console.debug("success deleteMessage. textStatus = "+textStatus);
+Messages.prototype.searchByNumber = function (number, callback) {
+    this.api.get('/messages/filter/' + number, callback);
 };
 
-message.deleteMessageError = function(data, textStatus, jqXHR) {
-	console.error("error deleteMessage. textStatus = "+textStatus);
-	console.error(JSON.stringify(data));
-};
+att.Messages = Messages;
 
-message.searchByNumberSuccess = function(data, textStatus, jqXHR) {
-	console.debug("success searchByNumber. textStatus = "+textStatus);
-
-	searchByNumberCallback(message.constructReturnData(data, textStatus));	
-};
-
-
-message.searchByNumberError = function(data, textStatus, jqXHR) {
-	console.error("error searchByNumber. textStatus = "+textStatus);
-	console.error(JSON.stringify(data));
-	
-	searchByNumberCallback(message.constructReturnData(data, textStatus));	
-};
-
-// helper function that gets URL, appends access token
-message.getUrl = function(requestedPath) {
-	var access_token = window.att.config.apiKey;
-	var url = "";
-	
-	if(requestedPath) {
-		url = messageServiceUrl+requestedPath+"/?access_token="+access_token;
-	} else {
-		url = messageServiceUrl+"?access_token="+access_token;		
-	}
-	
-	console.debug("url = "+url);
-	
-	return url;	
-};
-
-message.sendMessage = function(recipient, text) {
-	console.debug('sending message '+text+' to '+recipient);
-
-	var data = {};
-	data.recipient = recipient;
-	data.text = text;
-
-	$.ajax({
-		type : 'POST',
-		url : message.getUrl(),
-		data : JSON.stringify(data),
-		success : message.sendMessageSuccess,
-		error : message.sendMessageError,
-		dataType : 'application/json'
-	});
-};
-
-message.getMessages = function(callback) {
-	getMessagesCallback = callback;
-	$.ajax({
-		type : 'GET',
-		url : message.getUrl(),
-		success : message.getMessagesSuccess,
-		error : message.getMessagesError
-	});
-};
-
-message.getMessage = function(messageId, callback) {
-	getMessagesCallback = callback;
-	$.ajax({
-		type : 'GET',
-		url : message.getUrl(messageId),
-		success : message.getMessagesSuccess,
-		error : message.getMessagesError
-	});
-};
-
-message.deleteMessage = function(messageId) {
-	$.ajax({
-		type : 'DELETE',
-		url : message.getUrl(messageId),
-		success : message.deleteMessageSuccess,
-		error : message.deleteMessageError
-	});
-};
-
-message.searchByNumber = function(number, callback) {
-	searchByNumberCallback = callback;
-	$.ajax({
-		type : 'GET',
-		url : message.getUrl("filter/"+number),
-		success : message.searchByNumberSuccess,
-		error : message.searchByNumberError
-	});
-};
-
-att.message = message;
+if ($) {
+    $.messages = function (token) {
+        return new Messages(token);
+    };
+}

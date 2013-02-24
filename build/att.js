@@ -111,81 +111,91 @@
         }
     };
 
-    var phoneNumber = {};
-    
-    phoneNumber.stringify = function (text) {
-        // strip all non numbers
-        var cleaned = phoneNumber.parse(text),
-            len = cleaned.length,
-            countryCode = (cleaned.charAt(0) === '1'),
-            arr = cleaned.split(''),
-            diff;
-    
-        // if it's long just return it unformatted
-        if (len > (countryCode ? 11 : 10)) return cleaned;
-    
-        // if it's too short to tell
-        if (!countryCode && len < 4) return cleaned;
-    
-        // remove country code if we have it
-        if (countryCode) arr.splice(0, 1);
-    
-        // the rules are different enough when we have
-        // country codes so we just split it out
-        if (countryCode) {
-            if (len > 1) {
-                diff = 4 - len;
-                diff = (diff > 0) ? diff : 0;
-                arr.splice(0, 0, " (");
-                // back fill with spaces
-                arr.splice(4, 0, (new Array(diff + 1).join(' ') + ") "));
-    
-                if (len > 7) {
-                    arr.splice(8, 0, '-');
-                }
-            }
-        } else {
-            if (len > 7) {
-                arr.splice(0, 0, "(");
-                arr.splice(4, 0, ") ");
-                arr.splice(8, 0, "-");
-            } else if (len > 3) {
-                arr.splice(3, 0, "-");
-            }
-        }
-    
-        // join it back when we're done with the CC if it's there
-        return (countryCode ? '1' : '') + arr.join('');
-    };
-    
-    phoneNumber.parse = function (input) {
-        return String(input)
-            .toUpperCase()
-            .replace(/[A-Z]/g, function (l) {
-                return (l.charCodeAt(0) - 65) / 3 + 2 - ("SVYZ".indexOf(l) > -1) | 0;
-            })
-            .replace(/\D/g, '');
-    };
-    
-    phoneNumber.getCallable = function (input, countryAbr) {
-        var country = countryAbr || 'us',
-            cleaned = phoneNumber.parse(input);
-        if (cleaned.length === 10) {
-            if (country == 'us') {
-                return '1' + cleaned;
-            }
-        } else if (country == 'us' && cleaned.length === 11 && cleaned.charAt(0) === '1') {
-            return cleaned;
-        } else {
-            return false;
-        }
-    };
-    
-    att.phoneNumber = phoneNumber;
-    
-    if ($) {
-        $.phoneNumber = phoneNumber;
+    // Rester is a helper for doing repetitive ajax calls
+    //
+    // init it like so:
+    // api = new Rester("mytoken", "https://api.foundry.att.com/a4/addressbook");
+    //
+    // then use:
+    // api.get('/contacts', function (err, res) {
+    //
+    // });
+    //
+    function Rester(token, baseUrl) {
+        this.token = token;
+        this.baseUrl = baseUrl;
+        this.errorHandlers = {
+            401: function () {},
+            402: function () {},
+            403: function () {}
+        };
     }
+    
+    Rester.prototype.get = function (path, callback) {
+        var self = this;
+        $.ajax({
+            url: this.baseUrl + path + '?access_token=' + this.token,
+            success: function (result) {
+                callback(null, result);
+            },
+            error: function (err) {
+                console.log('err', err);
+                var errHand = self.errorHandlers[err.status];
+                if (errHand) errHand();
+                callback(err);
+            }
+        });
+    };
+    
+    Rester.prototype.put = function (path, payloadObj, callback) {
+        var self = this;
+        $.ajax({
+            url: this.baseUrl + path + '?access_token=' + this.token,
+            type: 'put',
+            data: payloadObj,
+            success: function (result) {
+                callback(null, result);
+            },
+            error: function (err) {
+                var errHand = self.errorHandlers[err.status];
+                if (errHand) errHand();
+                callback(err);
+            }
+        });
+    };
+    
+    Rester.prototype.post = function (path, payloadObj, callback) {
+        var self = this;
+        $.ajax({
+            url: this.baseUrl + path + '?access_token=' + this.token,
+            type: 'post',
+            data: payloadObj,
+            success: function (result) {
+                callback(null, result);
+            },
+            error: function (err) {
+                var errHand = self.errorHandlers[err.status];
+                if (errHand) errHand();
+                callback(err);
+            }
+        });
+    };
+    
+    Rester.prototype.delete = function (path, callback) {
+        var self = this;
+        $.ajax({
+            url: this.baseUrl + path + '?access_token=' + this.token,
+            type: 'delete',
+            success: function (result) {
+                callback(null, result);
+            },
+            error: function (err) {
+                var errHand = self.errorHandlers[err.status];
+                if (errHand) errHand();
+                callback(err);
+            }
+        });
+    };
     
     /*
     WildEmitter.js is a slim little event emitter largely based on @visionmedia's Emitter from UI Kit.
@@ -308,6 +318,450 @@
         }
         return result;
     };
+    
+    var phoneNumber = {};
+    
+    phoneNumber.stringify = function (text) {
+        // strip all non numbers
+        var cleaned = phoneNumber.parse(text),
+            len = cleaned.length,
+            countryCode = (cleaned.charAt(0) === '1'),
+            arr = cleaned.split(''),
+            diff;
+    
+        // if it's long just return it unformatted
+        if (len > (countryCode ? 11 : 10)) return cleaned;
+    
+        // if it's too short to tell
+        if (!countryCode && len < 4) return cleaned;
+    
+        // remove country code if we have it
+        if (countryCode) arr.splice(0, 1);
+    
+        // the rules are different enough when we have
+        // country codes so we just split it out
+        if (countryCode) {
+            if (len > 1) {
+                diff = 4 - len;
+                diff = (diff > 0) ? diff : 0;
+                arr.splice(0, 0, " (");
+                // back fill with spaces
+                arr.splice(4, 0, (new Array(diff + 1).join(' ') + ") "));
+    
+                if (len > 7) {
+                    arr.splice(8, 0, '-');
+                }
+            }
+        } else {
+            if (len > 7) {
+                arr.splice(0, 0, "(");
+                arr.splice(4, 0, ") ");
+                arr.splice(8, 0, "-");
+            } else if (len > 3) {
+                arr.splice(3, 0, "-");
+            }
+        }
+    
+        // join it back when we're done with the CC if it's there
+        return (countryCode ? '1' : '') + arr.join('');
+    };
+    
+    phoneNumber.parse = function (input) {
+        return String(input)
+            .toUpperCase()
+            .replace(/[A-Z]/g, function (l) {
+                return (l.charCodeAt(0) - 65) / 3 + 2 - ("SVYZ".indexOf(l) > -1) | 0;
+            })
+            .replace(/\D/g, '');
+    };
+    
+    phoneNumber.getCallable = function (input, countryAbr) {
+        var country = countryAbr || 'us',
+            cleaned = phoneNumber.parse(input);
+        if (cleaned.length === 10) {
+            if (country == 'us') {
+                return '1' + cleaned;
+            }
+        } else if (country == 'us' && cleaned.length === 11 && cleaned.charAt(0) === '1') {
+            return cleaned;
+        } else {
+            return false;
+        }
+    };
+    
+    att.phoneNumber = phoneNumber;
+    
+    if ($) {
+        $.phoneNumber = phoneNumber;
+    }
+    
+    var locker = {};
+    
+    // used by uploadFileFormData and uploadFile method. This variable contains the input[type=file] element
+    var fileToUpload;
+    
+    //place holder for developer's getMedia callback
+    var getMediaCallback;
+    
+    var lockerServiceUrl = "https://api.foundry.att.com/a2/locker";
+    
+    // helper function that gets URL, appends access token
+    locker.getUrl = function(requestedPath) {
+    	var access_token = window.att.config.apiKey;
+    	var url = "";
+    	
+    	if(requestedPath) {
+    		url = lockerServiceUrl+'/'+requestedPath+"?access_token="+access_token;
+    	} else {
+    		url = lockerServiceUrl+"?access_token="+access_token;		
+    	}
+    	
+    	console.debug("url = "+url);
+    	
+    	return url;	
+    };
+    
+    // helper function that creates data returned to developer's callback function
+    locker.constructReturnData = function(data, textStatus) {
+    	var returnData = {};
+    	returnData.status = textStatus;
+    	returnData.data = data;
+    	return JSON.stringify(returnData);
+    };
+    
+    locker.getUploadTicketSuccess = function(data, textStatus, jqXHR) {
+    	console.debug("success getUploadTicket. textStatus = "+textStatus);
+    	console.debug(JSON.stringify(data));
+    	console.log(data.token);
+    	// locker.uploadFile(data.token);
+    	// locker.uploadFileFormData(data.token);
+    	locker.renderUploadForm(data.token);
+    };
+    
+    locker.getUploadTicketError = function(data, textStatus, jqXHR) {
+    	console.error("error getUploadTicket. textStatus = "+textStatus);
+        console.error(JSON.stringify(data));
+    };
+    
+    locker.deleteSuccess = function(data, textStatus, jqXHR) {
+    	console.debug("success delete. textStatus = "+textStatus);
+        console.debug(JSON.stringify(data));	
+    };
+    
+    locker.deleteError = function(data, textStatus, jqXHR) {
+    	console.error("error delete. textStatus = "+textStatus);
+        console.error(JSON.stringify(data));
+    };
+    
+    locker.getMediaSuccess = function(data, textStatus, jqXHR) {
+    	console.debug("success getMedia. textStatus = "+textStatus);
+    	
+    	getMediaCallback(locker.constructReturnData(data, textStatus));
+    };
+    
+    locker.getMediaError = function(data, textStatus, jqXHR) {
+    	console.error("error getMedia. textStatus = "+textStatus);
+        console.error(JSON.stringify(data));
+    
+    	getMediaCallback(locker.constructReturnData(data, textStatus));
+    };
+    
+    locker.uploadFileSuccess = function(data, textStatus, jqXHR) {
+    	console.debug("success uploadFile. textStatus = "+textStatus);
+        console.debug(JSON.stringify(data));
+    };
+    
+    locker.uploadFileError = function(data, textStatus, jqXHR) {
+    	console.error("error uploadFile. textStatus = "+textStatus);
+        console.error(JSON.stringify(data));
+    };
+    
+    locker.getUploadTicket = function() {
+    	var url = locker.getUrl('upload');
+    	$.ajax({
+    		type : 'GET',
+    		url : url,
+    		success : locker.getUploadTicketSuccess,
+    		error : locker.getUploadTicketError
+    	});	
+    };
+    
+    /* this one uses FormData(), but doing a POST results in a pending action and does not yeild any result */
+    
+    locker.uploadFileFormData = function(token) {
+    	console.debug("uploading file token = "+token);
+     
+    	if(token == undefined || token.trim() == "") {
+    		console.error("invalid token. try again");
+    		return;
+    	}
+    	
+    	
+    	var data = new FormData();
+    	var fileUploadUrl = "https://UCM01-STG1A-DATCHL-ucm.att.com/data/1_0_0/upload/";
+    	
+    	filename = fileToUpload.name;
+    
+    	data.append('Filename', filename);
+    	data.append('X-Duplicate', true);
+    	data.append('Object-Name', filename);
+    	data.append('Upload-Token', token);
+    	
+    	
+    	var reader = new FileReader();
+    	reader.onloadend = (function(aFile) {
+    		// return function(e) {
+    		console.debug('loaded file');
+    		console.log(aFile);
+    		
+    		var fileContent = aFile.target.result;
+    		data.append('File', fileContent);
+    
+    
+    		/*
+    		var oReq = new XMLHttpRequest();
+    		oReq.open("POST", fileUploadUrl);
+    		oReq.send(data);
+    */
+    
+    		// console.log(data);
+    		$.ajax({
+    			type : 'POST',
+    			url : fileUploadUrl,
+    			contentType : false,
+    			contentLength : 1089207, 
+    			processData : false,
+    			cache : false,
+    			data : data,
+    			success : locker.uploadFileSuccess,
+    			error : locker.uploadFileError
+    			
+    		});
+    
+    		
+    	// };
+    	});
+    	console.log('end');
+    	reader.readAsBinaryString(fileToUpload);
+    	console.log('after read');
+    	
+    };
+    
+    /* This attempts to upload a file, but get cannot parse form data error */
+    
+    locker.uploadFile = function(token) {
+    	console.debug("uploading file token = "+token);
+     
+    	if(token == undefined || token.trim() == "") {
+    		console.error("invalid token. try again");
+    		return;
+    	}
+    	
+    	myfile = fileToUpload;
+    	fileName =myfile.name;
+    
+    	var fileUploadUrl = "https://UCM01-STG1A-DATCHL-ucm.att.com/data/1_0_0/upload/";
+    
+    	var boundaryKey = Math.floor(Math.random()*1000000).toString();
+    	
+    	var crlf = '\r\n';
+    
+    	var data = crlf;
+    
+    	data += '------'+ boundaryKey+crlf;
+    	data += 'Content-Disposition: form-data; name="Filename"'+crlf;
+    	// data += 'Content-Type: text/plain; charset=ISO-8859-1'+crlf;
+    	// data += 'Content-Transfer-Encoding: 8bit'+crlf;
+    	data += crlf;
+    	data += fileName+crlf;
+    
+    	data += '------'+ boundaryKey+crlf;
+    	data += 'Content-Disposition: form-data; name="X-Duplicate"'+crlf;
+    	// data += 'Content-Type: text/plain; charset=ISO-8859-1'+crlf;
+    	// data += 'Content-Transfer-Encoding: 8bit'+crlf;
+    	data += crlf +'true'+crlf;
+    
+    	
+    	data += '------'+ boundaryKey+crlf;	
+    	data += 'Content-Disposition: form-data; name="Object-Name"'+crlf;
+    	// data += 'Content-Type: text/plain; charset=ISO-8859-1'+crlf;
+    	// data += 'Content-Transfer-Encoding: 8bit'+crlf;
+    	data += crlf;
+    	data += fileName+crlf;
+    	
+    	data += '------'+ boundaryKey+crlf;
+    	data += 'Content-Disposition: form-data; name="Upload-Token"'+crlf;
+    	// data += 'Content-Type: text/plain; charset=ISO-8859-1'+crlf;
+    	// data += 'Content-Transfer-Encoding: 8bit'+crlf;
+    	data += crlf;
+    	data += token+crlf;
+    	
+    
+    
+    	data += '------'+ boundaryKey+crlf;	
+    	data += 'Content-Disposition: form-data; name="File"; filename="'+fileName+'"'+crlf;
+    	data += 'Content-Type: image/jpeg'+crlf;
+    	// data += 'Content-Transfer-Encoding: binary'+crlf;
+    	data += crlf;
+    		
+    	// data += '------'+ boundaryKey+crlf;
+    	
+    	var reader = new FileReader();
+    	reader.onloadend = (function(aFile) {
+    		console.debug('loaded file');
+    		console.log(aFile);
+    		
+    		data += aFile.target.result;
+    		data += crlf+'------'+ boundaryKey+'--'+crlf;
+    
+    		/*
+    		var oReq = new XMLHttpRequest();
+    		oReq.open("POST", fileUploadUrl);
+    		oReq.send(data);
+    		*/
+    
+    		// // console.log(data);
+    		$.ajax({
+     			type : 'POST',
+     			url : fileUploadUrl,
+     			// dataType : 'multipart/form-data; boundary=----'+boundaryKey,
+     			contentType : 'multipart/form-data; boundary=----'+boundaryKey,
+     			data : data,
+     			success : locker.uploadFileSuccess,
+     			error : locker.uploadFileError
+     			
+     		});
+    	});
+    	console.log('end');
+    	reader.readAsDataURL(myfile);
+    	console.log('after read');
+    	
+    };
+    
+    locker.upload = function(file) {
+    	fileToUpload = file;
+    	console.debug("getting upload ticket");
+    	locker.getUploadTicket();
+    	
+    };
+    
+    locker.getMedia = function(callback) {
+    	var url = locker.getUrl('media');
+    	
+    	getMediaCallback = callback;
+    	$.ajax({
+    		type : 'GET',
+    		url : url,
+    		success : locker.getMediaSuccess,
+    		error : locker.getMediaError
+    	});
+    };
+    
+    /*  
+     * deletes file(s) from locker. pass ID as string or array of strings
+     */
+    
+    locker.delete = function(mediaId) {
+    	var url = locker.getUrl('data');
+    
+    	data = {};
+    	data.fileIDs = mediaId;
+    	$.ajax({
+    		type : 'POST',
+    		url : url,
+    		data : JSON.stringify(data),
+    		success : locker.deleteSuccess,
+    		error : locker.deleteError
+    	});
+    	
+    }
+    
+    
+    /* this function creates a form element and uploads file.
+       this works, but the form is rendered in the page, and user has to select a file to upload
+       and clicking submit button redirects user to POST url, or can open in a new tab
+       */
+    
+    locker.renderUploadForm = function(token) {
+    	console.debug("uploading file token = "+token);
+     
+    	if(token == undefined || token.trim() == "") {
+    		console.error("invalid token. try again");
+    		return;
+    	}
+    	
+    	
+    	if ($('#locker_file_upload').length != 1) {
+    		console.error("div with id locker_file_upload not found. please create one");
+    		return;
+    	}
+    	
+    	var fileUploadUrl = "https://UCM01-STG1A-DATCHL-ucm.att.com/data/1_0_0/upload/";
+    	
+        var form = document.createElement('form');
+    	
+    	form.setAttribute('id', 'locker_file_upload_form');
+    	form.setAttribute('method', 'POST');
+    	form.setAttribute('enctype',"multipart/form-data");
+    	form.setAttribute('target', "_blank");
+    	form.setAttribute('action', fileUploadUrl);
+    
+        var filenameInput = document.createElement('input');
+    	filenameInput.setAttribute('id', 'locker_file_upload_form_filename_input');
+    	filenameInput.setAttribute('name', 'Filename');
+    	filenameInput.setAttribute('type', 'hidden');
+    
+    	form.appendChild(filenameInput);
+    	
+        var xDuplicate = document.createElement('input');
+    	xDuplicate.setAttribute('id', 'locker_file_upload_form_xduplicate_input');
+    	xDuplicate.setAttribute('name', 'X-Duplicate');
+    	xDuplicate.setAttribute('value', 'true');
+    	xDuplicate.setAttribute('type', 'hidden');
+    
+    	form.appendChild(xDuplicate);
+    	
+        var objectName = document.createElement('input');
+    	objectName.setAttribute('id', 'locker_file_upload_form_objectname_input');
+    	objectName.setAttribute('name', 'Object-Name');
+    	objectName.setAttribute('type', 'hidden');
+    	
+    	form.appendChild(objectName);
+    	
+    	var uploadToken = document.createElement('input');
+    	uploadToken.setAttribute('id', 'locker_file_upload_form_uploadtoken_input');	
+    	uploadToken.setAttribute('name', 'Upload-Token');
+    	uploadToken.setAttribute('value', token);
+    	uploadToken.setAttribute('type', 'hidden');
+    	
+    	form.appendChild(uploadToken);
+    	 
+    	var file = document.createElement('input');
+    	file.setAttribute('id', 'locker_file_upload_form_file_input');
+    	file.setAttribute('name', 'File');
+    	file.setAttribute('type', 'file');
+    	
+    	form.appendChild(file);
+    
+    	var submit = document.createElement('input');
+    	submit.setAttribute('name', 'Submit');
+    	submit.setAttribute('value', 'Upload');
+    	submit.setAttribute('type', 'submit');
+    	
+    	form.appendChild(submit);
+    	
+    	form.onSubmit = function() {
+    		filename = $('#locker_file_upload_form_file_input').val().split('\\')[file.split('\\').length -1 ];;
+    
+    		$('#locker_file_upload_form_filename_input').val(filename);
+    		$('#locker_file_upload_form_objectname_input').val(filename);
+    		return false;
+    	};
+    
+    	document.getElementById("locker_file_upload").appendChild(form);	
+    };
+    
+    att.locker = locker;
     
     function Att(options) {
         var self = this,
@@ -682,91 +1136,6 @@
     }
     
 
-    // Rester is a helper for doing repetitive ajax calls
-    //
-    // init it like so:
-    // api = new Rester("mytoken", "https://api.foundry.att.com/a4/addressbook");
-    //
-    // then use:
-    // api.get('/contacts', function (err, res) {
-    //
-    // });
-    //
-    function Rester(token, baseUrl) {
-        this.token = token;
-        this.baseUrl = baseUrl;
-        this.errorHandlers = {
-            401: function () {},
-            402: function () {},
-            403: function () {}
-        };
-    }
-    
-    Rester.prototype.get = function(path, callback) {
-        var self = this;
-        $.ajax({
-            url: this.baseUrl + path + '?access_token=' + this.token,
-            success: function (result) {
-                callback(null, result);
-            },
-            error: function (err) {
-                var errHand = self.errorHandlers[err.status];
-                if (errHand) errHand();
-                callback(err);
-            }
-        });
-    };
-    
-    Rester.prototype.put = function(path, payloadObj, callback) {
-        var self = this;
-        $.ajax({
-            url: this.baseUrl + path + '?access_token=' + this.token,
-            type: 'put',
-            data: payloadObj,
-            success: function (result) {
-                callback(null, result);
-            },
-            error: function (err) {
-                var errHand = self.errorHandlers[err.status];
-                if (errHand) errHand();
-                callback(err);
-            }
-        });
-    };
-    
-    Rester.prototype.post = function(path, payloadObj, callback) {
-        var self = this;
-        $.ajax({
-            url: this.baseUrl + path + '?access_token=' + this.token,
-            type: 'post',
-            data: payloadObj,
-            success: function (result) {
-                callback(null, result);
-            },
-            error: function (err) {
-                var errHand = self.errorHandlers[err.status];
-                if (errHand) errHand();
-                callback(err);
-            }
-        });
-    };
-    
-    Rester.prototype.delete = function(path, callback) {
-        var self = this;
-        $.ajax({
-            url: this.baseUrl + path + '?access_token=' + this.token,
-            type: 'delete',
-            success: function (result) {
-                callback(null, result);
-            },
-            error: function (err) {
-                var errHand = self.errorHandlers[err.status];
-                if (errHand) errHand();
-                callback(err);
-            }
-        });
-    };
-    
     function AddressBook(token) {
         var self = this;
         this.api = new Rester(token, 'https://api.foundry.att.com/a4/addressbook');
@@ -838,6 +1207,57 @@
         };
     }
     
+    
+    function Messages(token) {
+        var self = this;
+        this.api = new Rester(token, 'https://api.foundry.att.com/a1/messages');
+    
+        // inherit wildemitter properties
+        WildEmitter.call(this);
+    
+        // handle errors
+        this.api.errorHandlers[404] = this._badToken.bind(this);
+        this.api.errorHandlers[401] = this._badToken.bind(this);
+    }
+    
+    // set our prototype to be a new emitter instance
+    Messages.prototype = Object.create(WildEmitter.prototype, {
+        constructor: {
+            value: Messages 
+        }
+    });
+    
+    Messages.prototype._badToken = function () {
+        this.emit('invalidToken');
+    };
+    
+    Messages.prototype.sendMessage = function (contact, text, callback) {
+        this.api.post('/messages', {recipient: contact, text: text}, callback);
+    };
+    
+    Messages.prototype.getMessages = function (callback) {
+        this.api.get('/messages', callback);
+    };
+    
+    Messages.prototype.getMessage = function (id, callback) {
+        this.api.get('/messages/' + id, callback);
+    };
+    
+    Messages.prototype.deleteMessage = function (id, callback) {
+        this.api.delete('/messages/' + id, callback);
+    };
+    
+    Messages.prototype.searchByNumber = function (number, callback) {
+        this.api.get('/messages/filter/' + number, callback);
+    };
+    
+    att.Messages = Messages;
+    
+    if ($) {
+        $.messages = function (token) {
+            return new Messages(token);
+        };
+    }
     
 
     // attach to window or export with commonJS

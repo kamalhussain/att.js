@@ -18,7 +18,7 @@ function Rester(token, baseUrl) {
     };
 }
 
-Rester.prototype.get = function(path, callback) {
+Rester.prototype.get = function (path, callback) {
     var self = this;
     $.ajax({
         url: this.baseUrl + path + '?access_token=' + this.token,
@@ -34,7 +34,7 @@ Rester.prototype.get = function(path, callback) {
     });
 };
 
-Rester.prototype.put = function(path, payloadObj, callback) {
+Rester.prototype.put = function (path, payloadObj, callback) {
     var self = this;
     $.ajax({
         url: this.baseUrl + path + '?access_token=' + this.token,
@@ -51,7 +51,7 @@ Rester.prototype.put = function(path, payloadObj, callback) {
     });
 };
 
-Rester.prototype.post = function(path, payloadObj, callback) {
+Rester.prototype.post = function (path, payloadObj, callback) {
     var self = this;
     $.ajax({
         url: this.baseUrl + path + '?access_token=' + this.token,
@@ -68,7 +68,7 @@ Rester.prototype.post = function(path, payloadObj, callback) {
     });
 };
 
-Rester.prototype.delete = function(path, callback) {
+Rester.prototype.delete = function (path, callback) {
     var self = this;
     $.ajax({
         url: this.baseUrl + path + '?access_token=' + this.token,
