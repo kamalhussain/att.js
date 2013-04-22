@@ -78,12 +78,8 @@
             });
         }
 
-        console.log(self.plugins);
-        _.each(self.plugins, function (plugin, name) {
-            if (_.isFunction(plugin)) {
-                console.log('Loading ATT plugin: ' + name);
-                plugin(self);
-            }
+        _.each(self.plugins, function (plugin) {
+            self.on('init', plugin);
         });
     
         self.emit('init', self);
@@ -95,7 +91,12 @@
         },
     });
 
-    ATT.prototype.plugins = {};
+    ATT.prototype.plugins = [];
+
+    ATT.fn = ATT.prototype;
+    ATT.initPlugin = function (initHandler) {
+        ATT.prototype.plugins.push(initHandler);
+    };
 
 
     if (typeof module === "object" && typeof module.exports === "object") {

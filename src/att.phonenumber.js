@@ -1,5 +1,5 @@
 (function (ATT) {
-    ATT.prototype.phoneNumber = {
+    ATT.fn.phoneNumber = {
         stringify: function (text) {
             // strip all non numbers
             var cleaned = phoneNumber.parse(text),

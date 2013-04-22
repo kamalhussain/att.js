@@ -1,7 +1,7 @@
 (function (ATT, $) {
     var cache = {};
 
-    ATT.prototype.getMe = function (cb) {
+    ATT.fn.getMe = function (cb) {
         var self = this,
             baseUrl = "https://auth.tfoundry.com",
             data = {
@@ -56,7 +56,7 @@
         });
     };
 
-    ATT.prototype.plugins.me = function (att) {
+    ATT.initPlugin(function (att) {
         att.getMe(function (me) {
             // make it possible to override guessed version
             me.version = att.config.version || _.getQueryParam('version') || me.version;
@@ -67,6 +67,6 @@
 
             att.emit('user', me);
         });
-    };
+    });
 
 })(ATT, jQuery);
