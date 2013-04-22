@@ -1,12 +1,38 @@
 (function (ATT, $) {
 
-    function AttCall(att, call) {
+    function Call(att, phoneNumber) {
         var self = this
 
-        self.att = att;
-        self._call = call;
-
         WildEmitter.call(this);
+
+        self.att = att;
+        self._call = att.phonoBackend.phono.phone.dial('sip:' + phoneNumber + '@12.208.176.26', {
+            callerId: att.config.myNumber + '@phono06.tfoundry.com'
+        });
+
+        self._call.bind({
+            onRing: function () {
+                self.emit('ring');
+            },
+            onAnswer: function () {
+                self.emit('callBegin');
+            },
+            onHangup: function () {
+                self.emit('callEnd');
+            },
+            onHold: function () {
+                self.emit('hold');
+            },
+            onRetrieve: function () {
+                self.emit('retrieve');
+            },
+            onWaiting: function () {
+                self.emit('waiting');
+            },
+            onError: function () {
+                self.emit('error');
+            }
+        });
 
         self.on('*', function (eventType) {
             self.att.emit(eventType, self);
@@ -15,25 +41,23 @@
         return self;
     }
 
-    AttCall.prototype = Object.create(WildEmitter.prototype, {
+    Call.prototype = Object.create(WildEmitter.prototype, {
         constructor: {
-            value: AttCall
+            value: Call
         }
     });
 
-    AttCall.prototype.answer = function () {
+    Call.prototype.answer = function () {
         return this._call.answer();
     };
 
-    AttCall.prototype.hangup = function () {
+    Call.prototype.hangup = function () {
         return this._call.hangup();
     };
 
-    AttCall.prototype.__defineGetter__("initiator", function () { 
+    Call.prototype.__defineGetter__("initiator", function () { 
         return this._call.initiator; 
     });
-
-    ATT.fn.Call = AttCall;
 
 
     ATT.fn.dial = function (number) {
@@ -42,48 +66,12 @@
 
         self.emit('calling', number);
 
-        var call = self._makeCall(callable);
+        var call = new Call(self, number);
 
-        call.emit('ring');
         self.emit('outgoingCall', call);
+        call.emit('ring');
 
         return call;
-    };
-
-    ATT.fn._makeCall = function (phoneNumber) {
-        var self = this;
-
-        var call = self.phonoBackend.phono.phone.dial('sip:' + phoneNumber + '@12.208.176.26', {
-            callerId: self.config.myNumber + '@phono06.tfoundry.com'
-        });
-
-        var attCall = new ATT.fn.Call(self, call);
-
-        call.bind({
-            onRing: function () {
-                attCall.emit('ring');
-            },
-            onAnswer: function () {
-                attCall.emit('callBegin');
-            },
-            onHangup: function () {
-                attCall.emit('callEnd');
-            },
-            onHold: function () {
-                attCall.emit('hold');
-            },
-            onRetrieve: function () {
-                attCall.emit('retrieve');
-            },
-            onWaiting: function () {
-                attCall.emit('waiting');
-            },
-            onError: function () {
-                attCall.emit('error');
-            }
-        });
-
-        return attCall;
     };
 
     ATT.fn.phonoBackend = {
