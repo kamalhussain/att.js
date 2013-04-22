@@ -1,5 +1,5 @@
 (function (ATT) {
-    ATT.fn.phoneNumber = {
+    var phoneNumber = {
         stringify: function (text) {
             // strip all non numbers
             var cleaned = phoneNumber.parse(text),
@@ -66,4 +66,6 @@
             }
         }
     };
+
+    ATT.fn.phoneNumber = phoneNumber;
 })(ATT);
