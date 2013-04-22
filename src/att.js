@@ -91,11 +91,11 @@
         },
     });
 
-    ATT.prototype.plugins = [];
+    ATT.prototype.plugins = {};
 
     ATT.fn = ATT.prototype;
     ATT.initPlugin = function (initHandler) {
-        ATT.prototype.plugins.push(initHandler);
+        ATT.prototype.plugins[_.uuid()] = initHandler;
     };
 
 
