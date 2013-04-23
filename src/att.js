@@ -79,7 +79,7 @@
         }
 
         _.each(self.plugins, function (plugin) {
-            self.on('init', plugin);
+            plugin(self);
         });
     
         self.emit('init', self);

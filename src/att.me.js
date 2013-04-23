@@ -57,15 +57,17 @@
     };
 
     ATT.initPlugin(function (att) {
-        att.getMe(function (me) {
-            // make it possible to override guessed version
-            me.version = att.config.version || _.getQueryParam('version') || me.version;
-            att.config.version = me.version;
-            att.config.myNumber = me.number;
+        att.on('init', function () {
+            att.getMe(function (me) {
+                // make it possible to override guessed version
+                me.version = att.config.version || _.getQueryParam('version') || me.version;
+                att.config.version = me.version;
+                att.config.myNumber = me.number;
 
-            console.log('using API version:', att.config.version);
+                console.log('using API version:', att.config.version);
 
-            att.emit('user', me);
+                att.emit('user', me);
+            });
         });
     });
 
