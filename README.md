@@ -14,7 +14,7 @@ att.on('incomingCall', function (call) {
     call.answer();
 });
 
-att.on('callBegin, function (call) {
+att.on('callBegin', function (call) {
     // An outgoing call has been answered
 });
 
