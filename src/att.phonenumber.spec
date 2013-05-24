@@ -12,7 +12,7 @@
         "parse": {
             "description": "Convert a phone number that uses letters into numeric format.",
             "parameters": [
-                {"type": "string"},
+                {"type": "string"}
             ],
             "returns": "string"
         },
@@ -23,7 +23,7 @@
                 {"type": "string", "optional": true, "default": "us"}
             ],
             "returns": "string"
-        },
+        }
     },
     "events": {},
     "datatypes": {}

@@ -20,7 +20,7 @@
     },
     "datatypes": {
         "UserProfile": {
-            "description": "A dictionary of profile information for a user, including name and phone number.",
+            "description": "A dictionary of profile information for a user, including name and phone number."
         }
     }
 }

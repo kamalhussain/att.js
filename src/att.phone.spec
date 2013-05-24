@@ -33,7 +33,7 @@
             ]
         },
         "ring": {
-            "description": "A signal that a call request is in progress.",
+            "description": "A signal that a call request is in progress."
         },
         "callBegin": {
             "description": "Raised when a call has been answered and is ready for use.",
