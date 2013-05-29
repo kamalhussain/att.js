@@ -61,9 +61,9 @@ _.forEach(spec, function (plugin) {
             if (methodDesc.parameters) {
                 methodDesc.parameters.forEach(function (arg) {
                     if (builtins[arg.type]) {
-                        args.push(arg.type);
+                        args.push(arg.type + (arg.name ? ' ' + arg.name : ''));
                     } else {
-                        args.push('[' + arg.type + '](#' + datatypeIndex[arg.type].plugin + '-datatype-' + arg.type + ')');
+                        args.push('[' + arg.type + '](#' + datatypeIndex[arg.type].plugin + '-datatype-' + arg.type + ')' + (arg.name ? ' ' + arg.name : ''));
                     }
                 });
             }
@@ -106,9 +106,9 @@ _.forEach(datatypeIndex, function (desc, name) {
             if (methodDesc.parameters) {
                 methodDesc.parameters.forEach(function (arg) {
                     if (builtins[arg.type]) {
-                        args.push(arg.type);
+                        args.push(arg.type + (arg.name ? ' ' + arg.name : ''));
                     } else {
-                        args.push('[' + arg.type + '](#' + datatypeIndex[arg.type].plugin + '-datatype-' + arg.type + ')');
+                        args.push('[' + arg.type + '](#' + datatypeIndex[arg.type].plugin + '-datatype-' + arg.type + ')' + (arg.name ? ' ' + arg.name : ''));
                     }
                 });
             };

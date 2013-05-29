@@ -20,7 +20,7 @@
             "description": "Parses a phone number string into a callable format.",
             "parameters": [
                 {"type": "string"},
-                {"type": "string", "optional": true, "default": "us"}
+                {"type": "string", "name": "countryCode", "optional": true, "default": "us"}
             ],
             "returns": "string"
         }
