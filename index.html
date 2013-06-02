@@ -1,24 +1,26 @@
 <html>
   <head>
-    <script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" ></script>
     <script src="src/wildemitter.js"></script>
     <script src="vendor/socket.io.js"></script>
+    <script src="vendor/WCGUtil.js"></script>
+    <script src="vendor/WCGapi.js"></script>
     <script src="src/att.js"></script>
     <script src="src/att.oauth2.js"></script>
     <script src="src/att.me.js"></script>
-    <script src="src/att.wcg.js"></script>
     <script src="src/att.phonenumber.js"></script>
-    
-    <link href="//netdna.bootstrapcdn.com/font-awesome/2.0/css/font-awesome.css" rel="stylesheet">
-    <link href="//netdna.bootstrapcdn.com/bootswatch/2.1.1/spacelab/bootstrap.min.css" rel="stylesheet">
-    <link href="//netdna.bootstrapcdn.com/font-awesome/2.0/css/font-awesome.css" rel="stylesheet">
+    <script src="src/att.phone.js"></script>
+    <script src="src/att.wcg.js"></script>
+    <link href="//netdna.bootstrapcdn.com/bootswatch/2.3.2/flatly/bootstrap.min.css" rel="stylesheet">
     
   </head>
   <body>
-      <div id="main" class='container'>
+      <div id="main" class='container-fluid'>
+        <div class="">
         <h1>WebRTC Phone</h1>
             
-        <div class="well phonebox">
+        <div class="well">
           <form class='phone' action="#" method="get" class="form-horizontal">
             <fieldset id="" class="">
               <legend> Make A Call</legend>
@@ -33,9 +35,11 @@
             </fieldset>
           </form>
           
-          <pre id='debuglog'>
+          <pre id='debuglog' style='display:none'>
             <ol id='debuglist'></ol>
           </pre>
+          
+      </div>
           
         </div> <!-- /container -->
     
@@ -53,16 +57,8 @@
           att.oauth2.login( function(me){} );
           att.on('authorized', function () {
             $("#dial").show();
+            $("#dial").html('registering');
           })
-
-          att.on('phoneReady', function() {
-            console.log("Phone is ready");
-            document.getElementById("dial").removeAttribute("disabled");
-            $("#dial").click(function() {
-              console.log(("dial"));
-              var call = att.dial( $('#number_to_dial').val() );
-            });
-          });
 
           att.on('outgoingCall', function(call) {
             console.log("Outgoing call");
@@ -78,45 +74,40 @@
 
 
     // Below was tested with phono event emitter branch
-    //       att.on('ready', function() {
-    //           console.log('webphone is ready');
-    //           $("#debuglist").append('<li>phone is ready</li>');
-    //           $('#dial').attr("disabled", false).html("dial");
-    //           $("#dial").html("dial").addClass('btn-primary');
-    //         
-    //         
-    //           $('#dial').on('click.phone', function (event) {
-    //             event.preventDefault();
-    //             $("#dial").html("Connecting").removeClass('btn-primary').addClass('btn-info');
-    //             window.call = att.phone.dial( $('#number_to_dial').val());
-    //             $('#dial').off('click.phone');
-    //             $('#dial').on('click.call', call.hangup());
-    //        
-    //             call.on('ring', function() {
-    //               console.log('ringing');
-    //               $("#dial").html("Ringing").removeClass('btn-info').addClass('btn-warning');
-    //             });
-    //        
-    //             call.on('answer', function() {
-    //                 console.log('answered');
-    //                 $("#dial").html("Hangup").removeClass('btn-warning').addClass('btn-danger').fade();
-    //                 $("#dial").on('click.call', function (event) {
-    //                   console.log('hangup');
-    //                   call.hangup();
-    //                 })
-    //             });
-    //        
-    //             call.on('hangup', function() {
-    //                 console.log('hungup');
-    //                 $('#dial').off('click.call').on('click.phone'); // TODO: fixme
-    //                 $("#call").attr("disabled", false).val("Call");
-    //                 $("#status").html("Hangup");
-    //                 $("#dial").html("dial").removeClass('btn-warning btn-danger').addClass('btn-primary');
-    //             });
-    //        
-    //           });
-    //         
-    //        });
+          att.on('phoneReady', function() {
+              console.log('webphone is ready');
+              $("#debuglist").show();
+              $("#debuglist").append('<li>phone is ready</li>');
+              $('#dial').attr("disabled", false).html("dial");
+              $("#dial").html("dial").addClass('btn-primary');
+            
+              $('#dial').on('click.phone', function (event) {
+                event.preventDefault();
+                $("#dial").html("Connecting").removeClass('btn-primary').addClass('btn-info');
+                call = window.att.dial( $('#number_to_dial').val());
+                $('#dial').off('click.phone');
+                $('#dial').on('click.call', call.hangup() );
+           
+                call.on('ring', function() {
+                  console.log('ringing');
+                  $("#dial").html("Ringing").removeClass('btn-info').addClass('btn-warning');
+                });
+           
+                call.on('callBegin', function() {
+                    console.log('answered, callBegin');
+                    $("#dial").html("Hangup").removeClass('btn-warning').addClass('btn-danger');
+                });
+           
+                call.on('callEnd', function() {
+                    console.log('hungup callEnd');
+                    $('#dial').off('click.call').on('click.phone'); // TODO: fixme
+                    $("#call").attr("disabled", false).val("Call");
+                    $("#dial").html("dial").removeClass('btn-warning btn-danger btn-info').addClass('btn-primary');
+                });
+           
+              });
+            
+           });
 
          
          });
