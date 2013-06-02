@@ -19,7 +19,7 @@
     },
     "events": {
         "authorized": {
-            "description": "Raised an accesstoken is present in the url hash_fragement and an access_token is validatedd.",
+            "description": "Raised an accesstoken is present in the url hash_fragement and an access_token is validatedd."
         }
     },
     "datatypes": {

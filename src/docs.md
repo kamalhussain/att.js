@@ -12,9 +12,28 @@ Helper method for retrieving a user's ATT profile information.
 
 ### Events
 
-  - <a id="att.me-event-user"></a>user, called with: [UserProfile](#att.me-datatype-UserProfile)
+  - <a id="att.me-event-user"></a>user, called with: [UserProfile](#att.oauth2-datatype-UserProfile)
 
     Raised when the user's profile information has been retrieved. Suitable for other plugins to listen for to finish their own initialization steps
+
+## The att.oauth2 plugin
+
+This plugin allows easy user login and authorization from the att oauth system
+
+### Methods
+
+  - authorizeURL()
+
+    Returns an oauth authorize url for the configured client.
+  - login()
+
+    Validated accessToken or updates elements with btn-att-login class with authroizeURL to fetch an accessToken.
+
+### Events
+
+  - <a id="att.oauth2-event-authorized"></a>authorized
+
+    Raised an accesstoken is present in the url hash_fragement and an access_token is validatedd.
 
 ## The att.phone.generic plugin
 
@@ -78,7 +97,7 @@ A set of helper functions for parsing and processing phone number strings.
 
 ## Data Types
 
-### <a id="att.me-datatype-UserProfile"></a>UserProfile
+### <a id="att.oauth2-datatype-UserProfile"></a>UserProfile
 
 A dictionary of profile information for a user, including name and phone number.
 
@@ -99,6 +118,9 @@ A phone call session, which may be answered or hung up.
 
 ### user
   - [att.me](att.me)
+
+### authorized
+  - [att.oauth2](att.oauth2)
 
 ### phoneReady
   - [att.phone.generic](att.phone.generic)
