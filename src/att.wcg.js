@@ -144,7 +144,7 @@
 	ATT.fn.dial = function(number) {
 		var self = this;
 		
-		var call = new WCGCall(self, "sip:" + number + "@vims1.com", false);
+		var call = new WCGCall(self, "sip:" + number + "@webims.tfoundry.com", false);
 		self.emit('outgoingCall', call);
 	}
 
@@ -171,7 +171,8 @@
 			console.log('Setting up WCG');
 
 			//ALPHA Lab info
-			var wcgUrl = 'http://wcg-experimental.att.io:38080/HaikuServlet/rest/v2/';
+			//var wcgUrl = 'http://wcg-experimental.att.io:38080/HaikuServlet/rest/v2/';
+			var wcgUrl = 'http://wcg-dia.tfoundry.com:38080/HaikuServlet/rest/v2/';
 			var turn = 'STUN: stun-experimental.js.att.io:5060';
 			//My token created on APIGEE for my profile
 			var accessToken = att.config.apiKey;
