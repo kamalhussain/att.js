@@ -171,8 +171,8 @@
 			console.log('Setting up WCG');
 
 			//ALPHA Lab info
-			var wcgUrl = 'http://64.124.154.207:38080/HaikuServlet/rest/v2/';
-			var turn = 'STUN: 206.18.171.164:5060';
+			var wcgUrl = 'http://wcg-experimental.att.io:38080/HaikuServlet/rest/v2/';
+			var turn = 'STUN: stun-experimental.js.att.io:5060';
 			//My token created on APIGEE for my profile
 			var accessToken = att.config.apiKey;
 
