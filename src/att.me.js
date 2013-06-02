@@ -57,7 +57,7 @@
     };
 
     ATT.initPlugin(function (att) {
-        att.on('init', function () {
+        att.on('authorized', function () {
             att.getMe(function (me) {
                 // make it possible to override guessed version
                 me.version = att.config.version || _.getQueryParam('version') || me.version;

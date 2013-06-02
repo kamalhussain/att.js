@@ -63,7 +63,7 @@
             opts = opts || {};
 
         self.config = {
-            apiKey: '',
+            // apiKey: false,
             user: _.uuid(),
             log: true,
             dependencyBaseUrl: '//js.att.io'
@@ -81,7 +81,15 @@
         _.each(self.plugins, function (plugin) {
             plugin(self);
         });
-    
+        
+        // Set a session state that can be used to identify this session and can be used to validate oauth requests
+        if (!sessionStorage.state) {
+          sessionStorage.state = _.uuid();
+          self.state =  sessionStorage.state;
+        } else {
+          self.state = sessionStorage.getItem('state');
+        }
+        
         self.emit('init', self);
     }
 

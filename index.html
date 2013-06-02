@@ -1,14 +1,129 @@
 <html>
   <head>
-    <script src="vendor/jquery-1.7.1.js"></script>
-    <script src="https://js.att.io/js/phono.06.js"></script>
+    <script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
     <script src="src/wildemitter.js"></script>
     <script src="vendor/socket.io.js"></script>
     <script src="src/att.js"></script>
+    <script src="src/att.oauth2.js"></script>
     <script src="src/att.me.js"></script>
+    <script src="src/att.wcg.js"></script>
     <script src="src/att.phonenumber.js"></script>
-    <script src="src/att.phone.phono.js"></script>
+    
+    <link href="//netdna.bootstrapcdn.com/font-awesome/2.0/css/font-awesome.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/bootswatch/2.1.1/spacelab/bootstrap.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/2.0/css/font-awesome.css" rel="stylesheet">
+    
   </head>
   <body>
+      <div id="main" class='container'>
+        <h1>WebRTC Phone</h1>
+            
+        <div class="well phonebox">
+          <form class='phone' action="#" method="get" class="form-horizontal">
+            <fieldset id="" class="">
+              <legend> Make A Call</legend>
+              <label for="from">From </label>
+              <a class='btn btn-success btn-att-login' href="authorize_url_that_the_js_will_insert">Login</a>
+           
+             <label for="Number to Dial">To </label>
+             <input type="text" id='number_to_dial' name="number_to_dial" value="1-800-444-4444" class="input-block-level" placeholder="1-800-444-4444" autofocus>
+             
+             <!-- <input type="submit" name="action" value="register" class="input-block-level btn btn-large btn-primary" disabled='true' id='dial'> -->
+             <a href='#' class="input-block-level btn btn-large" id='dial'>register</a>
+            </fieldset>
+          </form>
+          
+          <pre id='debuglog'>
+            <ol id='debuglist'></ol>
+          </pre>
+          
+        </div> <!-- /container -->
+    
+      </div>
+    
+      <script type="text/javascript" charset="utf-8">
+        $(document).ready(function(){
+          $("#dial").hide();
+          window.att = new ATT({
+            clientID: "efxqmxsml7jrvhjd2dcflhep3qzu3v0o",
+            scope: 'profile,webrtc',
+            redirectURI: "http://localhost:8080/index.html"
+          });
+          console.debug(att.config);
+          att.oauth2.login( function(me){} );
+          att.on('authorized', function () {
+            $("#dial").show();
+          })
+
+          att.on('phoneReady', function() {
+            console.log("Phone is ready");
+            document.getElementById("dial").removeAttribute("disabled");
+            $("#dial").click(function() {
+              console.log(("dial"));
+              var call = att.dial( $('#number_to_dial').val() );
+            });
+          });
+
+          att.on('outgoingCall', function(call) {
+            console.log("Outgoing call");
+          });
+
+          att.on('callBegin', function(call) {
+            console.log("In a call");
+          });
+
+          att.on('callEnd', function(call) {
+            console.log("Call ended");
+          });
+
+
+    // Below was tested with phono event emitter branch
+    //       att.on('ready', function() {
+    //           console.log('webphone is ready');
+    //           $("#debuglist").append('<li>phone is ready</li>');
+    //           $('#dial').attr("disabled", false).html("dial");
+    //           $("#dial").html("dial").addClass('btn-primary');
+    //         
+    //         
+    //           $('#dial').on('click.phone', function (event) {
+    //             event.preventDefault();
+    //             $("#dial").html("Connecting").removeClass('btn-primary').addClass('btn-info');
+    //             window.call = att.phone.dial( $('#number_to_dial').val());
+    //             $('#dial').off('click.phone');
+    //             $('#dial').on('click.call', call.hangup());
+    //        
+    //             call.on('ring', function() {
+    //               console.log('ringing');
+    //               $("#dial").html("Ringing").removeClass('btn-info').addClass('btn-warning');
+    //             });
+    //        
+    //             call.on('answer', function() {
+    //                 console.log('answered');
+    //                 $("#dial").html("Hangup").removeClass('btn-warning').addClass('btn-danger').fade();
+    //                 $("#dial").on('click.call', function (event) {
+    //                   console.log('hangup');
+    //                   call.hangup();
+    //                 })
+    //             });
+    //        
+    //             call.on('hangup', function() {
+    //                 console.log('hungup');
+    //                 $('#dial').off('click.call').on('click.phone'); // TODO: fixme
+    //                 $("#call").attr("disabled", false).val("Call");
+    //                 $("#status").html("Hangup");
+    //                 $("#dial").html("dial").removeClass('btn-warning btn-danger').addClass('btn-primary');
+    //             });
+    //        
+    //           });
+    //         
+    //        });
+
+         
+         });
+      </script>
+    
+    </body>
+    
+    
   </body>
 </html>

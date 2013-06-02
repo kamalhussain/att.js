@@ -128,7 +128,7 @@ The `att.phonenumber` plugin is a set of helper function for parsing and process
 
 ### Phone Plugin
 
-There are several implementations for the phone plugin, based on different vendor backends. However, they all follow the same generic interface so that you as the end developer don't have to worry about which one is used.
+There are several implementations for the phone plugin, based on different vendor backends. However, they all follow the same generic interface so that the end developer doesn't have to worry about which one is used.
 
 ### Methods
 
