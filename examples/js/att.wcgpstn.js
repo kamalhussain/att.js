@@ -143,8 +143,9 @@
 
 	ATT.fn.dial = function(number) {
 		var self = this;
-		
-		var call = new WCGCall(self, "sip:" + number + "@vims1.com", false);
+		//
+		//var call = new WCGCall(self, "sip:" + number + "@vims1.com", false);
+		var call = new WCGCall(self, "sip:" + number + "@webims.tfoundry.com", false);
 		self.emit('outgoingCall', call);
 	}
 
@@ -158,7 +159,6 @@
 	};
 
 	ATT.initPlugin(function(att) {
-		console.log('Load WCG Plugin');
 
 		window.onbeforeunload = function() {
 
@@ -169,21 +169,12 @@
 
 		att.on('user', function(user) {
 			console.log('Setting up WCG');
-
-			//ALPHA Lab info
-			var wcgUrl = 'http://64.124.154.204:38080/HaikuServlet/rest/v2/';
-			var turn = 'STUN:stun.l.google.com:19302';
+			
+			var wcgUrl = 'http://wcg-dia.tfoundry.com:38080/HaikuServlet/rest/v2/';
+			var turn = 'STUN: 64.124.154.203:3478';
 			//My token created on APIGEE for my profile
 			var accessToken = att.config.apiKey;
-
-			//LOGIN HERE with APIGEE id
-			var options = {
-				'url' : wcgUrl,
-				'name' : user.first_name,
-				'token' : accessToken,
-				'media' : "audio,video,chat"
-			};
-
+			//user.first_name = "sip:16509992373@vims1.com";
 
 			att.wcgBackend.wcgService = new MediaServices(wcgUrl, user.first_name, "oauth " + accessToken, "audio,video,chat");
 			att.wcgBackend.wcgService.turnConfig = turn;

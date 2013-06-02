@@ -1,0 +1,56 @@
+<html>
+	<head>
+		<title>ATT.js WCG Plugin Sample</title>
+		<!--script type="text/javascript" src="js/basic.js"></script-->
+
+	</head>
+
+	<!-- Import Att.js -->
+	<script type="text/javascript" src="js/WCGUtil.js"></script>
+	<script src="js/WCGapi.js"></script>
+	<script src="js/jquery.min.js"></script>
+
+	<script src="../src/wildemitter.js"></script>
+	<script src="../src/att.js"></script>
+	<script src="../src/att.me.js"></script>
+	<script src="js/att.wcgpstn.js"></script>
+	<script>
+		$(document).ready(function() {
+			var att = new ATT({
+				apiKey : "ygbaviv3twayprjgpdjitjdp8y87i4da"
+			});
+
+			att.on('user', function(user) {
+				console.log("user", user);
+			});
+
+			att.on('phoneReady', function() {
+				console.log("Phone is ready");
+				document.getElementById("dial").removeAttribute("disabled");
+				$("#dial").click(function() {
+					console.log(("dial"));
+					var call = att.dial("16503531486");
+				})
+			});
+
+			att.on('outgoingCall', function(call) {
+				console.log("Outgoing call");
+			});
+
+			att.on('callBegin', function(call) {
+				console.log("In a call");
+			});
+
+			att.on('callEnd', function(call) {
+				console.log("Call ended");
+			});
+
+		});
+
+	</script>
+	<body>
+
+		<input type="button" id="dial" value="DIAL" disabled="disabled"/>
+
+	</body>
+</html>
