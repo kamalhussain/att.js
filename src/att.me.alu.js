@@ -44,8 +44,7 @@
         $.ajax({
             data: data,
             dataType: 'json',
-            //url: baseUrl + '/me.json',
-            url: '/src/me.php',
+            url: baseUrl + '/me.json',
             success: function(user) {
 
                 // store the user in the cache
@@ -55,8 +54,7 @@
                 $.ajax({
                     data: data,
                     dataType: 'json',
-                    //url: baseUrl + '/users/' + user.uid + '/api_services/webrtc.json',
-                        url: 'http://webtest.ic.att.com/oauth/webrtc',
+                    url: baseUrl + '/users/' + user.uid + '/api_services/webrtc.json',
                     // if we get a 200
                     success: function(res) {
                         // if we've got an explicit version use it.
