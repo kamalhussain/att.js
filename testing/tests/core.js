@@ -1,3 +1,5 @@
+module('core');
+
 test("Basic init and event tests", function() {
     // how many assertions to expect
     expect(4);
