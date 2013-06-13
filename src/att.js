@@ -66,7 +66,8 @@
             apiKey: '',
             user: _.uuid(),
             log: true,
-            dependencyBaseUrl: '//js.att.io'
+            dependencyBaseUrl: '//js.att.io',
+            settings: {}
         };
 
 
