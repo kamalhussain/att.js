@@ -60,7 +60,7 @@
         att.on('init', function () {
             att.getMe(function (me) {
                 // make it possible to override guessed version
-                me.version = att.config.version || _.getQueryParam('version') || me.version;
+                me.version = att.config.version || ATT._.getQueryParam('version') || me.version;
                 att.config.version = me.version;
                 att.config.myNumber = me.number;
 
