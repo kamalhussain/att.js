@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Make a phone call</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="//netdna.bootstrapcdn.com/bootswatch/2.3.2/flatly/bootstrap.min.css" rel="stylesheet">
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="../src/wildemitter.js"></script>
+    <script src="../vendor/socket.io.js"></script>
+    <script src="../vendor/wcg/BrowserDetect.js"></script>
+    <script src="../vendor/wcg/WCGapi.js"></script>
+
+    <script src="../src/att.js"></script>
+    <script src="../src/att.me.js"></script>
+    <script src="../src/att.phonenumber.js"></script>
+    <script src="../vendor/wcg/att.wcg.js"></script>
+
+</head>
+
+
+<body>
+
+<div id="main" class="container">
+    <div class="page-header">
+        <h1>WCG PSTN Breakout</h1>
+    </div>
+
+    <div class="row">
+        <div class="span10">
+
+            <form class="well form-horizontal">
+                <fieldset>
+                    <div class="control-group">
+                        <label for="login">Call from</label>
+                        <input type="button" id="login" class="btn" value="Login">
+                    </div>
+
+
+                    <div class="control-group">
+                        <label for="number">to</label>
+                        <input type="text" id="number" class="input-medium" type="" value="1-804-222-1111"/>
+                    </div>
+                    <div>
+                        <input type="button" id="dial" class="btn btn-primary" value="Dial" disabled>
+                    </div>
+                </fieldset>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    $(document).ready(function () {
+        var oauthParams = {},
+                queryString = window.parent.location.hash.substring(1),
+                regex = /([^&=]+)=([^&]*)/g,
+                m,
+                html = '';
+
+        var access_token = '';
+        var wcgcall;
+
+
+        while (m = regex.exec(queryString)) {
+            oauthParams[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+        }
+
+        access_token = oauthParams['access_token'];
+        if (access_token) {
+            window.att = new ATT({
+                apiKey: access_token,
+                server: "alpha1"
+            });
+
+            att.on('user', function (user) {
+                $("#login").val(user.first_name + "       x");
+                $("#login").addClass('btn-success');
+            });
+
+            //PHONE EVENTS
+            att.on('phoneReady', function () {
+
+                $("#dial").attr("disabled", false);
+                $("#number").on('mousedown', function () {
+                    if ($("#number").val() == "1-804-222-1111") {
+                        $("#number").val("");
+                    }
+                });
+
+                $("#dial").click(function () {
+                    if ($("#dial").val() == "Dial") {
+                        att.dial($.trim($("#number").val()));
+
+                    }
+                    else {
+                        wcgcall.hangup();
+                    }
+
+                });
+            });
+
+            att.on('phoneClose', function () {
+                $("#login").val("Login");
+                $("#login").removeClass('btn-success');
+                $("#dial").attr("disabled", true);
+            });
+
+            //should support phone errors as well (not only call errors)
+            att.on('error', function (eventData) {
+                console.log("ERROR");
+            });
+
+
+            //CALL EVENTS
+            att.on('calling', function (number) {
+                console.log("calling", number);
+            });
+            att.on('outgoingCall', function (call) {
+                console.log("OUTGOING CALL", call);
+                wcgcall = call;
+            });
+            att.on('incomingCall', function (call) {
+                console.log("INCOMING CALL", call);
+                wcgcall = call;
+            });
+            att.on('ring', function () {
+                console.log("ring");
+            });
+            att.on('callBegin', function (call) {
+                console.log("call begin", call);
+                $("#dial").val("Hangup");
+                $("#dial").addClass('btn-danger');
+                wcgcall = call;
+
+            });
+            att.on('callEnd', function (call) {
+                console.log("call end", call);
+                $("#dial").val("Dial");
+                $("#dial").removeClass('btn-danger');
+
+                wcgcall = call;
+            });
+
+
+        }
+
+        $("#login").click(function () {
+            if ($("#login").val() != "Login") {
+                console.log("Logging out");
+                att.logout();
+            }
+            else {
+                window.location.href = "https://auth.tfoundry.com/oauth/authorize?client_id=cdoso6wgycs073sk5zpmacgxuxc7mezz&response_type=token&scope=profile,webrtc&redirect_uri=http://localhost/examples/wcgphone.html";
+            }
+
+        });
+
+
+    });
+
+</script>
+
+</body>
+</html>
