@@ -35,6 +35,7 @@ loaded plugins in a single place.
 
 ### User Events
 
+* `authorized`
 * `user`
 
 ### Phone Events
