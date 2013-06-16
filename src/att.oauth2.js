@@ -27,7 +27,7 @@
         regex = /([^&=]+)=([^&]*)/g,
         m;
       while (m = regex.exec(  location.hash.substring(1) )) {
-        oauthParams[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+        oauthParams[decodeURIComponent(m[1].replace(/^\//,''))] = decodeURIComponent(m[2]);
       }
       
       if (oauthParams['access_token']) {
