@@ -1,6 +1,6 @@
 {
   "name": "att-js",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "AT&T Foundry",
   "contributors": [
     {
@@ -8,14 +8,18 @@
       "email": "henrik@andyet.net"
     },
     {
+      "name": "Lance Stout",
+      "email": "lance@andyet.net"
+    },
+    {
       "name": "Geoff Hollingsworth"
+    },
+    {
+      "name": "Kamal Hussain"
     }
   ],
   "dependencies": {
-    "underscore": "",
     "precommit-hook": "0.1.0",
-    "uglify-js": "2.x",
-    "mustache": "",
-    "colors": ""
+    "uglify-js": "2.x"
   }
 }
