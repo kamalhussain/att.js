@@ -10,7 +10,7 @@ function beautify(code) {
 
 
 
-var localFiles = fs.readdirSync('.'),
+var localFiles = fs.readdirSync('./src'),
     specFiles = [];
 
 localFiles.forEach(function (filename) {
@@ -30,7 +30,7 @@ var spec = {},
     };
 
 specFiles.forEach(function (specFile) {
-    var data = JSON.parse(fs.readFileSync(specFile, 'utf8'));
+    var data = JSON.parse(fs.readFileSync('./src/' + specFile, 'utf8'));
     spec[data.plugin] = data;
 
     _.forEach(data.events, function (desc, eventName) {
@@ -111,7 +111,7 @@ _.forEach(datatypeIndex, function (desc, name) {
                         args.push('[' + arg.type + '](#' + datatypeIndex[arg.type].plugin + '-datatype-' + arg.type + ')' + (arg.name ? ' ' + arg.name : ''));
                     }
                 });
-            };
+            }
             out.push(args.join(', '));
             out.push(')');
             out.push('\n\n    ' + methodDesc.description);
