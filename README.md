@@ -170,3 +170,4 @@ node build.js
 - [Henrik Joreteg](http://andyet.com/team/henrik/) – [&yet](http://andyet.com)
 - Geoff Hollingsworth – Ericsson
 - [Lance Stout](http://andyet.com/team/lance/) – [&yet](http://andyet.com)
+- Kamal Hussain - Alcatel-Lucent
