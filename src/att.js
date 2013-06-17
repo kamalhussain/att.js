@@ -58,7 +58,7 @@
             opts = opts || {};
 
         self.config = {
-            // apiKey: false,
+            apiKey: '',
             user: _.uuid(),
             log: true,
             dependencyBaseUrl: '//js.att.io',
@@ -67,6 +67,8 @@
 
         // extend self.config with passed in options
         _.extend(self.config, opts);
+
+        var hasToken = !!self.config.apiKey;
 
         // expose util methods as att._
         self._ = _;
@@ -82,6 +84,10 @@
         });
 
         self.emit('init', self);
+
+        if (hasToken) {
+            self.emit('accessToken', self.config.apiKey);
+        }
     }
 
     // expose util methods as ATT._ rather than a global
@@ -100,6 +106,14 @@
     ATT.initPlugin = function (initHandler) {
         ATT.prototype.plugins[_.uuid()] = initHandler;
     };
+
+    ATT.prototype.__defineGetter__('apiKey', function () {
+        return this.config.apiKey;
+    });
+    ATT.prototype.__defineSetter__('apiKey', function (value) {
+        this.config.apiKey = value;
+        this.emit('apiKey', value);
+    });
 
 
     if (typeof module === "object" && typeof module.exports === "object") {
