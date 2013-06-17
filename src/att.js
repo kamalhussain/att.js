@@ -58,7 +58,7 @@
             opts = opts || {};
 
         self.config = {
-            apiKey: '',
+            // apiKey: false,
             user: _.uuid(),
             log: true,
             dependencyBaseUrl: '//js.att.io',
