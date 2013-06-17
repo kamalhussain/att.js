@@ -124,7 +124,7 @@ out.push('\n\n## Event Index');
 _.forEach(eventIndex, function (sources, name) {
     out.push('\n\n### ' + name);
     _.forEach(sources, function (source) {
-        out.push('\n  - [' + source.plugin + '](' + source.plugin + ')');
+        out.push('\n  - [' + source.plugin + '](#' + source.plugin + ')');
     });
 });
 
