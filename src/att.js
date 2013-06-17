@@ -82,6 +82,9 @@
         });
 
         self.emit('init', self);
+        if (self.config.apiKey) {
+            self.emit('authorized', self);
+        }
     }
 
     // expose util methods as ATT._ rather than a global

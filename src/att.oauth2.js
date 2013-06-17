@@ -33,7 +33,7 @@
       if (oauthParams['access_token']) {
         console.debug('access_token is present: '+ oauthParams['access_token']);
         if (att.state!=oauthParams['state']) {
-          throw "the state of the returned access_token does not match. possible csrf attack."; 
+          throw "the state of the returned access_token does not match. possible csrf attack.";
         }
         // TODO: use att.me instead of this implementaton
         me_url = "https://auth.tfoundry.com/me.json?access_token="+oauthParams['access_token'];
@@ -47,7 +47,7 @@
           att.config.apiKey = att.config.apiKey || oauthParams['access_token'];
           att.user = data;
           att.config.user = data.uid;  // TODO, decide if it would instead be best to remove the other uuid on att.init, and just store the object here.
-          att.emit('user', data);
+          att.emit('authorized', data);
           return cb(data);
         });
         // TODO: deal with error and false token or 404 and emit oauth-error
