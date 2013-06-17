@@ -47,7 +47,7 @@
           att.config.apiKey = att.config.apiKey || oauthParams['access_token'];
           att.user = data;
           att.config.user = data.uid;  // TODO, decide if it would instead be best to remove the other uuid on att.init, and just store the object here.
-          att.emit('authorized', data);
+          att.emit('user', data);
           return cb(data);
         });
         // TODO: deal with error and false token or 404 and emit oauth-error
