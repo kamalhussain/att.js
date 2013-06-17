@@ -119,9 +119,11 @@
      * Logout from WCG
      */
     ATT.fn.logout = function () {
+      if(this.wcgBackend.wcgService) {
         console.log("Logging out");
         this.wcgBackend.wcgService.unregister();
         this.wcgBackend.wcgService = null;
+      }
     };
 
     /**
