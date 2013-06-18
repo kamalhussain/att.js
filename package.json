@@ -24,7 +24,8 @@
   "devDependencies": {
     "precommit-hook": "0.1.0",
     "uglify-js": "2.x",
-    "underscore": ""
+    "underscore": "1.4.4",
+    "jade": "0.31.2"
   },
   "scripts": {
     "build": "node docspec.js > docs/plugins.md"
