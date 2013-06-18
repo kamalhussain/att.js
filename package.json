@@ -23,7 +23,8 @@
   ],
   "devDependencies": {
     "precommit-hook": "0.1.0",
-    "uglify-js": "2.x"
+    "uglify-js": "2.x",
+    "underscore": ""
   },
   "scripts": {
     "build": "node docspec.js > docs/plugins.md"

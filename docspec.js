@@ -1,6 +1,5 @@
 var fs = require('fs'),
     path = require('path'),
-    jade = require('jade'),
     _ = require('underscore'),
     uglifyjs = require('uglify-js');
 
