@@ -43,8 +43,8 @@
           $('.btn-att-login').html(data.name);
           $('.btn-att-login').attr('href', "https://auth.tfoundry.com/users/" + data.uid);
           att.config.accessToken = oauthParams['access_token'];
-          // set the apiKey to the access_token if the apiKey already set
-          att.config.apiKey = att.config.apiKey || oauthParams['access_token'];
+          // set the accessToken to the access_token if the accessToken already set
+          att.config.accessToken= att.config.accessToken || oauthParams['access_token'];
           att.user = data;
           att.config.user = data.uid;  // TODO, decide if it would instead be best to remove the other uuid on att.init, and just store the object here.
           att.emit('user', data);

@@ -5,7 +5,7 @@ Client library for turning your browser into a phone.
 For more info/demos visit: https://js.att.io
 
 ```js
-var att = new ATT({apiKey: "YOUR ACCESS TOKEN"});
+var att = new ATT({accessToken: "YOUR ACCESS TOKEN"});
 att.on('phoneReady', function () {
     att.dial('1-8000-444-4444');
 });
@@ -59,7 +59,7 @@ att.on('EVENT_NAME', function (eventData) {
 
 The configuration settings for att.js are:
 
-* `apiKey`: Your OAuth access token. 
+* `accessToken`: Your OAuth access token. 
 * `log`: Defaults to `true` to include verbose console log output.
 
 ## Creating and Interacting with a Call

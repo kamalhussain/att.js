@@ -5,7 +5,7 @@
         var self = this,
             baseUrl = "https://auth.tfoundry.com",
             data = {
-                access_token: self.config.apiKey
+                access_token: self.config.accessToken
             },
             version;
 
@@ -57,7 +57,7 @@
     };
 
     ATT.initPlugin(function (att) {
-        att.on('apiKey', function () {
+        att.on('accessToken', function () {
             att.getMe(function (me) {
                 // make it possible to override guessed version
                 me.version = att.config.version || ATT._.getQueryParam('version') || me.version;

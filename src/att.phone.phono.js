@@ -107,7 +107,7 @@
         att.on('user', function (user) {
             console.log('Setting up Phono');
             att.phonoBackend.phono = $.phono({
-                token: att.config.apiKey,
+                token: att.config.accessToken,
                 apiKey: '7826110523f1241fcfd001859a67128d',
                 connectionUrl: 'http://gw.att.io:8080/http-bind',
                 phone: {

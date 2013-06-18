@@ -58,7 +58,7 @@
             opts = opts || {};
 
         self.config = {
-            apiKey: '',
+            accessToken: '',
             user: _.uuid(),
             log: true,
             dependencyBaseUrl: '//js.att.io',
@@ -68,7 +68,7 @@
         // extend self.config with passed in options
         _.extend(self.config, opts);
 
-        var hasToken = !!self.config.apiKey;
+        var hasToken = !!self.config.accessToken;
 
         // expose util methods as att._
         self._ = _;
@@ -86,7 +86,7 @@
         self.emit('init', self);
 
         if (hasToken) {
-            self.emit('apiKey', self.config.apiKey);
+            self.emit('accessToken', self.config.accessToken);
         }
     }
 
@@ -107,13 +107,13 @@
         ATT.prototype.plugins[_.uuid()] = initHandler;
     };
 
-    ATT.prototype.__defineGetter__('apiKey', function () {
-        return this.config.apiKey;
+    ATT.prototype.__defineGetter__('accessToken', function () {
+        return this.config.accessToken;
     });
-    ATT.prototype.__defineSetter__('apiKey', function (value) {
-        this.config.apiKey = value;
+    ATT.prototype.__defineSetter__('accessToken', function (value) {
+        this.config.accessToken= value;
         if (!!value) {
-            this.emit('apiKey', value);
+            this.emit('accessToken', value);
         }
     });
 
