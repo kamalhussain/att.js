@@ -1,0 +1,1 @@
+../../../../../../vendor/wcg/BrowserDetect.js
