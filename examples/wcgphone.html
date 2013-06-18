@@ -9,13 +9,21 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="../src/wildemitter.js"></script>
     <script src="../vendor/socket.io.js"></script>
-    <script src="../vendor/wcg/BrowserDetect.js"></script>
-    <script src="../vendor/wcg/WCGapi.js"></script>
+
 
     <script src="../src/att.js"></script>
     <script src="../src/att.me.js"></script>
     <script src="../src/att.phonenumber.js"></script>
+
+
+    <script src="../vendor/wcg/BrowserDetect.js"></script>
+    <script src="../vendor/wcg/WCGapi.js"></script>
     <script src="../vendor/wcg/att.wcg.js"></script>
+
+    <!--
+    <script src="../vendor/phono.06.js"></script>
+    <script src="../vendor/phono-webrtc.js"></script>
+    -->
 
 </head>
 
@@ -34,7 +42,7 @@
                 <fieldset>
                     <div class="control-group">
                         <label for="login">Call from</label>
-                        <input type="button" id="login" class="btn" value="Login">
+                        <input type="button" id="login" class="btn btn-primary" value="Login">
                     </div>
 
 
@@ -108,6 +116,7 @@
                 $("#login").val("Login");
                 $("#login").removeClass('btn-success');
                 $("#dial").attr("disabled", true);
+                $("#login").addClass('btn-primary');
             });
 
             //should support phone errors as well (not only call errors)

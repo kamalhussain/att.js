@@ -86,7 +86,7 @@
         self.emit('init', self);
 
         if (hasToken) {
-            self.emit('accessToken', self.config.apiKey);
+            self.emit('apiKey', self.config.apiKey);
         }
     }
 
