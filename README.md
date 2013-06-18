@@ -171,3 +171,4 @@ node build.js
 - Geoff Hollingsworth – Ericsson
 - [Lance Stout](http://andyet.com/team/lance/) – [&yet](http://andyet.com)
 - Kamal Hussain - Alcatel-Lucent
+- Thao Nguyen  - WCG
