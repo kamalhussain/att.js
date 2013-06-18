@@ -112,7 +112,9 @@
     });
     ATT.prototype.__defineSetter__('apiKey', function (value) {
         this.config.apiKey = value;
-        this.emit('apiKey', value);
+        if (!!value) {
+            this.emit('apiKey', value);
+        }
     });
 
 
