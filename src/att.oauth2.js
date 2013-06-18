@@ -32,9 +32,11 @@
       
       if (oauthParams['access_token']) {
         console.debug('access_token is present: '+ oauthParams['access_token']);
+          /*
         if (att.state!=oauthParams['state']) {
           throw "the state of the returned access_token does not match. possible csrf attack."; 
         }
+        */
         // TODO: use att.me instead of this implementaton
         me_url = "https://auth.tfoundry.com/me.json?access_token="+oauthParams['access_token'];
         console.log(me_url);

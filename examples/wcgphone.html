@@ -50,7 +50,8 @@
                         <input type="text" id="number" class="input-medium" type="" value="1-804-222-1111"/>
                     </div>
                     <div>
-                        <input type="button" id="dial" class="btn btn-primary" value="Dial" disabled>
+                        <!--<input type="button" id="dial" class="btn btn-primary btn-large input-block-level" value="Dial" disabled>-->
+                        <a href='#' class="input-block-level btn btn-primary btn-large" id='dial' disabled>Offline</a>
                     </div>
                 </fieldset>
 
@@ -93,6 +94,8 @@
             att.on('phoneReady', function () {
 
                 $("#dial").attr("disabled", false);
+                $("#dial").html("Dial");
+
                 $("#number").on('mousedown', function () {
                     if ($("#number").val() == "1-804-222-1111") {
                         $("#number").val("");
@@ -100,7 +103,7 @@
                 });
 
                 $("#dial").click(function () {
-                    if ($("#dial").val() == "Dial") {
+                    if ($("#dial").html() == "Dial") {
                         att.dial($.trim($("#number").val()));
 
                     }
@@ -114,8 +117,9 @@
             att.on('phoneClose', function () {
                 $("#login").val("Login");
                 $("#login").removeClass('btn-success');
-                $("#dial").attr("disabled", true);
                 $("#login").addClass('btn-primary');
+                $("#dial").attr("disabled", true);
+                $("#dial").html("Offline");
             });
 
             //should support phone errors as well (not only call errors)
@@ -127,10 +131,18 @@
             //CALL EVENTS
             att.on('calling', function (number) {
                 console.log("calling", number);
+
             });
+
             att.on('outgoingCall', function (call) {
                 console.log("OUTGOING CALL", call);
                 wcgcall = call;
+                console.log("calling", number);
+                $("#dial").html("Calling...");
+                $("#dial").removeClass('btn-primary');
+                $("#dial").addClass('btn-warning');
+
+
             });
             att.on('incomingCall', function (call) {
                 console.log("INCOMING CALL", call);
@@ -141,15 +153,18 @@
             });
             att.on('callBegin', function (call) {
                 console.log("call begin", call);
-                $("#dial").val("Hangup");
+                $("#dial").html("Hangup");
+                $("#dial").removeClass('btn-primary');
                 $("#dial").addClass('btn-danger');
                 wcgcall = call;
 
             });
             att.on('callEnd', function (call) {
                 console.log("call end", call);
-                $("#dial").val("Dial");
+                $("#dial").html("Dial");
                 $("#dial").removeClass('btn-danger');
+                $("#dial").removeClass('btn-warning');
+                $("#dial").addClass('btn-primary');
 
                 wcgcall = call;
             });
