@@ -328,8 +328,12 @@ Rester.prototype.delete = function (path, callback) {
     ATT.prototype.plugins = {};
 
     ATT.fn = ATT.prototype;
-    ATT.initPlugin = function (initHandler) {
-        ATT.prototype.plugins[_.uuid()] = initHandler;
+    ATT.initPlugin = function (name, initHandler) {
+        if (arguments.length == 1) {
+            name = _.uuid();
+            initHandler = arguments[0];
+        }
+        ATT.prototype.plugins[name] = initHandler;
     };
 
     ATT.prototype.__defineGetter__('accessToken', function () {
