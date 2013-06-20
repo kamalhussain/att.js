@@ -1,12 +1,16 @@
 {
-  "name": "application-name",
+  "name": "noded-voice",
   "version": "0.0.1",
   "private": true,
-  "scripts": {
-    "start": "node app"
+  "engines": {
+    "node": "0.8.x",
+    "npm": "1.1.x"
   },
   "dependencies": {
-    "express": "3.0.0",
-    "jade": "*"
+    "express": "3.x.x",
+    "jade": ">= 0.0.1",
+    "passport-att-alpha": "~0.1.4",
+    "passport": "~0.1.15",
+    "request": "~2.12.0"
   }
 }

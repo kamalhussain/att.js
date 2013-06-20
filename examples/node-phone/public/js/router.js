@@ -5,9 +5,9 @@ angular.module("app").config(function($routeProvider) {
     controller: 'LoginController'
   });
 
-  $routeProvider.when('/home', {
-    templateUrl: 'templates/home.html',
-    controller: 'HomeController'
+  $routeProvider.when('/loggedin', {
+    templateUrl: 'templates/loggedin.html',
+    controller: 'LoggedinController'
   });
 
   $routeProvider.otherwise({ redirectTo: '/login' });

@@ -1,0 +1,12 @@
+<form  ng-submit="dial()" class="form-horizontal">
+  <fieldset>
+    <legend> {{ callStatus }}</legend>
+
+    <label for="Number to Dial">To </label>
+    <input type="text" id='number_to_dial' name="number_to_dial" value="1-800-444-4444" class="input-block-level" placeholder="1-800-444-4444" autofocus ng-model="phoneNumber" required/>
+
+    <a href='#' type="submit" class="input-block-level btn btn-large" id='dial'>Call</a>
+    <button type="submit" class="button large expand radius">Call 2</button>
+
+  </fieldset>
+</form>
