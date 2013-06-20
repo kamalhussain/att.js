@@ -330,8 +330,8 @@ Rester.prototype.delete = function (path, callback) {
     ATT.fn = ATT.prototype;
     ATT.initPlugin = function (name, initHandler) {
         if (arguments.length == 1) {
-            name = _.uuid();
             initHandler = arguments[0];
+            name = _.uuid();
         }
         ATT.prototype.plugins[name] = initHandler;
     };
