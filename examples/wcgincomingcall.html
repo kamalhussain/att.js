@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Receive a phone call</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="//netdna.bootstrapcdn.com/bootswatch/2.3.2/flatly/bootstrap.min.css" rel="stylesheet">
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="../vendor/socket.io.js"></script>
+
+
+    <script src="../src/att.js"></script>
+    <script src="../src/att.me.js"></script>
+    <script src="../src/att.oauth2.js"></script>
+    <script src="../src/att.phonenumber.js"></script>
+
+
+    <script src="../vendor/wcg/BrowserDetect.js"></script>
+    <script src="../vendor/wcg/WCGapi.js"></script>
+    <script src="../vendor/wcg/att.wcg.js"></script>
+
+
+</head>
+
+
+<body>
+
+<div id="main" class="container">
+    <div class="page-header">
+        <h1>WCG PSTN Breakout</h1>
+    </div>
+
+    <div class="row">
+        <div class="span12">
+
+            <form class="well form-horizontal">
+                <fieldset>
+                    <div class="control-group">
+                        <label for="login">Call from</label>
+                        <input type="button" id="login" class="btn btn-primary" value="Login">
+                        <input type="button" id="logout" class="btn btn-success hide" value="Logout">
+                    </div>
+
+
+                    <div class="control-group">
+                        <label for="number">to</label>
+                        <input type="text" id="number" class="input-medium" type="" value="1-804-222-1111"/>
+                    </div>
+                    <div>
+                        <!--<input type="button" id="dial" class="btn btn-primary btn-large input-block-level" value="Dial" disabled>-->
+                        <a href='#' class="input-block-level btn btn-primary btn-large" id='dial' disabled>Offline</a>
+                    </div>
+                </fieldset>
+
+            </form>
+
+        </div>
+    </div>
+
+    <h3>Code</h3>
+
+    <div class="row">
+        <div class="span6">
+            <p>
+
+                <!--////////////////////////    PRE-FORMATTED CODE  /////////////////////////-->
+<pre>
+<span id="code-login">$("#login").click(function () {
+  window.location.href = <span id="code-loginfn">att.oauth2.authorizeURL()</span>;
+});</span>
+
+<span id="code-logout">$("#logout").click(function() {
+    <span id="code-logoutfn">att.logout();</span>
+});</span>
+
+
+<span id="code-att">window.att = new ATT({
+    clientID: "6s2gls5gvvvbvasatjx2glhftwede4ng",
+    scope: 'profile,webrtc',
+    redirectURI: "http://localhost/examples/wcgincomingcall.html" ,
+    server: "alpha2"
+});</span>
+<span id="code-oauthlogin">att.oauth2.login(function(me){});</span>
+
+<span id="code-onuser">att.on(<span id="code-userevent">'user'</span>, function (user) {
+    $("#logout").val(<span id="code-username">user.first_name</span>);
+});</span>
+
+<span id="code-onphoneready">att.on(<span id="code-phonereadyevent">'phoneReady'</span>, function () {
+    <span id="code-dial">$("#dial").click(function () {
+        if ($("#dial").html() == "Dial") {
+            <span id="code-dialfn">att.dial(<span id="code-dialnb">$("#number").val())</span>)</span>;
+        }
+    });</span>
+});</span>
+</pre>
+
+            </p>
+        </div>
+        <div class="span6">
+            <p>
+
+<pre>
+<span id="code-onoutgoingcall">att.on(<span id="code-outgoingcallevent">'outgoingCall'</span>, function (call) {
+    //...
+});</span>
+
+<span id="code-onring">att.on(<span id="code-ringevent">'ring'</span>, function () {
+    //...
+});</span>
+
+<span id="code-oncallbegin">att.on(<span id="code-callbeginevent">'callBegin'</span>, function (call) {
+    //DO SOMETHING WITH THIS CALL
+    <span id="code-hangup">$("#dial").click(function () {
+        if ($("#dial").html() == "Hangup") {
+            <span id="code-hangupfn">call.hangup();</span>
+        }
+    });</span>
+});</span>
+
+<span id="code-oncallend">att.on(<span id="code-callendevent">'callEnd'</span>, function (call) {
+    //DO SOMETHING WITH THIS CALL
+});</span>
+
+<span id="code-onerror">att.on(<span id="code-errorevent">'error'</span>, function (eventData) {
+    //DO SOMETHING HERE WITH THIS ERROR
+});</span>
+
+<span id="code-onphoneclose">att.on(<span id="code-phonecloseevent">'phoneClose'</span>, function () {
+    //DO SOMETHING HERE
+});</span>
+
+</pre>
+            <!--/////////////////////   END OF PRE-FORMATTED CODE   ////////////////////////////-->
+
+
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        window.att = new ATT({
+            clientID: "6s2gls5gvvvbvasatjx2glhftwede4ng",
+            scope: 'profile,webrtc',
+            redirectURI: "http://localhost/examples/wcgincomingcall.html",
+            server: "webims"
+        });
+
+
+        att.oauth2.login(function (me) {
+        });
+
+
+        att.on('user', function (user) {
+            /////////////////////////////////////////////////
+            $("#code-att").css("color", "#3498db");
+            $("#code-oauthlogin").addClass("badge");
+            $("#code-oauthlogin").addClass("badge-success");
+            $("#code-login").css("color", "#3498db");
+            $("#code-loginfn").addClass("badge");
+            $("#code-loginfn").addClass("badge-success");
+
+
+            $("#code-onuser").css("color", "#3498db");
+            $("#code-username").html(user.first_name);
+            $("#code-userevent").addClass("badge");
+            $("#code-userevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
+
+            $("#logout").val(user.first_name + "       x");
+            $("#login").hide();
+            $("#logout").show();
+        });
+
+        //PHONE EVENTS
+        att.on('phoneReady', function () {
+            ///////////////////////////////////////////////
+            $("#code-onphoneready").css("color", "#3498db");
+            $("#code-phonereadyevent").addClass("badge");
+            $("#code-phonereadyevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
+
+            $("#dial").attr("disabled", false);
+            $("#dial").html("Dial");
+
+            $("#number").on('mousedown', function () {
+                if ($("#number").val() == "1-804-222-1111") {
+                    $("#number").val("");
+                }
+            });
+
+            $("#dial").click(function () {
+                if ($("#dial").html() == "Dial") {
+                    ///////////////////////////////////////////////
+                    $("#code-dialnb").html($.trim($("#number").val()));
+                    $("#code-dial").css("color", "#3498db");
+                    $("#code-dialfn").addClass("badge");
+                    $("#code-dialfn").addClass("badge-success");
+                    /////////////////////////////////////////////////
+
+                    att.dial($.trim($("#number").val()));
+
+                }
+
+            });
+        });
+
+        att.on('phoneClose', function () {
+            ///////////////////////////////////////////////
+            $("#code-onphoneclose").css("color", "#3498db");
+            $("#code-phonecloseevent").addClass("badge");
+            $("#code-phonecloseevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
+
+            $("#login").val("Login");
+            $("#login").removeClass('btn-success');
+            $("#login").addClass('btn-primary');
+            $("#dial").attr("disabled", true);
+            $("#dial").html("Offline");
+            $("#login").show();
+            $("#logout").hide();
+
+        });
+
+        //should support phone errors as well (not only call errors)
+        att.on('error', function (eventData) {
+            console.log("ERROR");
+            ///////////////////////////////////////////////
+            $("#code-onerror").css("color", "#3498db");
+            $("#code-errorevent").addClass("badge");
+            $("#code-errorevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
+        });
+
+        att.on('incomingCall', function (call) {
+            console.log("INCOMING CALL", call);
+            $("#dial").html("Call from " + call.remotePeer + ". Click to answer.");
+            $("#dial").removeClass('btn-primary');
+            $("#dial").addClass('btn-warning');
+
+            ("#dial").click(function () {
+                if ($("#dial").html() != "Hangup" || $("#dial").html() != "Dial") {
+                    call.answer();
+                }
+
+            });
+        });
+
+        att.on('callBegin', function (call) {
+            console.log("call begin", call);
+            ///////////////////////////////////////////////
+            $("#code-oncallbegin").css("color", "#3498db");
+            $("#code-callbeginevent").addClass("badge");
+            $("#code-callbeginevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
+
+            $("#dial").html("Hangup");
+            $("#dial").removeClass('btn-primary');
+            $("#dial").addClass('btn-danger');
+            $("#dial").click(function () {
+                if ($("#dial").html() == "Hangup") {
+                    ///////////////////////////////////////////////
+                    $("#code-hangup").css("color", "#3498db");
+                    $("#code-hangupfn").addClass("badge");
+                    $("#code-hangupfn").addClass("badge-success");
+                    /////////////////////////////////////////////////
+
+                    call.hangup();
+
+                }
+
+            });
+
+        });
+        att.on('callEnd', function (call) {
+            console.log("call end", call);
+            ///////////////////////////////////////////////
+            $("#code-oncallend").css("color", "#3498db");
+            $("#code-callendevent").addClass("badge");
+            $("#code-callendevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
+
+            $("#dial").html("Dial");
+            $("#dial").removeClass('btn-danger');
+            $("#dial").removeClass('btn-warning');
+            $("#dial").addClass('btn-primary');
+        });
+
+
+        $("#login").click(function () {
+            ///////////////////////////////////////////////
+            $("#code-login").css("color", "#3498db");
+            $("#code-loginfn").addClass("badge");
+            $("#code-loginfn").addClass("badge-success");
+
+            ///////////////////////////////////////////////
+            window.location.href = att.oauth2.authorizeURL();
+
+        });
+
+        $("#logout").click(function () {
+            ///////////////////////////////////////////////
+            $("#code-logout").css("color", "#3498db");
+            $("#code-logoutfn").addClass("badge");
+            $("#code-logoutfn").addClass("badge-success");
+            /////////////////////////////////////////////////
+
+            console.log("Logging out");
+            att.logout();
+
+        });
+
+
+    });
+
+</script>
+
+</body>
+</html>

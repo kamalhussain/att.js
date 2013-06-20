@@ -87,13 +87,13 @@
      * Answer to the call
      */
     WCGCall.prototype.answer = function () {
-        return this._call.answer();
+        this._call.answer();
     }
     /**
      * End the call
      */
     WCGCall.prototype.hangup = function () {
-        return this._call.end();
+        this._call.end();
     }
     //////////////////////////////////////////////////////
     ATT.fn.WCGCall = function (att, call) {
@@ -129,6 +129,7 @@
     /**
      * Make a video call
      */
+    /*
     ATT.fn.videocall = function (callee) {
         var self = this;
         var call = new WCGCall(self, callee, true);
@@ -145,6 +146,7 @@
         return call;
 
     };
+    */
 
     ATT.fn.wcgBackend = {
         wcgService: null
@@ -160,6 +162,9 @@
         var sipuser = "sip:" + number + "@webims.tfoundry.com";
 
         if (att.config.server == 'alpha1') {
+            sipuser = "sip:" + number + "@vims1.com";
+        }
+        else if (att.config.server == 'alpha2') {
             sipuser = "sip:" + number + "@vims1.com";
         }
         else if (att.config.server == 'webims') {
@@ -198,6 +203,12 @@
                 wcgUrl = 'http://64.124.154.204:38080/HaikuServlet/rest/v2/';
                 turn = 'STUN:64.125.154.203:3478';
             }
+            else if (att.config.server == 'alpha2') {
+                wcgUrl = 'http://64.124.154.204:38080/HaikuServlet/rest/v2/';
+                turn = 'STUN:64.125.154.203:3478';
+                //TODO this should be removed once we are able to make a call to a real user
+                user.first_name="sip:16509992361@vims.com";
+            }
             else if (att.config.server == 'webims') {
                 wcgUrl = 'http://wcg-dia.tfoundry.com:38080/HaikuServlet/rest/v2/';
                 turn = 'STUN:206.18.171.164:5060';
@@ -209,7 +220,7 @@
 
             att.wcgBackend.wcgService.onready = function () {
 
-                att.emit('phoneReady', user.first_name);
+                att.emit('phoneReady');
             }
             att.wcgBackend.wcgService.onclose = function () {
                 att.emit('phoneClose');
