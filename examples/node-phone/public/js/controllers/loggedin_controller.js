@@ -11,12 +11,12 @@ angular.module("app").controller('LoggedinController', function($scope, $rootSco
 
 		att.on('init', function () {
 		    console.log("init");
-			att.me.getMe(function (user) {
-				$rootScope.user = user;
-				$rootScope.loginState = "Logout " + $user.first_name;
-				$rootScope.loginUrl = "/logout";
-				$scope.callStatus = "Make a Call";
-			});
+			// att.me.getMe(function (user) {
+			// 	$rootScope.user = user;
+			// 	$rootScope.loginState = "Logout " + $user.first_name;
+			// 	$rootScope.loginUrl = "/logout";
+			// 	$scope.callStatus = "Make a Call";
+			// });
 		});
 
 		att.on('user', function (user) {
