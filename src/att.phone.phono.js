@@ -68,7 +68,7 @@
 
         var call = new Call(self, number);
 
-        self.emit('outgoingCall', call);
+        self.emit('outgoingCall', call, number);
         call.emit('ring');
 
         return call;
