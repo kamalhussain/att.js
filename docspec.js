@@ -78,7 +78,11 @@ _.forEach(spec, function (plugin) {
             var args = [];
             (eventDesc.args || []).forEach(function (arg) {
                 if (builtins[arg.type]) {
-                    args.push(arg.type);
+                    if (arg.name) {
+                        args.push(arg.name + ' (' + arg.type + ')');
+                    } else {
+                        args.push(arg.type);
+                    }
                 } else {
                     args.push('[' + arg.type + '](#' + datatypeIndex[arg.type].plugin + '-datatype-' + arg.type + ')');
                 }

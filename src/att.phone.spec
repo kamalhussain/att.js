@@ -21,15 +21,17 @@
             ]
         },
         "outgoingCall": {
-            "description": "Raised with a Call object for managing an outgoing call.",
+            "description": "Raised with a Call object for managing an outgoing call, and the phone number that is being dialed.",
             "args": [
-                {"type": "Call"}
+                {"type": "Call"},
+                {"type": "string", "name": "callerDisplayName"}
             ]
         },
         "incomingCall": {
-            "description": "Raised with a Call object for managing an incoming call.",
+            "description": "Raised with a Call object for managing an incoming call, and the phone number of the caller.",
             "args": [
-                {"type": "Call"}
+                {"type": "Call"},
+                {"type": "string", "name": "callerDisplayName"}
             ]
         },
         "ring": {
