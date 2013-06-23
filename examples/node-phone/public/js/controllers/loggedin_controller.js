@@ -21,7 +21,7 @@ angular.module("app").controller('LoggedinController', function($scope, $rootSco
 
 		att.on('user', function (user) {
 			$rootScope.user = user;
-			$rootScope.loginState = "Logout " + $user.first_name;
+			$rootScope.loginState = "Logout " + user.first_name;
 			$rootScope.loginUrl = "/logout";
 			$scope.callStatus = "Make a Call";
 		});
@@ -64,7 +64,6 @@ angular.module("app").controller('LoggedinController', function($scope, $rootSco
 	$scope.dial = function() {
 
 		$rootScope.att.dial($scope.phoneNumber);
-
 
 	};
 
