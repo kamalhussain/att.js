@@ -189,6 +189,8 @@
     ATT.initPlugin(function (att) {
         console.log('Load WCG Plugin');
 
+        var self = this;
+        self.att = att;
 
         att.on('user', function (user) {
             console.log('Setting up WCG');
