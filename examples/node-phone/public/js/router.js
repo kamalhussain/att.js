@@ -10,6 +10,22 @@ angular.module("app").config(function($routeProvider) {
     controller: 'LoggedinController'
   });
 
+  $routeProvider.when('/calling', {
+    templateUrl: 'templates/calling.html'
+  });
+
+ $routeProvider.when('/speaking', {
+    templateUrl: 'templates/speaking.html'
+  });
+
+ $routeProvider.when('/answering', {
+    templateUrl: 'templates/answering.html'
+  });
+
+ $routeProvider.when('/about', {
+    templateUrl: 'templates/about.html'
+  });
+
   $routeProvider.otherwise({ redirectTo: '/login' });
 
 });

@@ -44,13 +44,13 @@
             <div class="nav-collapse collapse">
               <ul class="nav">
                 <li class="active"><a href="#">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><a ng-href="/#/about">About</a></li>
+                <li><a href="http://twitter.com/geoffworth">Contact</a></li>
               </ul>
               <ul class="nav pull-right">
                 <li class="divider-vertical"></li>
                 <li>
-                  <a ng-href="{{loginUrl}}" class="btn-play">
+                  <a href=""ng-click="login()" class="btn-play">
                    <strong>{{loginState}}</strong>
                  </a>
                </li>
@@ -63,9 +63,9 @@
 
      <div class="container">
         <div class="well" ng-view>
-        <h1>Bootstrap starter template</h1>
-        <p>Use this document as a way to quick start any new project.<br> All you get is this message and a barebones HTML document.</p>
-    </div> <!-- /well -->
+<!--             <h1>Bootstrap starter template</h1>
+            <p>Use this document as a way to quick start any new project.<br> All you get is this message and a barebones HTML document.</p>
+ -->        </div> <!-- /well -->
 
     </div> <!-- /container -->
 
