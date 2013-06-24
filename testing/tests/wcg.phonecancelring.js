@@ -71,7 +71,12 @@ test("Basic init and event tests for WCG plugin: cancel a call after a ringing e
             start();
         });
 
-        att.on("error", function (eventData) {
+        att.on("callError", function (call) {
+            ok(false, "this should not happen");
+
+        });
+
+        att.on("phoneError", function () {
             ok(false, "this should not happen");
 
         });

@@ -120,7 +120,7 @@
     //DO SOMETHING WITH THIS CALL
 });</span>
 
-<span id="code-onerror">att.on(<span id="code-errorevent">'error'</span>, function (eventData) {
+<span id="code-oncallerror">att.on(<span id="code-callerrorevent">'callError'</span>, function (call) {
     //DO SOMETHING HERE WITH THIS ERROR
 });</span>
 
@@ -128,7 +128,11 @@
     //DO SOMETHING HERE
 });</span>
 
-</pre>
+<span id="code-onphoneerror">att.on(<span id="code-phoneerrorevent">'phoneError'</span>, function () {
+    //DO SOMETHING HERE WITH THIS ERROR
+});</span>
+
+        </pre>
             <!--/////////////////////   END OF PRE-FORMATTED CODE   ////////////////////////////-->
 
 
@@ -224,13 +228,12 @@
 
         });
 
-        //should support phone errors as well (not only call errors)
-        att.on('error', function (eventData) {
+        att.on('phoneError', function () {
             console.log("ERROR");
             ///////////////////////////////////////////////
-            $("#code-onerror").css("color", "#3498db");
-            $("#code-errorevent").addClass("badge");
-            $("#code-errorevent").addClass("badge-warning");
+            $("#code-onphoneerror").css("color", "#3498db");
+            $("#code-phoneerrorevent").addClass("badge");
+            $("#code-phoneerrorevent").addClass("badge-warning");
             /////////////////////////////////////////////////
         });
 
@@ -287,6 +290,16 @@
             $("#dial").removeClass('btn-warning');
             $("#dial").addClass('btn-primary');
         });
+
+        att.on('callError', function (call) {
+            console.log("ERROR");
+            ///////////////////////////////////////////////
+            $("#code-oncallerror").css("color", "#3498db");
+            $("#code-callerrorevent").addClass("badge");
+            $("#code-callerrorevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
+        });
+
 
 
         $("#login").click(function () {

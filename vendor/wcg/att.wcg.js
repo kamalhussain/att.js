@@ -83,7 +83,7 @@
         };
         this._call.onerror = function (event) {
             console.log("onerror", event);
-            self.emit('error');
+            self.emit('callError');
         };
         this._call.onstatechange = function (event) {
             console.log("onstatechange", event);
@@ -272,7 +272,7 @@
                 att.emit('phoneClose');
             }
             att.wcgBackend.wcgService.onerror = function (event) {
-                att.emit('error', event.reason);
+                att.emit('phoneError', event.reason);
             }
             att.wcgBackend.wcgService.oninvite = function (event) {
                 if (event.call) {
