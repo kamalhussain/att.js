@@ -19,6 +19,10 @@
 
         self.att = att;
         self.remotePeer = callee;
+        //If user cancels the call right after having dialed the number, wait for the "RINGING" event.
+        //If cancelling the call is done before the RINGING event, it would throw an exception because the WCGapi.js is
+        //looking for a call session that doesn't exist.
+        self.earlyHangup = false;
 
         var media = (hasVideo) ? {
             audio: true,
@@ -84,6 +88,12 @@
         this._call.onstatechange = function (event) {
             console.log("onstatechange", event);
             if (event.state == Call.State.RINGING) {
+                if (self.earlyHangup == true) {
+                    //if user cancels the call before accepting/denying the controls
+                    //wait until the call has actually reached the server ("RINGING")
+                    self.earlyHangup = false;
+                    self._call.end();
+                }
                 self.emit('ring');
             }
             self.emit('wcgstateChange');
@@ -100,14 +110,20 @@
      * End the call
      */
     WCGCall.prototype.hangup = function () {
-        if ((this._call.state == Call.State.ONGOING) || (this._call.state == Call.State.HOLDING) || (this._call.state == Call.State.WAITING)) {
-            this._call.end();
+        var self = this;
+
+        if (this._call && this._call != null) {
+            if ((this._call.state == Call.State.RINGING) || (this._call.state == Call.State.ONGOING) || (this._call.state == Call.State.HOLDING) || (this._call.state == Call.State.WAITING)) {
+                this._call.end();
+            }
+            else {
+                //if user cancels the call before accepting the controls
+                //wait until the call has actually reached the server ("RINGING")
+                self.earlyHangup = true;
+            }
+
         }
-        else {
-            console.log("Hangup");
-            //go straight to the end event
-            self.emit('callEnd');
-        }
+
     }
     //////////////////////////////////////////////////////
     ATT.fn.WCGCall = function (att, call) {

@@ -110,7 +110,7 @@
     //...
 });</span>
 
-<span id="code-onring">att.on(<span id="code-ringevent">'ring'</span>, function () {
+<span id="code-onring">att.on(<span id="code-ringevent">'ring'</span>, function (call) {
     //...
 });</span>
 
@@ -278,28 +278,6 @@
                 $("#dial").removeClass('btn-primary');
                 $("#dial").addClass('btn-warning');
 
-
-            });
-            att.on('incomingCall', function (call) {
-                console.log("INCOMING CALL", call);
-
-            });
-            att.on('ring', function () {
-                console.log("ring");
-                ///////////////////////////////////////////////
-                $("#code-onring").css("color", "#3498db");
-                $("#code-ringevent").addClass("badge");
-                $("#code-ringevent").addClass("badge-warning");
-                /////////////////////////////////////////////////
-            });
-            att.on('callBegin', function (call) {
-                console.log("call begin", call);
-                ///////////////////////////////////////////////
-                $("#code-oncallbegin").css("color", "#3498db");
-                $("#code-callbeginevent").addClass("badge");
-                $("#code-callbeginevent").addClass("badge-warning");
-                /////////////////////////////////////////////////
-
                 $("#dial").html("Hangup");
                 $("#dial").removeClass('btn-primary');
                 $("#dial").addClass('btn-danger');
@@ -316,6 +294,28 @@
                     }
 
                 });
+
+            });
+            att.on('incomingCall', function (call) {
+                console.log("INCOMING CALL", call);
+
+            });
+            att.on('ring', function (call) {
+                console.log("ring");
+                ///////////////////////////////////////////////
+                $("#code-onring").css("color", "#3498db");
+                $("#code-ringevent").addClass("badge");
+                $("#code-ringevent").addClass("badge-warning");
+                /////////////////////////////////////////////////
+            });
+            att.on('callBegin', function (call) {
+                console.log("call begin", call);
+                ///////////////////////////////////////////////
+                $("#code-oncallbegin").css("color", "#3498db");
+                $("#code-callbeginevent").addClass("badge");
+                $("#code-callbeginevent").addClass("badge-warning");
+                /////////////////////////////////////////////////
+
 
             });
             att.on('callEnd', function (call) {
