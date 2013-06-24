@@ -79,7 +79,7 @@ angular.module("app").controller('LoggedinController', function($scope, $rootSco
 
 	$rootScope.dial = function() {
 		var pn = $scope.phoneNumber;
-		$rootScope.phoneNumber = $rootScope.att.phoneNumber.stringify(pn);		 
+		$rootScope.phoneNumber = ATT.phoneNumber.stringify(pn);		 
 		$rootScope.att.dial(pn);
 		$location.path('/calling');
 	};
