@@ -128,7 +128,7 @@ Common interface for making and receiving phone calls.
 
     Raised with a Call object for managing an incoming call, and the phone number of the caller.
 
-  - <a id="att.phone.generic-event-ring"></a>ring
+  - <a id="att.phone.generic-event-ring"></a>ring, called with: [Call](#att.phone.generic-datatype-Call), callerDisplayName (string)
 
     A signal that a call request is in progress.
 

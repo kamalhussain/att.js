@@ -12,7 +12,7 @@
 
         self._call.bind({
             onRing: function () {
-                self.emit('ring');
+                self.emit('ring', self, phoneNumber);
             },
             onAnswer: function () {
                 self.emit('callBegin');
@@ -69,7 +69,7 @@
         var call = new Call(self, number);
 
         self.emit('outgoingCall', call, number);
-        call.emit('ring');
+        call.emit('ring', call, number);
 
         return call;
     };
