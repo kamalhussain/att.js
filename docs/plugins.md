@@ -114,7 +114,11 @@ Common interface for making and receiving phone calls.
 
   - <a id="att.phone.generic-event-phoneReady"></a>phoneReady
 
-    Raised when the phone backend has been initialized and is ready to make or receive calls
+    Raised when the phone backend has been initialized and is ready to make or receive calls.
+
+  - <a id="att.phone.generic-event-phoneError"></a>phoneError
+
+    Raised when the phone backend could not be initialized.
 
   - <a id="att.phone.generic-event-calling"></a>calling, called with: string
 
@@ -140,7 +144,7 @@ Common interface for making and receiving phone calls.
 
     Raised when a call has been hung up.
 
-  - <a id="att.phone.generic-event-error"></a>error, called with: [Call](#att.phone.generic-datatype-Call)
+  - <a id="att.phone.generic-event-callError"></a>callError, called with: [Call](#att.phone.generic-datatype-Call)
 
     Emitted when an error has occured while establishing or during a call.
 
@@ -193,6 +197,9 @@ A phone call session, which may be answered or hung up.
 ### phoneReady
   - [att.phone.generic](#att.phone.generic)
 
+### phoneError
+  - [att.phone.generic](#att.phone.generic)
+
 ### calling
   - [att.phone.generic](#att.phone.generic)
 
@@ -211,5 +218,5 @@ A phone call session, which may be answered or hung up.
 ### callEnd
   - [att.phone.generic](#att.phone.generic)
 
-### error
+### callError
   - [att.phone.generic](#att.phone.generic)

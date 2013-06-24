@@ -12,7 +12,10 @@
     },
     "events": {
         "phoneReady": {
-            "description": "Raised when the phone backend has been initialized and is ready to make or receive calls"
+            "description": "Raised when the phone backend has been initialized and is ready to make or receive calls."
+        },
+        "phoneError": {
+            "description": "Raised when the phone backend could not be initialized."
         },
         "calling": {
             "description": "Raised with the phone number be dialed on an outgoing call.",
@@ -53,7 +56,7 @@
                 {"type": "Call"}
             ]
         },
-        "error": {
+        "callError": {
             "description": "Emitted when an error has occured while establishing or during a call.",
             "args": [
                 {"type": "Call"}

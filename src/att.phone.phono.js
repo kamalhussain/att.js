@@ -30,7 +30,7 @@
                 self.emit('waiting');
             },
             onError: function () {
-                self.emit('error');
+                self.emit('callError');
             }
         });
 
