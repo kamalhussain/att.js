@@ -84,7 +84,7 @@
               });
             
            });
-            att.on('ring', function() {
+            att.on('ring', function(call) {
                 console.log('ringing');
                 $("#dial").html("Ringing").removeClass('btn-info').addClass('btn-warning');
             });
