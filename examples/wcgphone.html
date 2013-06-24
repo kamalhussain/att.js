@@ -102,6 +102,10 @@
             <p>
 
 <pre>
+<span id="code-oncalling">att.on(<span id="code-callingevent">'calling'</span>, function (number) {
+    //Calling <span id="code-number">number</span>
+});</span>
+
 <span id="code-onoutgoingcall">att.on(<span id="code-outgoingcallevent">'outgoingCall'</span>, function (call) {
     //...
 });</span>
@@ -246,6 +250,22 @@
                 /////////////////////////////////////////////////
             });
 
+            att.on('calling', function (number) {
+                console.log("CALLING", number);
+                ///////////////////////////////////////////////
+                $("#code-oncalling").css("color", "#3498db");
+                $("#code-callingevent").addClass("badge");
+                $("#code-callingevent").addClass("badge-warning");
+                $("#code-number").html(number);
+                /////////////////////////////////////////////////
+
+                $("#dial").html("Calling...");
+                $("#dial").removeClass('btn-primary');
+                $("#dial").addClass('btn-warning');
+
+
+            });
+
             att.on('outgoingCall', function (call) {
                 console.log("OUTGOING CALL", call);
                 ///////////////////////////////////////////////
@@ -254,7 +274,7 @@
                 $("#code-outgoingcallevent").addClass("badge-warning");
                 /////////////////////////////////////////////////
 
-                $("#dial").html("Calling...");
+                $("#dial").html("Call sent...");
                 $("#dial").removeClass('btn-primary');
                 $("#dial").addClass('btn-warning');
 

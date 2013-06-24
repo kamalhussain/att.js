@@ -69,16 +69,23 @@
             }
 
         };
-        this._call.onbegin = function () {
+        this._call.onbegin = function (event) {
+            console.log("onbegin", event);
             self.emit('callBegin')
         };
-        this._call.onend = function () {
+        this._call.onend = function (event) {
+            console.log("onend", event);
             self.emit('callEnd');
         };
         this._call.onerror = function (event) {
+            console.log("onerror", event);
             self.emit('error');
         };
-        this._call.onstatechange = function () {
+        this._call.onstatechange = function (event) {
+            console.log("onstatechange", event);
+            if (event.state == Call.State.RINGING) {
+                self.emit('ring');
+            }
             self.emit('wcgstateChange');
         };
 
@@ -93,7 +100,14 @@
      * End the call
      */
     WCGCall.prototype.hangup = function () {
-        this._call.end();
+        if ((this._call.state == Call.State.ONGOING) || (this._call.state == Call.State.HOLDING) || (this._call.state == Call.State.WAITING)) {
+            this._call.end();
+        }
+        else {
+            console.log("Hangup");
+            //go straight to the end event
+            self.emit('callEnd');
+        }
     }
     //////////////////////////////////////////////////////
     ATT.fn.WCGCall = function (att, call) {
@@ -158,8 +172,10 @@
         var self = this;
 
         number = ATT.phoneNumber.parse(number);
+        number = ATT.phoneNumber.getCallable(number);
+
         //using by default webims server
-        var sipuser = "sip:" + number + "@webims.tfoundry.com";
+        var sipuser = "sip:" + number + "@vims1.com";
 
         if (att.config.server == 'alpha1') {
             sipuser = "sip:" + number + "@vims1.com";
@@ -172,32 +188,39 @@
         }
         var call = new WCGCall(self, sipuser, false);
 
+        var numberToMatch = call.remotePeer.match(/sip\:([^@]*)@/);
+        var matchedNb = numberToMatch ? numberToMatch[1] : null;
+
+
+        self.emit('calling', matchedNb);
         self.emit('outgoingCall', call);
-        self.emit('ring');
 
     }
 
     ATT.fn.video = function (callee) {
         var self = this;
         var call = new WCGCall(self, callee, true);
+
+        var numberToMatch = call.remotePeer.match(/sip\:([^@]*)@/);
+        var matchedNb = numberToMatch ? numberToMatch[1] : null;
+
+        self.emit('calling', matchedNb);
         self.emit('outgoingCall', call);
-
-        return call;
-
     };
 
     ATT.initPlugin(function (att) {
         console.log('Load WCG Plugin');
 
-
         att.on('user', function (user) {
             console.log('Setting up WCG');
 
             //set the default WCG values: using by default webims server
-            var wcgUrl = 'http://wcg-dia.tfoundry.com:38080/HaikuServlet/rest/v2/';
-            var turn = 'STUN:206.18.171.164:5060';
+            var wcgUrl = 'http://64.124.154.204:38080/HaikuServlet/rest/v2/';
+            var turn = 'STUN:64.125.154.203:3478';
 
             var accessToken = att.config.apiKey;
+            var sipuser = user.first_name;
+            var password = 'oauth' + accessToken;
 
             if (att.config.server == 'alpha1') {
                 wcgUrl = 'http://64.124.154.204:38080/HaikuServlet/rest/v2/';
@@ -212,10 +235,17 @@
             else if (att.config.server == 'webims') {
                 wcgUrl = 'http://wcg-dia.tfoundry.com:38080/HaikuServlet/rest/v2/';
                 turn = 'STUN:206.18.171.164:5060';
+                sipuser = "sip:" + user.first_name + "@webims.tfoundry.com";
+                sipuser = sipuser.toLowerCase();
+
+                var stringToMatch = sipuser.match(/sip\:([^@]*)@/);
+                var string = stringToMatch ? stringToMatch[1] : null;
+
+                password = string;
 
             }
 
-            att.wcgBackend.wcgService = new MediaServices(wcgUrl, user.first_name, "oauth " + accessToken, "audio,video,chat");
+            att.wcgBackend.wcgService = new MediaServices(wcgUrl, sipuser, password, "audio,video,chat");
             att.wcgBackend.wcgService.turnConfig = turn;
 
             att.wcgBackend.wcgService.onready = function () {
@@ -235,7 +265,7 @@
 
                     //instantiage the WCGCall (incoming call)
                     var wcgCall = new ATT.fn.WCGCall(att, call);
-                    att.emit('incomingCall', wcgCall);
+                    att.emit('incomingCall', wcgCall, wcgCall.remotePeer);
                 }
             }
 

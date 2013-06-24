@@ -201,7 +201,7 @@
             $("#dial").click(function () {
                 if ($("#dial").html() == "Dial") {
                     ///////////////////////////////////////////////
-                    $("#code-dialnb").html($.trim($("#number").val()));
+                    $("#code-dialnb").html("'" + $.trim($("#number").val()) + "'");
                     $("#code-dial").css("color", "#3498db");
                     $("#code-dialfn").addClass("badge");
                     $("#code-dialfn").addClass("badge-success");
