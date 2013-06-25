@@ -4,7 +4,7 @@ Version 1.1 - June 2013
 
 #### Please read this License carefully before downloading this software.  By downloading or using this software, you are agreeing to be bound by the terms of this License. If you do not or cannot agree to the terms of this License, please do not download or use the software. ####
 
-This License applies to any software program or other work which AT&T Services, Inc., d/b/a, AT&T Labs ("AT&T") makes publicly available and which contains a notice placed by AT&T identifying such software program or work as "Original Code" and stating that it is subject to the terms of this AT&T Public Source License version 1.1 ("License").  As used in this Public Source License:
+This License applies to any software program or other work which AT&T Services, Inc., d/b/a, AT&T Services Inc ("AT&T") makes publicly available and which contains a notice placed by AT&T identifying such software program or work as "Original Code" and stating that it is subject to the terms of this AT&T Public Source License version 1.1 ("License").  As used in this Public Source License:
 
 1.0 Definitions. 
 
@@ -104,3 +104,7 @@ You may choose to offer, and to charge a fee for, warranty, support, indemnity o
 This file contains Original Code and/or Modifications of Original Code as defined in and that are subject to the AT&T Public Source License Version 1.1 (the 'License'). You may not use this file except in compliance with the License. Please obtain a copy of the License at http://www.att.developer.com/ and read it before using this file.
 
 The Original Code and all software distributed under the License are distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND AT&T HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.  Please see the AT&T Public Source License Version 1.0 for the specific language governing rights and limitations under the License."
+
+----
+
+In addition to the AT&T PUBLIC SOURCE LICENSE terms and conditions, ATT.JS includes the Open Source Software Applications WildEmitter, QUnit, and jQuery (“Open Source Software”). The Open Source Software is licensed under the MIT License (the “License”). You may not use the Open Source Software except in compliance with the License.  You may obtain a copy of the License at http://opensource.org/licenses/MIT.  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the License for the specific language governing permissions and limitations under the License.”
