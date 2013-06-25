@@ -30,7 +30,7 @@ angular.module("app").controller('LoggedinController', function($scope, $rootSco
 
 		att.on('outgoingCall', function (call) {
 		    console.log("outgoingCall");
-    		// $rootScope.call = call;
+    		$rootScope.call = call;
 			$rootScope.changePage('/calling');
 		});
 
