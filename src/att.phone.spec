@@ -12,7 +12,10 @@
     },
     "events": {
         "phoneReady": {
-            "description": "Raised when the phone backend has been initialized and is ready to make or receive calls"
+            "description": "Raised when the phone backend has been initialized and is ready to make or receive calls."
+        },
+        "phoneError": {
+            "description": "Raised when the phone backend could not be initialized."
         },
         "calling": {
             "description": "Raised with the phone number be dialed on an outgoing call.",
@@ -35,7 +38,11 @@
             ]
         },
         "ring": {
-            "description": "A signal that a call request is in progress."
+            "description": "A signal that a call request is in progress.",
+            "args": [
+                {"type": "Call"},
+                {"type": "string", "name": "callerDisplayName"}
+            ]
         },
         "callBegin": {
             "description": "Raised when a call has been answered and is ready for use.",
@@ -49,7 +56,7 @@
                 {"type": "Call"}
             ]
         },
-        "error": {
+        "callError": {
             "description": "Emitted when an error has occured while establishing or during a call.",
             "args": [
                 {"type": "Call"}

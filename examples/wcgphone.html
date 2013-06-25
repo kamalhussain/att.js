@@ -102,11 +102,15 @@
             <p>
 
 <pre>
+<span id="code-oncalling">att.on(<span id="code-callingevent">'calling'</span>, function (number) {
+    //Calling <span id="code-number">number</span>
+});</span>
+
 <span id="code-onoutgoingcall">att.on(<span id="code-outgoingcallevent">'outgoingCall'</span>, function (call) {
     //...
 });</span>
 
-<span id="code-onring">att.on(<span id="code-ringevent">'ring'</span>, function () {
+<span id="code-onring">att.on(<span id="code-ringevent">'ring'</span>, function (call) {
     //...
 });</span>
 
@@ -123,12 +127,16 @@
     //DO SOMETHING WITH THIS CALL
 });</span>
 
-<span id="code-onerror">att.on(<span id="code-errorevent">'error'</span>, function (eventData) {
+<span id="code-oncallerror">att.on(<span id="code-callerrorevent">'callError'</span>, function (call) {
     //DO SOMETHING HERE WITH THIS ERROR
 });</span>
 
 <span id="code-onphoneclose">att.on(<span id="code-phonecloseevent">'phoneClose'</span>, function () {
     //DO SOMETHING HERE
+});</span>
+
+<span id="code-onphoneerror">att.on(<span id="code-phoneerrorevent">'phoneError'</span>, function () {
+    //DO SOMETHING HERE WITH THIS ERROR
 });</span>
 
 </pre>
@@ -236,14 +244,29 @@
 
             });
 
-            //should support phone errors as well (not only call errors)
-            att.on('error', function (eventData) {
+            att.on('phoneError', function () {
                 console.log("ERROR");
                 ///////////////////////////////////////////////
-                $("#code-onerror").css("color", "#3498db");
-                $("#code-errorevent").addClass("badge");
-                $("#code-errorevent").addClass("badge-warning");
+                $("#code-onphoneerror").css("color", "#3498db");
+                $("#code-phoneerrorevent").addClass("badge");
+                $("#code-phoneerrorevent").addClass("badge-warning");
                 /////////////////////////////////////////////////
+            });
+
+            att.on('calling', function (number) {
+                console.log("CALLING", number);
+                ///////////////////////////////////////////////
+                $("#code-oncalling").css("color", "#3498db");
+                $("#code-callingevent").addClass("badge");
+                $("#code-callingevent").addClass("badge-warning");
+                $("#code-number").html(number);
+                /////////////////////////////////////////////////
+
+                $("#dial").html("Calling...");
+                $("#dial").removeClass('btn-primary');
+                $("#dial").addClass('btn-warning');
+
+
             });
 
             att.on('outgoingCall', function (call) {
@@ -254,31 +277,9 @@
                 $("#code-outgoingcallevent").addClass("badge-warning");
                 /////////////////////////////////////////////////
 
-                $("#dial").html("Calling...");
+                $("#dial").html("Call sent...");
                 $("#dial").removeClass('btn-primary');
                 $("#dial").addClass('btn-warning');
-
-
-            });
-            att.on('incomingCall', function (call) {
-                console.log("INCOMING CALL", call);
-
-            });
-            att.on('ring', function () {
-                console.log("ring");
-                ///////////////////////////////////////////////
-                $("#code-onring").css("color", "#3498db");
-                $("#code-ringevent").addClass("badge");
-                $("#code-ringevent").addClass("badge-warning");
-                /////////////////////////////////////////////////
-            });
-            att.on('callBegin', function (call) {
-                console.log("call begin", call);
-                ///////////////////////////////////////////////
-                $("#code-oncallbegin").css("color", "#3498db");
-                $("#code-callbeginevent").addClass("badge");
-                $("#code-callbeginevent").addClass("badge-warning");
-                /////////////////////////////////////////////////
 
                 $("#dial").html("Hangup");
                 $("#dial").removeClass('btn-primary');
@@ -298,12 +299,48 @@
                 });
 
             });
+            att.on('incomingCall', function (call) {
+                console.log("INCOMING CALL", call);
+
+            });
+            att.on('ring', function (call) {
+                console.log("ring");
+                ///////////////////////////////////////////////
+                $("#code-onring").css("color", "#3498db");
+                $("#code-ringevent").addClass("badge");
+                $("#code-ringevent").addClass("badge-warning");
+                /////////////////////////////////////////////////
+            });
+            att.on('callBegin', function (call) {
+                console.log("call begin", call);
+                ///////////////////////////////////////////////
+                $("#code-oncallbegin").css("color", "#3498db");
+                $("#code-callbeginevent").addClass("badge");
+                $("#code-callbeginevent").addClass("badge-warning");
+                /////////////////////////////////////////////////
+
+
+            });
             att.on('callEnd', function (call) {
                 console.log("call end", call);
                 ///////////////////////////////////////////////
                 $("#code-oncallend").css("color", "#3498db");
                 $("#code-callendevent").addClass("badge");
                 $("#code-callendevent").addClass("badge-warning");
+                /////////////////////////////////////////////////
+
+                $("#dial").html("Dial");
+                $("#dial").removeClass('btn-danger');
+                $("#dial").removeClass('btn-warning');
+                $("#dial").addClass('btn-primary');
+            });
+
+            att.on('callError', function (call) {
+                console.log("ERROR");
+                ///////////////////////////////////////////////
+                $("#code-oncallerror").css("color", "#3498db");
+                $("#code-callerrorevent").addClass("badge");
+                $("#code-callerrorevent").addClass("badge-warning");
                 /////////////////////////////////////////////////
 
                 $("#dial").html("Dial");
