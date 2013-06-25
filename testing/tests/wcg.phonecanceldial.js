@@ -14,7 +14,6 @@ test("Basic init and event tests for WCG plugin: cancel a call right after havin
         clientID: client_id,
         scope: 'profile,webrtc',
         redirectURI: redirect_uri,
-        server: "alpha1"
     });
     ok(att, "att is instantiated");
 
@@ -49,18 +48,39 @@ test("Basic init and event tests for WCG plugin: cancel a call right after havin
 
         att.on("calling", function (dialedNumber) {
             ok("calling", "calling: calling " + dialedNumber);
-            equal(ATT.phoneNumber.parse(nb_to_dial), dialedNumber, "calling: Dialed number: " + dialedNumber);
+            var number = dialedNumber;
+            var sipOccurence = dialedNumber.match(/sip\:([^@]*)@/);
+            if (!sipOccurence) {
+                number = ATT.phoneNumber.parse(dialedNumber);
+                number = ATT.phoneNumber.getCallable(number);
+
+                nb_to_dial = ATT.phoneNumber.parse(nb_to_dial);
+                nb_to_dial = ATT.phoneNumber.getCallable(nb_to_dial);
+            }
+
+            equal(number, nb_to_dial, "calling: Dialed number: " + dialedNumber);
         });
 
         att.on("outgoingCall", function (call) {
             ok("outgoingCall", "outgoingCall: Number has been dialed");
-            var numberToMatch = call.remotePeer.match(/sip\:([^@]*)@/);
-            var number = numberToMatch ? numberToMatch[1] : null;
-            equal(number, ATT.phoneNumber.parse(nb_to_dial), "Dialed number: " + number);
+
+            var number = call.remotePeer;
+            var sipOccurence = number.match(/sip\:([^@]*)@/);
+            if (sipOccurence) {
+                number = sipOccurence[1];
+            }
+
+            nb_to_dial = ATT.phoneNumber.parse(nb_to_dial);
+            nb_to_dial = ATT.phoneNumber.getCallable(nb_to_dial);
+
+
+            equal(number, nb_to_dial, "Dialed number: " + call.remotePeer);
+
             setTimeout(function() {
                 call.hangup();
             }, 2000);
         });
+
 
 
         att.on("callBegin", function (call) {

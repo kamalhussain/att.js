@@ -149,34 +149,34 @@
      * Logout from WCG
      */
     ATT.fn.logout = function () {
-      if(this.wcgBackend.wcgService) {
-        console.log("Logging out");
-        this.wcgBackend.wcgService.unregister();
-        this.wcgBackend.wcgService = null;
-      }
+        if (this.wcgBackend.wcgService) {
+            console.log("Logging out");
+            this.wcgBackend.wcgService.unregister();
+            this.wcgBackend.wcgService = null;
+        }
     };
 
     /**
      * Make a video call
      */
     /*
-    ATT.fn.videocall = function (callee) {
-        var self = this;
-        var call = new WCGCall(self, callee, true);
-        self.emit('outgoingCall', call);
+     ATT.fn.videocall = function (callee) {
+     var self = this;
+     var call = new WCGCall(self, callee, true);
+     self.emit('outgoingCall', call);
 
-        return call;
+     return call;
 
-    };
-    ATT.fn.voicecall = function (callee) {
-        var self = this;
-        var call = new WCGCall(self, callee, false);
-        self.emit('outgoingCall', call);
+     };
+     ATT.fn.voicecall = function (callee) {
+     var self = this;
+     var call = new WCGCall(self, callee, false);
+     self.emit('outgoingCall', call);
 
-        return call;
+     return call;
 
-    };
-    */
+     };
+     */
 
     ATT.fn.wcgBackend = {
         wcgService: null
@@ -187,28 +187,37 @@
     ATT.fn.dial = function (number) {
         var self = this;
 
-        number = ATT.phoneNumber.parse(number);
-        number = ATT.phoneNumber.getCallable(number);
+        var sipOccurence = number.match(/sip\:([^@]*)@/);
+        var sipuser = null;
+        if (sipOccurence) {
+            //it's a sip address
+            sipuser = number;
+        } else {
 
-        //using by default webims server
-        var sipuser = "sip:" + number + "@vims1.com";
-
-        if (att.config.server == 'alpha1') {
-            sipuser = "sip:" + number + "@vims1.com";
-        }
-        else if (att.config.server == 'alpha2') {
-            sipuser = "sip:" + number + "@vims1.com";
-        }
-        else if (att.config.server == 'webims') {
+            //otherwise parse the number
+            number = ATT.phoneNumber.parse(number);
+            number = ATT.phoneNumber.getCallable(number);
+            //by default we are using the webims server
             sipuser = "sip:" + number + "@webims.tfoundry.com";
+
+            if (att.config.server == 'alpha1') {
+                sipuser = "sip:" + number + "@vims1.com";
+            }
+            else if (att.config.server == 'alpha2') {
+                number = ATT.phoneNumber.parse(number);
+                number = ATT.phoneNumber.getCallable(number);
+                sipuser = "sip:" + number + "@vims1.com";
+            }
+            else if (att.config.server == 'webims') {
+                sipuser = "sip:" + number + "@webims.tfoundry.com";
+            }
         }
+
+        //make a call
         var call = new WCGCall(self, sipuser, false);
 
-        var numberToMatch = call.remotePeer.match(/sip\:([^@]*)@/);
-        var matchedNb = numberToMatch ? numberToMatch[1] : null;
 
-
-        self.emit('calling', matchedNb);
+        self.emit('calling', number);
         self.emit('outgoingCall', call);
 
     }
@@ -234,22 +243,33 @@
             console.log('Setting up WCG');
 
             //set the default WCG values: using by default webims server
-            var wcgUrl = 'http://64.124.154.204:38080/HaikuServlet/rest/v2/';
-            var turn = 'STUN:64.125.154.203:3478';
+            var wcgUrl = 'http://wcg-dia.tfoundry.com:38080/HaikuServlet/rest/v2/';
+            var turn = 'STUN:206.18.171.164:5060';
 
             var accessToken = att.config.apiKey;
-            var sipuser = user.first_name;
-            var password = 'oauth' + accessToken;
+
+
+            sipuser = "sip:" + user.first_name + "@webims.tfoundry.com";
+            sipuser = sipuser.toLowerCase();
+
+            var stringToMatch = sipuser.match(/sip\:([^@]*)@/);
+            var string = stringToMatch ? stringToMatch[1] : null;
+
+            password = string;
 
             if (att.config.server == 'alpha1') {
                 wcgUrl = 'http://64.124.154.204:38080/HaikuServlet/rest/v2/';
                 turn = 'STUN:64.125.154.203:3478';
+                sipuser = user.first_name;
+                password = 'oauth' + accessToken;
             }
             else if (att.config.server == 'alpha2') {
                 wcgUrl = 'http://64.124.154.204:38080/HaikuServlet/rest/v2/';
                 turn = 'STUN:64.125.154.203:3478';
                 //TODO this should be removed once we are able to make a call to a real user
-                user.first_name="sip:16509992361@vims.com";
+                user.first_name = "sip:16509992361@vims.com";
+                sipuser = user.first_name;
+                password = 'oauth' + accessToken;
             }
             else if (att.config.server == 'webims') {
                 wcgUrl = 'http://wcg-dia.tfoundry.com:38080/HaikuServlet/rest/v2/';
