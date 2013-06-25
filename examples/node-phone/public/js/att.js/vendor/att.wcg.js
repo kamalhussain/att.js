@@ -19,10 +19,6 @@
 
         self.att = att;
         self.remotePeer = callee;
-        //If user cancels the call right after having dialed the number, wait for the "RINGING" event.
-        //If cancelling the call is done before the RINGING event, it would throw an exception because the WCGapi.js is
-        //looking for a call session that doesn't exist.
-        self.earlyHangup = false;
 
         var media = (hasVideo) ? {
             audio: true,
@@ -73,29 +69,16 @@
             }
 
         };
-        this._call.onbegin = function (event) {
-            console.log("onbegin", event);
+        this._call.onbegin = function () {
             self.emit('callBegin')
         };
-        this._call.onend = function (event) {
-            console.log("onend", event);
+        this._call.onend = function () {
             self.emit('callEnd');
         };
         this._call.onerror = function (event) {
-            console.log("onerror", event);
-            self.emit('callError');
+            self.emit('error');
         };
-        this._call.onstatechange = function (event) {
-            console.log("onstatechange", event);
-            if (event.state == Call.State.RINGING) {
-                if (self.earlyHangup == true) {
-                    //if user cancels the call before accepting/denying the controls
-                    //wait until the call has actually reached the server ("RINGING")
-                    self.earlyHangup = false;
-                    self._call.end();
-                }
-                self.emit('ring');
-            }
+        this._call.onstatechange = function () {
             self.emit('wcgstateChange');
         };
 
@@ -110,20 +93,7 @@
      * End the call
      */
     WCGCall.prototype.hangup = function () {
-        var self = this;
-
-        if (this._call && this._call != null) {
-            if ((this._call.state == Call.State.RINGING) || (this._call.state == Call.State.ONGOING) || (this._call.state == Call.State.HOLDING) || (this._call.state == Call.State.WAITING)) {
-                this._call.end();
-            }
-            else {
-                //if user cancels the call before accepting the controls
-                //wait until the call has actually reached the server ("RINGING")
-                self.earlyHangup = true;
-            }
-
-        }
-
+        this._call.end();
     }
     //////////////////////////////////////////////////////
     ATT.fn.WCGCall = function (att, call) {
@@ -188,10 +158,8 @@
         var self = this;
 
         number = ATT.phoneNumber.parse(number);
-        number = ATT.phoneNumber.getCallable(number);
-
         //using by default webims server
-        var sipuser = "sip:" + number + "@vims1.com";
+        var sipuser = "sip:" + number + "@webims.tfoundry.com";
 
         if (att.config.server == 'alpha1') {
             sipuser = "sip:" + number + "@vims1.com";
@@ -204,24 +172,18 @@
         }
         var call = new WCGCall(self, sipuser, false);
 
-        var numberToMatch = call.remotePeer.match(/sip\:([^@]*)@/);
-        var matchedNb = numberToMatch ? numberToMatch[1] : null;
-
-
-        self.emit('calling', matchedNb);
         self.emit('outgoingCall', call);
+        self.emit('ring');
 
     }
 
     ATT.fn.video = function (callee) {
         var self = this;
         var call = new WCGCall(self, callee, true);
-
-        var numberToMatch = call.remotePeer.match(/sip\:([^@]*)@/);
-        var matchedNb = numberToMatch ? numberToMatch[1] : null;
-
-        self.emit('calling', matchedNb);
         self.emit('outgoingCall', call);
+
+        return call;
+
     };
 
     ATT.initPlugin(function (att) {
@@ -234,12 +196,10 @@
             console.log('Setting up WCG');
 
             //set the default WCG values: using by default webims server
-            var wcgUrl = 'http://64.124.154.204:38080/HaikuServlet/rest/v2/';
-            var turn = 'STUN:64.125.154.203:3478';
+            var wcgUrl = 'http://wcg-dia.tfoundry.com:38080/HaikuServlet/rest/v2/';
+            var turn = 'STUN:206.18.171.164:5060';
 
             var accessToken = att.config.apiKey;
-            var sipuser = user.first_name;
-            var password = 'oauth' + accessToken;
 
             if (att.config.server == 'alpha1') {
                 wcgUrl = 'http://64.124.154.204:38080/HaikuServlet/rest/v2/';
@@ -254,17 +214,10 @@
             else if (att.config.server == 'webims') {
                 wcgUrl = 'http://wcg-dia.tfoundry.com:38080/HaikuServlet/rest/v2/';
                 turn = 'STUN:206.18.171.164:5060';
-                sipuser = "sip:" + user.first_name + "@webims.tfoundry.com";
-                sipuser = sipuser.toLowerCase();
-
-                var stringToMatch = sipuser.match(/sip\:([^@]*)@/);
-                var string = stringToMatch ? stringToMatch[1] : null;
-
-                password = string;
 
             }
 
-            att.wcgBackend.wcgService = new MediaServices(wcgUrl, sipuser, password, "audio,video,chat");
+            att.wcgBackend.wcgService = new MediaServices(wcgUrl, user.first_name, "oauth " + accessToken, "audio,video,chat");
             att.wcgBackend.wcgService.turnConfig = turn;
 
             att.wcgBackend.wcgService.onready = function () {
@@ -275,7 +228,7 @@
                 att.emit('phoneClose');
             }
             att.wcgBackend.wcgService.onerror = function (event) {
-                att.emit('phoneError', event.reason);
+                att.emit('error', event.reason);
             }
             att.wcgBackend.wcgService.oninvite = function (event) {
                 if (event.call) {
@@ -284,7 +237,7 @@
 
                     //instantiage the WCGCall (incoming call)
                     var wcgCall = new ATT.fn.WCGCall(att, call);
-                    att.emit('incomingCall', wcgCall, wcgCall.remotePeer);
+                    att.emit('incomingCall', wcgCall);
                 }
             }
 
