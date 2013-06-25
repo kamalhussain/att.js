@@ -68,5 +68,4 @@
     };
 
     ATT.phoneNumber = phoneNumber;
-    ATT.fn.phoneNumber = phoneNumber;
 })(ATT);
