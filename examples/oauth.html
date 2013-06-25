@@ -46,7 +46,6 @@
     
       <script type="text/javascript" charset="utf-8">
         $(document).ready(function(){
-          var wcgcall;
           $("#dial").hide();
           window.att = new ATT({
             clientID: "ro5rhicseujhlqqec2d1wax6foi3gkyg",
@@ -63,7 +62,6 @@
 
           att.on('outgoingCall', function(call) {
             console.log("Outgoing call");
-             wcgcall = call;
           });
 
 
@@ -86,14 +84,13 @@
               });
             
            });
-            att.on('ring', function() {
+            att.on('ring', function(call) {
                 console.log('ringing');
                 $("#dial").html("Ringing").removeClass('btn-info').addClass('btn-warning');
             });
 
             att.on('callBegin', function(call) {
                 console.log('answered, callBegin');
-                wcgcall = call;
                 $("#dial").addClass("call");
                 $("#dial").html("Hangup").removeClass('btn-warning').addClass('btn-danger');
                 $('#dial').on('click.call', function (event) {
@@ -103,7 +100,6 @@
             });
 
             att.on('callEnd', function(call) {
-                wcgcall = call;
                 console.log('hungup callEnd');
                 $("#dial").removeClass("call");
                 $('#dial').off('click.call').on('click.phone'); // TODO: fixme

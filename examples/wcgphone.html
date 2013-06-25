@@ -35,13 +35,14 @@
     </div>
 
     <div class="row">
-        <div class="span10">
+        <div class="span12">
 
             <form class="well form-horizontal">
                 <fieldset>
                     <div class="control-group">
                         <label for="login">Call from</label>
                         <input type="button" id="login" class="btn btn-primary" value="Login">
+                        <input type="button" id="logout" class="btn btn-success hide" value="Logout">
                     </div>
 
 
@@ -57,6 +58,92 @@
 
             </form>
 
+        </div>
+    </div>
+
+    <h3>Code</h3>
+
+    <div class="row">
+        <div class="span6">
+            <p>
+
+<!--////////////////////////    PRE-FORMATTED CODE  /////////////////////////-->
+<pre>
+<span id="code-login">$("#login").click(function () {
+  window.location.href = "https://auth.tfoundry.com/oauth/authorize?client_id=cdoso6wgycs073sk5zpmacgxuxc7mezz&response_type=token&scope=profile,webrtc&redirect_uri=http://localhost/examples/wcgphone.html";
+});</span>
+
+<span id="code-logout">$("#logout").click(function() {
+    <span id="code-logoutfn">att.logout();</span>
+});</span>
+
+
+<span id="code-att">window.att = new ATT({
+    accessToken: <span id="code-accesstoken">access_token</span>,
+    server: "alpha1"
+});</span>
+
+<span id="code-onuser">att.on(<span id="code-userevent">'user'</span>, function (user) {
+    $("#logout").val(<span id="code-username">user.first_name</span>);
+});</span>
+
+<span id="code-onphoneready">att.on(<span id="code-phonereadyevent">'phoneReady'</span>, function () {
+    <span id="code-dial">$("#dial").click(function () {
+        if ($("#dial").html() == "Dial") {
+            <span id="code-dialfn">att.dial(<span id="code-dialnb">$("#number").val())</span>)</span>;
+        }
+    });</span>
+});</span>
+</pre>
+
+            </p>
+        </div>
+        <div class="span6">
+            <p>
+
+<pre>
+<span id="code-oncalling">att.on(<span id="code-callingevent">'calling'</span>, function (number) {
+    //Calling <span id="code-number">number</span>
+});</span>
+
+<span id="code-onoutgoingcall">att.on(<span id="code-outgoingcallevent">'outgoingCall'</span>, function (call) {
+    //...
+});</span>
+
+<span id="code-onring">att.on(<span id="code-ringevent">'ring'</span>, function (call) {
+    //...
+});</span>
+
+<span id="code-oncallbegin">att.on(<span id="code-callbeginevent">'callBegin'</span>, function (call) {
+    //DO SOMETHING WITH THIS CALL
+    <span id="code-hangup">$("#dial").click(function () {
+        if ($("#dial").html() == "Hangup") {
+            <span id="code-hangupfn">call.hangup();</span>
+        }
+    });</span>
+});</span>
+
+<span id="code-oncallend">att.on(<span id="code-callendevent">'callEnd'</span>, function (call) {
+    //DO SOMETHING WITH THIS CALL
+});</span>
+
+<span id="code-oncallerror">att.on(<span id="code-callerrorevent">'callError'</span>, function (call) {
+    //DO SOMETHING HERE WITH THIS ERROR
+});</span>
+
+<span id="code-onphoneclose">att.on(<span id="code-phonecloseevent">'phoneClose'</span>, function () {
+    //DO SOMETHING HERE
+});</span>
+
+<span id="code-onphoneerror">att.on(<span id="code-phoneerrorevent">'phoneError'</span>, function () {
+    //DO SOMETHING HERE WITH THIS ERROR
+});</span>
+
+</pre>
+<!--/////////////////////   END OF PRE-FORMATTED CODE   ////////////////////////////-->
+
+
+            </p>
         </div>
     </div>
 
@@ -80,18 +167,40 @@
 
         access_token = oauthParams['access_token'];
         if (access_token) {
+            /////////////////////////////////////////////////
+            $("#code-login").css("color", "#3498db");
+            $("#code-att").css("color", "#3498db");
+            $("#code-accesstoken").html("'" + access_token + "'" );
+            $("#code-accesstoken").addClass("badge");
+            $("#code-accesstoken").addClass("badge-success");
+            /////////////////////////////////////////////////
+
+
             window.att = new ATT({
                 accessToken: access_token,
                 server: "alpha1"
             });
 
             att.on('user', function (user) {
-                $("#login").val(user.first_name + "       x");
-                $("#login").addClass('btn-success');
+                /////////////////////////////////////////////////
+                $("#code-onuser").css("color", "#3498db");
+                $("#code-username").html(user.first_name);
+                $("#code-userevent").addClass("badge");
+                $("#code-userevent").addClass("badge-warning");
+                /////////////////////////////////////////////////
+
+                $("#logout").val(user.first_name + "       x");
+                $("#login").hide();
+                $("#logout").show();
             });
 
             //PHONE EVENTS
             att.on('phoneReady', function () {
+                ///////////////////////////////////////////////
+                $("#code-onphoneready").css("color", "#3498db");
+                $("#code-phonereadyevent").addClass("badge");
+                $("#code-phonereadyevent").addClass("badge-warning");
+                /////////////////////////////////////////////////
 
                 $("#dial").attr("disabled", false);
                 $("#dial").html("Dial");
@@ -104,84 +213,162 @@
 
                 $("#dial").click(function () {
                     if ($("#dial").html() == "Dial") {
+                        ///////////////////////////////////////////////
+                        $("#code-dialnb").html($.trim($("#number").val()));
+                        $("#code-dial").css("color", "#3498db");
+                        $("#code-dialfn").addClass("badge");
+                        $("#code-dialfn").addClass("badge-success");
+                        /////////////////////////////////////////////////
+
                         att.dial($.trim($("#number").val()));
 
-                    }
-                    else {
-                        wcgcall.hangup();
                     }
 
                 });
             });
 
             att.on('phoneClose', function () {
+                ///////////////////////////////////////////////
+                $("#code-onphoneclose").css("color", "#3498db");
+                $("#code-phonecloseevent").addClass("badge");
+                $("#code-phonecloseevent").addClass("badge-warning");
+                /////////////////////////////////////////////////
+
                 $("#login").val("Login");
                 $("#login").removeClass('btn-success');
                 $("#login").addClass('btn-primary');
                 $("#dial").attr("disabled", true);
                 $("#dial").html("Offline");
+                $("#login").show();
+                $("#logout").hide();
+
             });
 
-            //should support phone errors as well (not only call errors)
-            att.on('error', function (eventData) {
+            att.on('phoneError', function () {
                 console.log("ERROR");
+                ///////////////////////////////////////////////
+                $("#code-onphoneerror").css("color", "#3498db");
+                $("#code-phoneerrorevent").addClass("badge");
+                $("#code-phoneerrorevent").addClass("badge-warning");
+                /////////////////////////////////////////////////
             });
 
-
-            //CALL EVENTS
             att.on('calling', function (number) {
-                console.log("calling", number);
+                console.log("CALLING", number);
+                ///////////////////////////////////////////////
+                $("#code-oncalling").css("color", "#3498db");
+                $("#code-callingevent").addClass("badge");
+                $("#code-callingevent").addClass("badge-warning");
+                $("#code-number").html(number);
+                /////////////////////////////////////////////////
 
-            });
-
-            att.on('outgoingCall', function (call) {
-                console.log("OUTGOING CALL", call);
-                wcgcall = call;
-                console.log("calling", number);
                 $("#dial").html("Calling...");
                 $("#dial").removeClass('btn-primary');
                 $("#dial").addClass('btn-warning');
 
 
             });
-            att.on('incomingCall', function (call) {
-                console.log("INCOMING CALL", call);
-                wcgcall = call;
-            });
-            att.on('ring', function () {
-                console.log("ring");
-            });
-            att.on('callBegin', function (call) {
-                console.log("call begin", call);
+
+            att.on('outgoingCall', function (call) {
+                console.log("OUTGOING CALL", call);
+                ///////////////////////////////////////////////
+                $("#code-onoutgoingcall").css("color", "#3498db");
+                $("#code-outgoingcallevent").addClass("badge");
+                $("#code-outgoingcallevent").addClass("badge-warning");
+                /////////////////////////////////////////////////
+
+                $("#dial").html("Call sent...");
+                $("#dial").removeClass('btn-primary');
+                $("#dial").addClass('btn-warning');
+
                 $("#dial").html("Hangup");
                 $("#dial").removeClass('btn-primary');
                 $("#dial").addClass('btn-danger');
-                wcgcall = call;
+                $("#dial").click(function () {
+                    if ($("#dial").html() == "Hangup") {
+                        ///////////////////////////////////////////////
+                        $("#code-hangup").css("color", "#3498db");
+                        $("#code-hangupfn").addClass("badge");
+                        $("#code-hangupfn").addClass("badge-success");
+                        /////////////////////////////////////////////////
+
+                        call.hangup();
+
+                    }
+
+                });
+
+            });
+            att.on('incomingCall', function (call) {
+                console.log("INCOMING CALL", call);
+
+            });
+            att.on('ring', function (call) {
+                console.log("ring");
+                ///////////////////////////////////////////////
+                $("#code-onring").css("color", "#3498db");
+                $("#code-ringevent").addClass("badge");
+                $("#code-ringevent").addClass("badge-warning");
+                /////////////////////////////////////////////////
+            });
+            att.on('callBegin', function (call) {
+                console.log("call begin", call);
+                ///////////////////////////////////////////////
+                $("#code-oncallbegin").css("color", "#3498db");
+                $("#code-callbeginevent").addClass("badge");
+                $("#code-callbeginevent").addClass("badge-warning");
+                /////////////////////////////////////////////////
+
 
             });
             att.on('callEnd', function (call) {
                 console.log("call end", call);
+                ///////////////////////////////////////////////
+                $("#code-oncallend").css("color", "#3498db");
+                $("#code-callendevent").addClass("badge");
+                $("#code-callendevent").addClass("badge-warning");
+                /////////////////////////////////////////////////
+
                 $("#dial").html("Dial");
                 $("#dial").removeClass('btn-danger');
                 $("#dial").removeClass('btn-warning');
                 $("#dial").addClass('btn-primary');
+            });
 
-                wcgcall = call;
+            att.on('callError', function (call) {
+                console.log("ERROR");
+                ///////////////////////////////////////////////
+                $("#code-oncallerror").css("color", "#3498db");
+                $("#code-callerrorevent").addClass("badge");
+                $("#code-callerrorevent").addClass("badge-warning");
+                /////////////////////////////////////////////////
+
+                $("#dial").html("Dial");
+                $("#dial").removeClass('btn-danger');
+                $("#dial").removeClass('btn-warning');
+                $("#dial").addClass('btn-primary');
             });
 
 
         }
 
         $("#login").click(function () {
-            if ($("#login").val() != "Login") {
-                console.log("Logging out");
-                att.logout();
-            }
-            else {
+                $("#code-login").css("color", "#3498db");
                 window.location.href = "https://auth.tfoundry.com/oauth/authorize?client_id=cdoso6wgycs073sk5zpmacgxuxc7mezz&response_type=token&scope=profile,webrtc&redirect_uri=http://localhost/examples/wcgphone.html";
-            }
 
         });
+
+        $("#logout").click(function() {
+            ///////////////////////////////////////////////
+            $("#code-logout").css("color", "#3498db");
+            $("#code-logoutfn").addClass("badge");
+            $("#code-logoutfn").addClass("badge-success");
+            /////////////////////////////////////////////////
+
+            console.log("Logging out");
+            att.logout();
+
+        }) ;
 
 
     });

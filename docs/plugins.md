@@ -1,5 +1,48 @@
 # ATT.js Plugin Documentation
 
+## The att.addressbook plugin
+
+
+
+### Methods
+
+  - getContacts()
+
+    
+  - getContact(string)
+
+    
+  - addContact(object)
+
+    
+  - updateContact(string, object)
+
+    
+  - deleteContact(string)
+
+    
+  - getGroups()
+
+    
+  - getGroup(string)
+
+    
+  - addGroup(object)
+
+    
+  - updateGroup(string, object)
+
+    
+  - deleteGroup(string)
+
+    
+
+### Events
+
+  - <a id="att.addressbook-event-addressBookReady"></a>addressBookReady
+
+    Raised when the addressbook object has been created with an access token.
+
 ## The att.me plugin
 
 Helper method for retrieving a user's ATT profile information.
@@ -12,9 +55,37 @@ Helper method for retrieving a user's ATT profile information.
 
 ### Events
 
-  - <a id="att.me-event-user"></a>user, called with: [UserProfile](#att.oauth2-datatype-UserProfile)
+  - <a id="att.me-event-user"></a>user, called with: [UserProfile](#att.me-datatype-UserProfile)
 
     Raised when the user's profile information has been retrieved. Suitable for other plugins to listen for to finish their own initialization steps
+
+## The att.messages plugin
+
+
+
+### Methods
+
+  - sendMessage(string, string)
+
+    
+  - getMessages()
+
+    
+  - getMessage(string)
+
+    
+  - deleteMessage(string)
+
+    
+  - searchByNumber(string)
+
+    
+
+### Events
+
+  - <a id="att.messages-event-messagesReady"></a>messagesReady
+
+    Raised when the messages object has been created with an access token.
 
 ## The att.oauth2 plugin
 
@@ -28,12 +99,6 @@ This plugin allows easy user login and authorization from the att oauth system
   - login()
 
     Validated accessToken or updates elements with btn-att-login class with authroizeURL to fetch an accessToken.
-
-### Events
-
-  - <a id="att.oauth2-event-authorized"></a>authorized
-
-    Raised an accesstoken is present in the url hash_fragement and an access_token is validatedd.
 
 ## The att.phone.generic plugin
 
@@ -49,21 +114,25 @@ Common interface for making and receiving phone calls.
 
   - <a id="att.phone.generic-event-phoneReady"></a>phoneReady
 
-    Raised when the phone backend has been initialized and is ready to make or receive calls
+    Raised when the phone backend has been initialized and is ready to make or receive calls.
+
+  - <a id="att.phone.generic-event-phoneError"></a>phoneError
+
+    Raised when the phone backend could not be initialized.
 
   - <a id="att.phone.generic-event-calling"></a>calling, called with: string
 
     Raised with the phone number be dialed on an outgoing call.
 
-  - <a id="att.phone.generic-event-outgoingCall"></a>outgoingCall, called with: [Call](#att.phone.generic-datatype-Call)
+  - <a id="att.phone.generic-event-outgoingCall"></a>outgoingCall, called with: [Call](#att.phone.generic-datatype-Call), callerDisplayName (string)
 
-    Raised with a Call object for managing an outgoing call.
+    Raised with a Call object for managing an outgoing call, and the phone number that is being dialed.
 
-  - <a id="att.phone.generic-event-incomingCall"></a>incomingCall, called with: [Call](#att.phone.generic-datatype-Call)
+  - <a id="att.phone.generic-event-incomingCall"></a>incomingCall, called with: [Call](#att.phone.generic-datatype-Call), callerDisplayName (string)
 
-    Raised with a Call object for managing an incoming call.
+    Raised with a Call object for managing an incoming call, and the phone number of the caller.
 
-  - <a id="att.phone.generic-event-ring"></a>ring
+  - <a id="att.phone.generic-event-ring"></a>ring, called with: [Call](#att.phone.generic-datatype-Call), callerDisplayName (string)
 
     A signal that a call request is in progress.
 
@@ -75,7 +144,7 @@ Common interface for making and receiving phone calls.
 
     Raised when a call has been hung up.
 
-  - <a id="att.phone.generic-event-error"></a>error, called with: [Call](#att.phone.generic-datatype-Call)
+  - <a id="att.phone.generic-event-callError"></a>callError, called with: [Call](#att.phone.generic-datatype-Call)
 
     Emitted when an error has occured while establishing or during a call.
 
@@ -97,7 +166,7 @@ A set of helper functions for parsing and processing phone number strings.
 
 ## Data Types
 
-### <a id="att.oauth2-datatype-UserProfile"></a>UserProfile
+### <a id="att.me-datatype-UserProfile"></a>UserProfile
 
 A dictionary of profile information for a user, including name and phone number.
 
@@ -116,13 +185,19 @@ A phone call session, which may be answered or hung up.
 
 ## Event Index
 
+### addressBookReady
+  - [att.addressbook](#att.addressbook)
+
 ### user
   - [att.me](#att.me)
 
-### authorized
-  - [att.oauth2](#att.oauth2)
+### messagesReady
+  - [att.messages](#att.messages)
 
 ### phoneReady
+  - [att.phone.generic](#att.phone.generic)
+
+### phoneError
   - [att.phone.generic](#att.phone.generic)
 
 ### calling
@@ -143,5 +218,5 @@ A phone call session, which may be answered or hung up.
 ### callEnd
   - [att.phone.generic](#att.phone.generic)
 
-### error
+### callError
   - [att.phone.generic](#att.phone.generic)
