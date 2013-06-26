@@ -1,72 +1,55 @@
-doctype 5
-html
-  head
-    link(type='text/css', rel='stylesheet', href='//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css')
-    link(type='text/css', rel='stylesheet', href='styles.css')
-  body
-    .container
-      h1: a(href="index.html") ATT.js Documentation
-      .navbar
-        .navbar-inner
-          ul.nav
-            li
-              a(href="plugins.html") Plugins
-            li
-              a(href="datatypes.html") Data Types
-            li
-              a(href="events.html") Event Index
 
-      h2 Data Types
-      each dataType, typeName in datatypeIndex
-        h3(id='type-'+typeName)= typeName
-        p Provided by 
-          a(href="plugins#plugin-" + dataType.plugin)= dataType.plugin
-        p= dataType.type.description
-        -if (dataType.type.methods && Object.keys(dataType.type.methods).length)
-          h4 Methods
-          dl
-            each method, methodName in dataType.type.methods
-              dt.signature
-                span.name= methodName
-                ul.parameterList
-                  - if (method.parameters)
-                    each param in method.parameters
-                      -if (param.name)
-                        li
-                          span.name= param.name 
-                          -if (!builtins[param.type])
-                            a.type(href="datatypes.html#type-" + param.type)= ':' + param.type
-                          -else
-                            span.type= ':' + param.type
-                      -else
-                        li
-                          -if (!builtins[param.type])
-                            a.type.name(href="datatypes.html#type-" + param.type)= param.type
-                          -else
-                            span.type= param.type
-              dd= method.description
-              - if (method.callbackArgs && method.callbackArgs.length)
-                dd.signature
-                  span.name callback
-                  ul.parameterList
-                    each param in method.callbackArgs
-                      -if (param.name)
-                        li
-                          span.name= param.name 
-                          -if (!builtins[param.type])
-                            a.type(href="datatypes.html#type-" + param.type)= ':' + param.type
-                          -else
-                            span.type= ':' + param.type
-                      -else
-                        li
-                          -if (!builtins[param.type])
-                            a.type.name(href="datatypes.html#type-" + param.type)= param.type
-                          -else
-                            span.type= param.type
- 
-        -if (dataType.type.events)
-          h4 Events
-          ul
-            each eventName in dataType.type.events
-              li
-                a(href="events.html#event-" + eventName)= eventName
+h2 Data Types
+each dataType, typeName in datatypeIndex
+  h3(id='type-'+typeName)= typeName
+  p Provided by 
+    a(href="plugins#plugin-" + dataType.plugin)= dataType.plugin
+  p= dataType.type.description
+  -if (dataType.type.methods && Object.keys(dataType.type.methods).length)
+    h4 Methods
+    dl
+      each method, methodName in dataType.type.methods
+        dt.signature
+          span.name= methodName
+          ul.parameterList
+            - if (method.parameters)
+              each param in method.parameters
+                -if (param.name)
+                  li
+                    span.name= param.name 
+                    -if (!builtins[param.type])
+                      a.type(href="datatypes.html#type-" + param.type)= ':' + param.type
+                    -else
+                      span.type= ':' + param.type
+                -else
+                  li
+                    -if (!builtins[param.type])
+                      a.type.name(href="datatypes.html#type-" + param.type)= param.type
+                    -else
+                      span.type= param.type
+        dd= method.description
+        - if (method.callbackArgs && method.callbackArgs.length)
+          dd.signature
+            span.name callback
+            ul.parameterList
+              each param in method.callbackArgs
+                -if (param.name)
+                  li
+                    span.name= param.name 
+                    -if (!builtins[param.type])
+                      a.type(href="datatypes.html#type-" + param.type)= ':' + param.type
+                    -else
+                      span.type= ':' + param.type
+                -else
+                  li
+                    -if (!builtins[param.type])
+                      a.type.name(href="datatypes.html#type-" + param.type)= param.type
+                    -else
+                      span.type= param.type
+
+  -if (dataType.type.events)
+    h4 Events
+    ul
+      each eventName in dataType.type.events
+        li
+          a(href="events.html#event-" + eventName)= eventName
