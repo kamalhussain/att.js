@@ -152,28 +152,130 @@ Plugins for att.js follow the jQuery pattern, and look like:
 
 1. Install dependencies:
 
-```
-npm install .
-```
+        npm install .
 
 2. Make edits in `/src`
 
 3. Build documentation
 
-```
-npm run-script build
-```
+        npm run-script build
 
 4. Test
-Uses qunit for testing in the browser
-```
-open testing/index.html 
-```
+
+  Uses qunit for testing in the browser
+
+        open testing/index.html 
+
+## Specs
+
+In order to automatically generate useful documentation for all att.js plugins, a plugin should provide a spec file describing the methods it provides, and any events it emits. An example spec file that uses all of the available features would look like:
+
+      {
+          "plugin": "my.plugin",
+          "description": "A demo plugin for demonstrating spec files",
+          "methods": {
+              "runFoo": {
+                  "description": "Calculates and returns foo directly, and via a callback.",
+                  "parameters": [
+                      {"name": "InitialValue", "type": "BarData"}
+                  ],
+                  "returns": "BarData",
+                  "callbackArgs": [
+                      {"name": "SomeOutputValue", "type": "BarData"}
+                  ]
+              }
+          },
+          "events": {
+              "success": {
+                  "description": "Things worked!",
+                  "args": [
+                      {"name": "ResultCode", "type": "string"}
+                  ]
+              },
+              "failed": {
+                  "description": "Things didn't work",
+                  "args": [
+                        {"name": "ResultCode", "type": "string"}
+                  ]
+              },
+              "pong": {
+                  "description": "Ping Pong!"
+              }
+          },
+          "datatypes": {
+              "BarData": {
+                  "description": "A dictionary of data about bar",
+                  "methods": {
+                      "ping": {
+                          "description": "Ping something"
+                      }
+                  },
+                  "events": [
+                      "pong"
+                  ]
+              }
+          }
+        }
+
+## Testing
+
+Testing is done through [QUnit](http://qunitjs.com/) test suites which run in the browser.
+Test suites are placed in `testing/tests` and then referenced in `testing/index.html`. 
+
+For example, a basic test suite looks like:
+
+      module('foo');
+
+      test("Ensure that runFoo returns BarData", function() {
+          // How many assertions to expect during this test
+          expect(2);
+
+          var att = new ATT();
+
+          att.on('success', function (result) {
+              equal(result, 'OK');
+          });
+
+          att.runFoo({}, function (barData) {
+              equal(barData, {a: 1});
+          });
+      });
+
+For more details on how to write tests, see the [QUnit documentation](http://qunitjs.com).
+
+After saving the test suite in `testing/tests/foo.js` the `testing/index.html` file is updated to include both the plugin being tested, and the test suite:
+
+      <!DOCTYPE html>
+      <html>
+          <head>
+              <meta charset="utf-8">
+              <title>att.js core tests</title>
+              <link rel="stylesheet" href="qunit.css">
+          </head>
+          <body>
+              <div id="qunit"></div>
+              <div id="qunit-fixture"></div>
+              <script src="qunit.js"></script>
+              <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+              <!-- the scripts we're testing -->
+              <script src="../src/att.js"></script>
+              ...
+              <script src="../src/foo.js"></script><!-- The plugin to test -->
+      
+              <!-- the tests -->
+              <script src="tests/core.js"></script>
+              <script src="tests/phoneNumber.js"></script>
+              ...
+              <script src="tests/foo.js"></script><!-- The test suite -->
+          </body>
+      </html>       
+
+Running the entire collection of test suites is done by opening `testing/index.html` in the browser version you wish to test against.
 
 ## Credits
 
-[The AT&T Foundry](https://foundry.att.com/)
-[Phono](http://phono.com)
+- [The AT&T Foundry](https://foundry.att.com/)
+- [Phono](http://phono.com)
 
 ### Developers
 
