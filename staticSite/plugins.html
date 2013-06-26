@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link type="text/css" rel="stylesheet" href="http://twitter.github.io/bootstrap/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css">
     <link type="text/css" rel="stylesheet" href="styles.css">
-    <style>h2 {margin-left: -10px}</style>
   </head>
   <body>
     <div class="container">
       <h1><a href="index.html">ATT.js Documentation</a></h1>
-      <div class="navbar">
+      <div class="navbar navbar-fixed">
         <div class="navbar-inner">
           <ul class="nav">
             <li><a href="plugins.html">Plugins</a></li>
@@ -17,246 +16,246 @@
           </ul>
         </div>
       </div>
-      <div class="navbar">
-        <div class="navbar-inner">
-          <ul class="nav">
-            <li><a href="#plugin-att.addressbook">att.addressbook</a></li>
-            <li><a href="#plugin-att.me">att.me</a></li>
-            <li><a href="#plugin-att.messages">att.messages</a></li>
-            <li><a href="#plugin-att.oauth2">att.oauth2</a></li>
-            <li><a href="#plugin-att.phone.generic">att.phone.generic</a></li>
-            <li><a href="#plugin-att.phonenumber">att.phonenumber</a></li>
-          </ul>
-        </div>
-      </div>
-      <h2 id="plugin-att.addressbook">att.addressbook</h2>
-      <p></p>
-      <h4>Methods</h4>
-      <dl>
-        <dt class="signature"><span class="name">att.addressbook.getContacts</span>
-          <ul class="parameterList">
-          </ul>
-        </dt>
-        <dd></dd>
-        <dt class="signature"><span class="name">att.addressbook.getContact</span>
-          <ul class="parameterList">
-            <li><span class="type">string</span>
-            </li>
-          </ul>
-        </dt>
-        <dd></dd>
-        <dt class="signature"><span class="name">att.addressbook.addContact</span>
-          <ul class="parameterList">
-            <li><span class="type">object</span>
-            </li>
-          </ul>
-        </dt>
-        <dd></dd>
-        <dt class="signature"><span class="name">att.addressbook.updateContact</span>
-          <ul class="parameterList">
-            <li><span class="type">string</span>
-            </li>
-            <li><span class="type">object</span>
-            </li>
-          </ul>
-        </dt>
-        <dd></dd>
-        <dt class="signature"><span class="name">att.addressbook.deleteContact</span>
-          <ul class="parameterList">
-            <li><span class="type">string</span>
-            </li>
-          </ul>
-        </dt>
-        <dd></dd>
-        <dt class="signature"><span class="name">att.addressbook.getGroups</span>
-          <ul class="parameterList">
-          </ul>
-        </dt>
-        <dd></dd>
-        <dt class="signature"><span class="name">att.addressbook.getGroup</span>
-          <ul class="parameterList">
-            <li><span class="type">string</span>
-            </li>
-          </ul>
-        </dt>
-        <dd></dd>
-        <dt class="signature"><span class="name">att.addressbook.addGroup</span>
-          <ul class="parameterList">
-            <li><span class="type">object</span>
-            </li>
-          </ul>
-        </dt>
-        <dd></dd>
-        <dt class="signature"><span class="name">att.addressbook.updateGroup</span>
-          <ul class="parameterList">
-            <li><span class="type">string</span>
-            </li>
-            <li><span class="type">object</span>
-            </li>
-          </ul>
-        </dt>
-        <dd></dd>
-        <dt class="signature"><span class="name">att.addressbook.deleteGroup</span>
-          <ul class="parameterList">
-            <li><span class="type">string</span>
-            </li>
-          </ul>
-        </dt>
-        <dd></dd>
-      </dl>
-      <h4>Events</h4>
-      <ul>
-        <li><a href="events.html#event-addressBookReady">addressBookReady</a></li>
-      </ul>
-      <hr>
-      <h2 id="plugin-att.me">att.me</h2>
-      <p>Helper method for retrieving a user's ATT profile information.</p>
-      <h4>Methods</h4>
-      <dl>
-        <dt class="signature"><span class="name">att.getMe</span>
-          <ul class="parameterList">
-          </ul>
-        </dt>
-        <dd>Make an AJAX request to retrieve the user's profile information.</dd>
-        <dd class="signature"><span class="name">callback</span>
-          <ul class="parameterList">
-            <li><a href="datatypes.html#type-UserProfile" class="type name">UserProfile</a>
-            </li>
-          </ul>
-        </dd>
-      </dl>
-      <h4>Events</h4>
-      <ul>
-        <li><a href="events.html#event-user">user</a></li>
-      </ul>
-      <hr>
-      <h2 id="plugin-att.messages">att.messages</h2>
-      <p></p>
-      <h4>Methods</h4>
-      <dl>
-        <dt class="signature"><span class="name">att.messages.sendMessage</span>
-          <ul class="parameterList">
-            <li><span class="type">string</span>
-            </li>
-            <li><span class="type">string</span>
-            </li>
-          </ul>
-        </dt>
-        <dd></dd>
-        <dt class="signature"><span class="name">att.messages.getMessages</span>
-          <ul class="parameterList">
-          </ul>
-        </dt>
-        <dd></dd>
-        <dt class="signature"><span class="name">att.messages.getMessage</span>
-          <ul class="parameterList">
-            <li><span class="type">string</span>
-            </li>
-          </ul>
-        </dt>
-        <dd></dd>
-        <dt class="signature"><span class="name">att.messages.deleteMessage</span>
-          <ul class="parameterList">
-            <li><span class="type">string</span>
-            </li>
-          </ul>
-        </dt>
-        <dd></dd>
-        <dt class="signature"><span class="name">att.messages.searchByNumber</span>
-          <ul class="parameterList">
-            <li><span class="type">string</span>
-            </li>
-          </ul>
-        </dt>
-        <dd></dd>
-      </dl>
-      <h4>Events</h4>
-      <ul>
-        <li><a href="events.html#event-messagesReady">messagesReady</a></li>
-      </ul>
-      <hr>
-      <h2 id="plugin-att.oauth2">att.oauth2</h2>
-      <p>This plugin allows easy user login and authorization from the att oauth system</p>
-      <h4>Methods</h4>
-      <dl>
-        <dt class="signature"><span class="name">authorizeURL</span>
-          <ul class="parameterList">
-          </ul>
-        </dt>
-        <dd>Returns an oauth authorize url for the configured client.</dd>
-        <dd class="signature"><span class="name">callback</span>
-          <ul class="parameterList">
-            <li><a href="datatypes.html#type-UserProfile" class="type name">UserProfile</a>
-            </li>
-          </ul>
-        </dd>
-        <dt class="signature"><span class="name">login</span>
-          <ul class="parameterList">
-          </ul>
-        </dt>
-        <dd>Validated accessToken or updates elements with btn-att-login class with authroizeURL to fetch an accessToken.</dd>
-        <dd class="signature"><span class="name">callback</span>
-          <ul class="parameterList">
-            <li><a href="datatypes.html#type-UserProfile" class="type name">UserProfile</a>
-            </li>
-          </ul>
-        </dd>
-      </dl>
-      <hr>
-      <h2 id="plugin-att.phone.generic">att.phone.generic</h2>
-      <p>Common interface for making and receiving phone calls.</p>
-      <h4>Methods</h4>
-      <dl>
-        <dt class="signature"><span class="name">att.dial</span>
-          <ul class="parameterList">
-            <li><span class="name">phoneNumber</span><span class="type">:string</span>
-            </li>
-          </ul>
-        </dt>
-        <dd>Dial a number and make an outgoing call.</dd>
-      </dl>
-      <h4>Events</h4>
-      <ul>
-        <li><a href="events.html#event-phoneReady">phoneReady</a></li>
-        <li><a href="events.html#event-phoneError">phoneError</a></li>
-        <li><a href="events.html#event-calling">calling</a></li>
-        <li><a href="events.html#event-outgoingCall">outgoingCall</a></li>
-        <li><a href="events.html#event-incomingCall">incomingCall</a></li>
-        <li><a href="events.html#event-ring">ring</a></li>
-        <li><a href="events.html#event-callBegin">callBegin</a></li>
-        <li><a href="events.html#event-callEnd">callEnd</a></li>
-        <li><a href="events.html#event-callError">callError</a></li>
-      </ul>
-      <hr>
-      <h2 id="plugin-att.phonenumber">att.phonenumber</h2>
-      <p>A set of helper functions for parsing and processing phone number strings.</p>
-      <h4>Methods</h4>
-      <dl>
-        <dt class="signature"><span class="name">att.phoneNumber.stringify</span>
-          <ul class="parameterList">
-            <li><span class="type">string</span>
-            </li>
-          </ul>
-        </dt>
-        <dd>Format a phone number to include dashes and parenthesis.</dd>
-        <dt class="signature"><span class="name">att.phoneNumber.parse</span>
-          <ul class="parameterList">
-            <li><span class="type">string</span>
-            </li>
-          </ul>
-        </dt>
-        <dd>Convert a phone number that uses letters into numeric format.</dd>
-        <dt class="signature"><span class="name">att.phoneNumber.getCallable</span>
-          <ul class="parameterList">
-            <li><span class="type">string</span>
-            </li>
-            <li><span class="name">countryCode</span><span class="type">:string</span>
-            </li>
-          </ul>
-        </dt>
-        <dd>Parses a phone number string into a callable format.</dd>
-      </dl>
-      <hr>
+<div class="navbar">
+  <div class="navbar-inner">
+    <ul class="nav">
+      <li><a href="#plugin-att.addressbook">att.addressbook</a></li>
+      <li><a href="#plugin-att.me">att.me</a></li>
+      <li><a href="#plugin-att.messages">att.messages</a></li>
+      <li><a href="#plugin-att.oauth2">att.oauth2</a></li>
+      <li><a href="#plugin-att.phone.generic">att.phone.generic</a></li>
+      <li><a href="#plugin-att.phonenumber">att.phonenumber</a></li>
+    </ul>
+  </div>
+</div>
+<h2 id="plugin-att.addressbook">att.addressbook</h2>
+<p></p>
+<h4>Methods</h4>
+<dl>
+  <dt class="signature"><span class="name">att.addressbook.getContacts</span>
+    <ul class="parameterList">
+    </ul>
+  </dt>
+  <dd></dd>
+  <dt class="signature"><span class="name">att.addressbook.getContact</span>
+    <ul class="parameterList">
+      <li><span class="type">string</span>
+      </li>
+    </ul>
+  </dt>
+  <dd></dd>
+  <dt class="signature"><span class="name">att.addressbook.addContact</span>
+    <ul class="parameterList">
+      <li><span class="type">object</span>
+      </li>
+    </ul>
+  </dt>
+  <dd></dd>
+  <dt class="signature"><span class="name">att.addressbook.updateContact</span>
+    <ul class="parameterList">
+      <li><span class="type">string</span>
+      </li>
+      <li><span class="type">object</span>
+      </li>
+    </ul>
+  </dt>
+  <dd></dd>
+  <dt class="signature"><span class="name">att.addressbook.deleteContact</span>
+    <ul class="parameterList">
+      <li><span class="type">string</span>
+      </li>
+    </ul>
+  </dt>
+  <dd></dd>
+  <dt class="signature"><span class="name">att.addressbook.getGroups</span>
+    <ul class="parameterList">
+    </ul>
+  </dt>
+  <dd></dd>
+  <dt class="signature"><span class="name">att.addressbook.getGroup</span>
+    <ul class="parameterList">
+      <li><span class="type">string</span>
+      </li>
+    </ul>
+  </dt>
+  <dd></dd>
+  <dt class="signature"><span class="name">att.addressbook.addGroup</span>
+    <ul class="parameterList">
+      <li><span class="type">object</span>
+      </li>
+    </ul>
+  </dt>
+  <dd></dd>
+  <dt class="signature"><span class="name">att.addressbook.updateGroup</span>
+    <ul class="parameterList">
+      <li><span class="type">string</span>
+      </li>
+      <li><span class="type">object</span>
+      </li>
+    </ul>
+  </dt>
+  <dd></dd>
+  <dt class="signature"><span class="name">att.addressbook.deleteGroup</span>
+    <ul class="parameterList">
+      <li><span class="type">string</span>
+      </li>
+    </ul>
+  </dt>
+  <dd></dd>
+</dl>
+<h4>Events</h4>
+<ul>
+  <li><a href="events.html#event-addressBookReady">addressBookReady</a></li>
+</ul>
+<hr/>
+<h2 id="plugin-att.me">att.me</h2>
+<p>Helper method for retrieving a user's ATT profile information.</p>
+<h4>Methods</h4>
+<dl>
+  <dt class="signature"><span class="name">att.getMe</span>
+    <ul class="parameterList">
+    </ul>
+  </dt>
+  <dd>Make an AJAX request to retrieve the user's profile information.</dd>
+  <dd class="signature"><span class="name">callback</span>
+    <ul class="parameterList">
+      <li><a href="datatypes.html#type-UserProfile" class="type name">UserProfile</a>
+      </li>
+    </ul>
+  </dd>
+</dl>
+<h4>Events</h4>
+<ul>
+  <li><a href="events.html#event-user">user</a></li>
+</ul>
+<hr/>
+<h2 id="plugin-att.messages">att.messages</h2>
+<p></p>
+<h4>Methods</h4>
+<dl>
+  <dt class="signature"><span class="name">att.messages.sendMessage</span>
+    <ul class="parameterList">
+      <li><span class="type">string</span>
+      </li>
+      <li><span class="type">string</span>
+      </li>
+    </ul>
+  </dt>
+  <dd></dd>
+  <dt class="signature"><span class="name">att.messages.getMessages</span>
+    <ul class="parameterList">
+    </ul>
+  </dt>
+  <dd></dd>
+  <dt class="signature"><span class="name">att.messages.getMessage</span>
+    <ul class="parameterList">
+      <li><span class="type">string</span>
+      </li>
+    </ul>
+  </dt>
+  <dd></dd>
+  <dt class="signature"><span class="name">att.messages.deleteMessage</span>
+    <ul class="parameterList">
+      <li><span class="type">string</span>
+      </li>
+    </ul>
+  </dt>
+  <dd></dd>
+  <dt class="signature"><span class="name">att.messages.searchByNumber</span>
+    <ul class="parameterList">
+      <li><span class="type">string</span>
+      </li>
+    </ul>
+  </dt>
+  <dd></dd>
+</dl>
+<h4>Events</h4>
+<ul>
+  <li><a href="events.html#event-messagesReady">messagesReady</a></li>
+</ul>
+<hr/>
+<h2 id="plugin-att.oauth2">att.oauth2</h2>
+<p>This plugin allows easy user login and authorization from the att oauth system</p>
+<h4>Methods</h4>
+<dl>
+  <dt class="signature"><span class="name">authorizeURL</span>
+    <ul class="parameterList">
+    </ul>
+  </dt>
+  <dd>Returns an oauth authorize url for the configured client.</dd>
+  <dd class="signature"><span class="name">callback</span>
+    <ul class="parameterList">
+      <li><a href="datatypes.html#type-UserProfile" class="type name">UserProfile</a>
+      </li>
+    </ul>
+  </dd>
+  <dt class="signature"><span class="name">login</span>
+    <ul class="parameterList">
+    </ul>
+  </dt>
+  <dd>Validated accessToken or updates elements with btn-att-login class with authroizeURL to fetch an accessToken.</dd>
+  <dd class="signature"><span class="name">callback</span>
+    <ul class="parameterList">
+      <li><a href="datatypes.html#type-UserProfile" class="type name">UserProfile</a>
+      </li>
+    </ul>
+  </dd>
+</dl>
+<hr/>
+<h2 id="plugin-att.phone.generic">att.phone.generic</h2>
+<p>Common interface for making and receiving phone calls.</p>
+<h4>Methods</h4>
+<dl>
+  <dt class="signature"><span class="name">att.dial</span>
+    <ul class="parameterList">
+      <li><span class="name">phoneNumber</span><span class="type">:string</span>
+      </li>
+    </ul>
+  </dt>
+  <dd>Dial a number and make an outgoing call.</dd>
+</dl>
+<h4>Events</h4>
+<ul>
+  <li><a href="events.html#event-phoneReady">phoneReady</a></li>
+  <li><a href="events.html#event-phoneError">phoneError</a></li>
+  <li><a href="events.html#event-calling">calling</a></li>
+  <li><a href="events.html#event-outgoingCall">outgoingCall</a></li>
+  <li><a href="events.html#event-incomingCall">incomingCall</a></li>
+  <li><a href="events.html#event-ring">ring</a></li>
+  <li><a href="events.html#event-callBegin">callBegin</a></li>
+  <li><a href="events.html#event-callEnd">callEnd</a></li>
+  <li><a href="events.html#event-callError">callError</a></li>
+</ul>
+<hr/>
+<h2 id="plugin-att.phonenumber">att.phonenumber</h2>
+<p>A set of helper functions for parsing and processing phone number strings.</p>
+<h4>Methods</h4>
+<dl>
+  <dt class="signature"><span class="name">att.phoneNumber.stringify</span>
+    <ul class="parameterList">
+      <li><span class="type">string</span>
+      </li>
+    </ul>
+  </dt>
+  <dd>Format a phone number to include dashes and parenthesis.</dd>
+  <dt class="signature"><span class="name">att.phoneNumber.parse</span>
+    <ul class="parameterList">
+      <li><span class="type">string</span>
+      </li>
+    </ul>
+  </dt>
+  <dd>Convert a phone number that uses letters into numeric format.</dd>
+  <dt class="signature"><span class="name">att.phoneNumber.getCallable</span>
+    <ul class="parameterList">
+      <li><span class="type">string</span>
+      </li>
+      <li><span class="name">countryCode</span><span class="type">:string</span>
+      </li>
+    </ul>
+  </dt>
+  <dd>Parses a phone number string into a callable format.</dd>
+</dl>
+<hr/>
     </div>
   </body>
 </html>
