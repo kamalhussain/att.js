@@ -89,5 +89,4 @@ module.exports = function (result) {
     });
 
     return out.join('');
-
 };

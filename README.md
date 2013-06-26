@@ -24,6 +24,10 @@ att.on('callEnd', function (call) {
 
 ```
 
+## Documentation
+* [Architectural Overview](docs/architecture.md)
+* [Plugin Interfaces](docs/plugins.md)
+
 ## Configuring att.js
 
 The core of `att.js` is an event emitter, which collects all of events from 
@@ -35,7 +39,7 @@ loaded plugins in a single place.
 
 ### User Events
 
-* `authorized`
+* `accessToken`
 * `user`
 
 ### Phone Events
@@ -84,7 +88,7 @@ The available call events are:
 * `outgoingCall`
 * `callBegin`
 * `callEnd`
-* `error`
+* `callError`
 
 Once a call object has been created, you can control and interact with the call
 session using:
@@ -146,7 +150,7 @@ Plugins for att.js follow the jQuery pattern, and look like:
 
 ### Steps
 
-1. install dependencies:
+1. Install dependencies:
 
 ```
 npm install .
@@ -154,10 +158,16 @@ npm install .
 
 2. Make edits in `/src`
 
-3. build att.js and minified version
+3. Build documentation
 
 ```
-node build.js
+npm run-script build
+```
+
+4. Test
+Uses qunit for testing in the browser
+```
+open testing/index.html 
 ```
 
 ## Credits

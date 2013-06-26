@@ -2,11 +2,10 @@
 // spec data.
 var fs = require('fs'),
     path = require('path'),
-    _ = require('underscore'),
-    renderMarkdown = require('./renderMarkdown');
+    _ = require('underscore');
 
 module.exports = function () {
-    var localFiles = fs.readdirSync('./src'),
+    var localFiles = fs.readdirSync('.'),
     specFiles = [];
 
     localFiles.forEach(function (filename) {

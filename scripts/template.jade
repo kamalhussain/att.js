@@ -1,0 +1,41 @@
+doctype 5
+html
+  head
+    link(type='text/css', rel='stylesheet', href='http://twitter.github.io/bootstrap/assets/css/bootstrap.css')
+  body
+    .container
+      h1 ATT.js Plugin Documentation
+      .navbar
+        .navbar-inner
+          ul.nav
+            - for (var plugin in spec)
+              li
+                a(href= "##{spec[plugin].plugin}")= spec[plugin].plugin
+
+      each plugin, pluginName in spec
+        h2(id='plugin-'+pluginName)= pluginName
+
+      h1 Data Types
+      each dataType, typeName in datatypeIndex
+        h3(id='type-'+typeName)= typeName
+        p= dataType.type.description
+        -if (dataType.type.methods && Object.keys(dataType.type.methods).length)
+          h4 Methods
+          dl
+            each method, methodName in dataType.type.methods
+              dt= methodName + '('
+                - if (method.parameters)
+                  each param in method.parameters
+                    span= param.type
+                    span= param.name
+                span )
+              dd= method.description
+
+      h1 Event Index
+      each eventInfo, eventName in eventIndex
+        h3(id='event-'+eventName)= eventName
+        dl
+        each source in eventInfo
+          dt
+            a(href='#plugin-'+source.plugin)= source.plugin
+          dd= source.event.description
