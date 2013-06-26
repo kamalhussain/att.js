@@ -5,7 +5,7 @@ var fs = require('fs'),
     _ = require('underscore');
 
 module.exports = function () {
-    var localFiles = fs.readdirSync('.'),
+    var localFiles = fs.readdirSync('./src'),
     specFiles = [];
 
     localFiles.forEach(function (filename) {

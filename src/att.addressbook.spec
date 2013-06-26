@@ -2,14 +2,14 @@
     "plugin": "att.addressbook",
     "description": "",
     "methods": {
-        "getContacts": {
+        "att.addressbook.getContacts": {
             "description": "",
             "parameters": [
             ],
             "callbackArgs": [
             ]
         },
-        "getContact": {
+        "att.addressbook.getContact": {
             "description": "",
             "parameters": [
                 {"type": "string"}
@@ -17,7 +17,7 @@
             "callbackArgs": [
             ]
         },
-        "addContact": {
+        "att.addressbook.addContact": {
             "description": "",
             "parameters": [
                 {"type": "object"}
@@ -25,7 +25,7 @@
             "callbackArgs": [
             ]
         },
-        "updateContact": {
+        "att.addressbook.updateContact": {
             "description": "",
             "parameters": [
                 {"type": "string"},
@@ -34,7 +34,7 @@
             "callbackArgs": [
             ]
         },
-        "deleteContact": {
+        "att.addressbook.deleteContact": {
             "description": "",
             "parameters": [
                 {"type": "string"}
@@ -42,14 +42,14 @@
             "callbackArgs": [
             ]
         },
-        "getGroups": {
+        "att.addressbook.getGroups": {
             "description": "",
             "parameters": [
             ],
             "callbackArgs": [
             ]
         },
-        "getGroup": {
+        "att.addressbook.getGroup": {
             "description": "",
             "parameters": [
                 {"type": "string"}
@@ -57,7 +57,7 @@
             "callbackArgs": [
             ]
         },
-        "addGroup": {
+        "att.addressbook.addGroup": {
             "description": "",
             "parameters": [
                 {"type": "object"}
@@ -65,7 +65,7 @@
             "callbackArgs": [
             ]
         },
-        "updateGroup": {
+        "att.addressbook.updateGroup": {
             "description": "",
             "parameters": [
                 {"type": "string"},
@@ -74,7 +74,7 @@
             "callbackArgs": [
             ]
         },
-        "deleteGroup": {
+        "att.addressbook.deleteGroup": {
             "description": "",
             "parameters": [
                 {"type": "string"}

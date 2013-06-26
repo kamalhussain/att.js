@@ -2,10 +2,10 @@
     "plugin": "att.phone.generic",
     "description": "Common interface for making and receiving phone calls.",
     "methods": {
-        "dial": {
+        "att.dial": {
             "description": "Dial a number and make an outgoing call.",
             "parameters": [
-                {"name": "Phone Number", "type": "string"}
+                {"name": "phoneNumber", "type": "string"}
             ],
             "returns": "Call"
         }
@@ -18,7 +18,7 @@
             "description": "Raised when the phone backend could not be initialized."
         },
         "calling": {
-            "description": "Raised with the phone number be dialed on an outgoing call.",
+            "description": "Raised with the phone number being dialed on an outgoing call.",
             "args": [
                 {"type": "string"}
             ]
@@ -73,7 +73,13 @@
                 "hangup": {
                     "description": "Decline, or end an existing, phone call"
                 }
-            }
+            },
+            "events": [
+                "ring",
+                "callBegin",
+                "callEnd",
+                "callError"
+            ]
         }
     }
 }

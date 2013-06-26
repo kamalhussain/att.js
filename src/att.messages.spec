@@ -2,7 +2,7 @@
     "plugin": "att.messages",
     "description": "",
     "methods": {
-        "sendMessage": {
+        "att.messages.sendMessage": {
             "description": "",
             "parameters": [
                 {"type": "string"},
@@ -11,22 +11,14 @@
             "callbackArgs": [
             ]
         },
-        "getMessages": {
+        "att.messages.getMessages": {
             "description": "",
             "parameters": [
             ],
             "callbackArgs": [
             ]
         },
-        "getMessage": {
-            "description": "",
-            "parameters": [
-                {"type": "string"}
-            ],
-            "callbackArgs": [
-            ]
-        },
-        "deleteMessage": {
+        "att.messages.getMessage": {
             "description": "",
             "parameters": [
                 {"type": "string"}
@@ -34,7 +26,15 @@
             "callbackArgs": [
             ]
         },
-        "searchByNumber": {
+        "att.messages.deleteMessage": {
+            "description": "",
+            "parameters": [
+                {"type": "string"}
+            ],
+            "callbackArgs": [
+            ]
+        },
+        "att.messages.searchByNumber": {
             "description": "",
             "parameters": [
                 {"type": "string"}

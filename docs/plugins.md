@@ -6,34 +6,34 @@
 
 ### Methods
 
-  - getContacts()
+  - att.addressbook.getContacts()
 
     
-  - getContact(string)
+  - att.addressbook.getContact(string)
 
     
-  - addContact(object)
+  - att.addressbook.addContact(object)
 
     
-  - updateContact(string, object)
+  - att.addressbook.updateContact(string, object)
 
     
-  - deleteContact(string)
+  - att.addressbook.deleteContact(string)
 
     
-  - getGroups()
+  - att.addressbook.getGroups()
 
     
-  - getGroup(string)
+  - att.addressbook.getGroup(string)
 
     
-  - addGroup(object)
+  - att.addressbook.addGroup(object)
 
     
-  - updateGroup(string, object)
+  - att.addressbook.updateGroup(string, object)
 
     
-  - deleteGroup(string)
+  - att.addressbook.deleteGroup(string)
 
     
 
@@ -49,7 +49,7 @@ Helper method for retrieving a user's ATT profile information.
 
 ### Methods
 
-  - getMe()
+  - att.getMe()
 
     Make an AJAX request to retrieve the user's profile information.
 
@@ -65,19 +65,19 @@ Helper method for retrieving a user's ATT profile information.
 
 ### Methods
 
-  - sendMessage(string, string)
+  - att.messages.sendMessage(string, string)
 
     
-  - getMessages()
+  - att.messages.getMessages()
 
     
-  - getMessage(string)
+  - att.messages.getMessage(string)
 
     
-  - deleteMessage(string)
+  - att.messages.deleteMessage(string)
 
     
-  - searchByNumber(string)
+  - att.messages.searchByNumber(string)
 
     
 
@@ -106,7 +106,7 @@ Common interface for making and receiving phone calls.
 
 ### Methods
 
-  - dial(string Phone Number)
+  - att.dial(string phoneNumber)
 
     Dial a number and make an outgoing call.
 
@@ -122,7 +122,7 @@ Common interface for making and receiving phone calls.
 
   - <a id="att.phone.generic-event-calling"></a>calling, called with: string
 
-    Raised with the phone number be dialed on an outgoing call.
+    Raised with the phone number being dialed on an outgoing call.
 
   - <a id="att.phone.generic-event-outgoingCall"></a>outgoingCall, called with: [Call](#att.phone.generic-datatype-Call), callerDisplayName (string)
 
@@ -154,13 +154,13 @@ A set of helper functions for parsing and processing phone number strings.
 
 ### Methods
 
-  - stringify(string)
+  - att.phoneNumber.stringify(string)
 
     Format a phone number to include dashes and parenthesis.
-  - parse(string)
+  - att.phoneNumber.parse(string)
 
     Convert a phone number that uses letters into numeric format.
-  - getCallable(string, string countryCode)
+  - att.phoneNumber.getCallable(string, string countryCode)
 
     Parses a phone number string into a callable format.
 

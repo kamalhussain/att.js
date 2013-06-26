@@ -1,0 +1,33 @@
+doctype 5
+html
+  head
+    link(type='text/css', rel='stylesheet', href='http://twitter.github.io/bootstrap/assets/css/bootstrap.css')
+  body
+    .container
+      h1: a(href="index.html") ATT.js Documentation
+      .navbar
+        .navbar-inner
+          ul.nav
+            li
+              a(href="plugins.html") Plugins
+            li
+              a(href="datatypes.html") Data Types
+            li
+              a(href="events.html") Event Index
+
+      h2 Contents
+      h3 Plugins
+      ul
+        each plugin, pluginName in spec
+          li
+            a(href="plugins.html#plugin-" + pluginName)= pluginName
+      h3 Data Types
+      ul
+        each dataType, typeName in datatypeIndex
+          li
+            a(href="datatypes.html#type-" + typeName)= typeName
+      h3 Events
+      ul
+        each eventInfo, eventName in eventIndex
+          li
+            a(href="events.html#event-" + eventName)= eventName

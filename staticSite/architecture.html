@@ -1,4 +1,22 @@
-# ATT.js Architecture
+<!DOCTYPE html>
+<html>
+  <head>
+    <link type="text/css" rel="stylesheet" href="http://twitter.github.io/bootstrap/assets/css/bootstrap.css">
+  </head>
+  <body>
+    <div class="container">
+      <h1><a href="index.html">ATT.js Documentation</a></h1>
+      <div class="navbar">
+        <div class="navbar-inner">
+          <ul class="nav">
+            <li><a href="architecture.html">Architecture</a></li>
+            <li><a href="plugins.html">Plugins</a></li>
+            <li><a href="datatypes.html">Data Types</a></li>
+            <li><a href="events.html">Event Index</a></li>
+          </ul>
+        </div>
+      </div>
+      <h2>Architecture</h2># ATT.js Architecture
 
 ATT.js is an event emitter framework, which allows for plugins to interact via events using ATT.js as a message bus.
 
@@ -16,11 +34,11 @@ The goal is that various user interface components can register handlers for sta
 By using the event pattern, multiple handlers may be registered for a single action, instead of a single callback function. This allows for multiple UI components to be easily kept in sync without coupling.
 
 
-Including plugins is done by inserting additional `<script />` tags after the main `att.js` script:
+Including plugins is done by inserting additional `&lt;script /&gt;` tags after the main `att.js` script:
 
-    <script src="att.js" />
-    <script src="att.me.js />
-    <script src="att.phonenumber.js" />
+    &lt;script src=&quot;att.js&quot; /&gt;
+    &lt;script src=&quot;att.me.js /&gt;
+    &lt;script src=&quot;att.phonenumber.js&quot; /&gt;
     ...
 
 ## Creating a Plugin
@@ -85,47 +103,47 @@ An ATT.js plugin works similarly to a jQuery plugin, extending the core `ATT` ob
   In order to automatically generate useful documentation for all att.js plugins, a plugin should provide a spec file describing the methods it provides, and any events it emits. An example spec file that uses all of the available features would look like:
 
         {
-            "plugin": "my.plugin",
-            "description": "A demo plugin for demonstrating spec files",
-            "methods": {
-                "runFoo": {
-                    "description": "Calculates and returns foo directly, and via a callback.",
-                    "parameters": [
-                        {"name": "InitialValue", "type": "BarData"}
+            &quot;plugin&quot;: &quot;my.plugin&quot;,
+            &quot;description&quot;: &quot;A demo plugin for demonstrating spec files&quot;,
+            &quot;methods&quot;: {
+                &quot;runFoo&quot;: {
+                    &quot;description&quot;: &quot;Calculates and returns foo directly, and via a callback.&quot;,
+                    &quot;parameters&quot;: [
+                        {&quot;name&quot;: &quot;InitialValue&quot;, &quot;type&quot;: &quot;BarData&quot;}
                     ],
-                    "returns": "BarData",
-                    "callbackArgs": [
-                        {"name": "SomeOutputValue", "type": "BarData"}
+                    &quot;returns&quot;: &quot;BarData&quot;,
+                    &quot;callbackArgs&quot;: [
+                        {&quot;name&quot;: &quot;SomeOutputValue&quot;, &quot;type&quot;: &quot;BarData&quot;}
                     ]
                 }
             },
-            "events": {
-                "success": {
-                    "description": "Things worked!",
-                    "args": [
-                        {"name": "ResultCode", "type": "string"}
+            &quot;events&quot;: {
+                &quot;success&quot;: {
+                    &quot;description&quot;: &quot;Things worked!&quot;,
+                    &quot;args&quot;: [
+                        {&quot;name&quot;: &quot;ResultCode&quot;, &quot;type&quot;: &quot;string&quot;}
                     ]
                 },
-                "failed": {
-                    "description": "Things didn't work",
-                    "args": [
-                          {"name": "ResultCode", "type": "string"}
+                &quot;failed&quot;: {
+                    &quot;description&quot;: &quot;Things didn't work&quot;,
+                    &quot;args&quot;: [
+                          {&quot;name&quot;: &quot;ResultCode&quot;, &quot;type&quot;: &quot;string&quot;}
                     ]
                 },
-                "pong": {
-                    "description": "Ping Pong!"
+                &quot;pong&quot;: {
+                    &quot;description&quot;: &quot;Ping Pong!&quot;
                 }
             },
-            "datatypes": {
-                "BarData": {
-                    "description": "A dictionary of data about bar",
-                    "methods": {
-                        "ping": {
-                            "description": "Ping something"
+            &quot;datatypes&quot;: {
+                &quot;BarData&quot;: {
+                    &quot;description&quot;: &quot;A dictionary of data about bar&quot;,
+                    &quot;methods&quot;: {
+                        &quot;ping&quot;: {
+                            &quot;description&quot;: &quot;Ping something&quot;
                         }
                     },
-                    "events": [
-                        "pong"
+                    &quot;events&quot;: [
+                        &quot;pong&quot;
                     ]
                 }
             }
@@ -139,7 +157,7 @@ An ATT.js plugin works similarly to a jQuery plugin, extending the core `ATT` ob
 
         module('foo');
 
-        test("Ensure that runFoo returns BarData", function() {
+        test(&quot;Ensure that runFoo returns BarData&quot;, function() {
             // How many assertions to expect during this test
             expect(2);
 
@@ -156,29 +174,33 @@ An ATT.js plugin works similarly to a jQuery plugin, extending the core `ATT` ob
 
   After saving the test suite in `testing/tests/foo.js` the `testing/index.html` file is updated to include both the plugin being tested, and the test suite:
 
-        <!DOCTYPE html>
-        <html>
-            <head>
-                <meta charset="utf-8">
-                <title>att.js core tests</title>
-                <link rel="stylesheet" href="qunit.css">
-            </head>
-            <body>
-                <div id="qunit"></div>
-                <div id="qunit-fixture"></div>
-                <script src="qunit.js"></script>
-                <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-                <!-- the scripts we're testing -->
-                <script src="../src/att.js"></script>
+        &lt;!DOCTYPE html&gt;
+        &lt;html&gt;
+            &lt;head&gt;
+                &lt;meta charset=&quot;utf-8&quot;&gt;
+                &lt;title&gt;att.js core tests&lt;/title&gt;
+                &lt;link rel=&quot;stylesheet&quot; href=&quot;qunit.css&quot;&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+                &lt;div id=&quot;qunit&quot;&gt;&lt;/div&gt;
+                &lt;div id=&quot;qunit-fixture&quot;&gt;&lt;/div&gt;
+                &lt;script src=&quot;qunit.js&quot;&gt;&lt;/script&gt;
+                &lt;script src=&quot;//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js&quot;&gt;&lt;/script&gt;
+                &lt;!-- the scripts we're testing --&gt;
+                &lt;script src=&quot;../src/att.js&quot;&gt;&lt;/script&gt;
                 ...
-                <script src="../src/foo.js"></script><!-- The plugin to test -->
+                &lt;script src=&quot;../src/foo.js&quot;&gt;&lt;/script&gt;&lt;!-- The plugin to test --&gt;
         
-                <!-- the tests -->
-                <script src="tests/core.js"></script>
-                <script src="tests/phoneNumber.js"></script>
+                &lt;!-- the tests --&gt;
+                &lt;script src=&quot;tests/core.js&quot;&gt;&lt;/script&gt;
+                &lt;script src=&quot;tests/phoneNumber.js&quot;&gt;&lt;/script&gt;
                 ...
-                <script src="tests/foo.js"></script><!-- The test suite -->
-            </body>
-        </html>       
+                &lt;script src=&quot;tests/foo.js&quot;&gt;&lt;/script&gt;&lt;!-- The test suite --&gt;
+            &lt;/body&gt;
+        &lt;/html&gt;       
 
   Running the entire collection of test suites is done by opening `testing/index.html` in the browser version you wish to test against.
+
+    </div>
+  </body>
+</html>

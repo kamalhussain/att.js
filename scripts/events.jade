@@ -1,0 +1,45 @@
+doctype 5
+html
+  head
+    link(type='text/css', rel='stylesheet', href='http://twitter.github.io/bootstrap/assets/css/bootstrap.css')
+    link(type='text/css', rel='stylesheet', href='styles.css')
+  body
+    .container
+      h1: a(href="index.html") ATT.js Documentation
+      .navbar
+        .navbar-inner
+          ul.nav
+            li
+              a(href="plugins.html") Plugins
+            li
+              a(href="datatypes.html") Data Types
+            li
+              a(href="events.html") Event Index
+
+      h2 Event Index
+      each eventInfo, eventName in eventIndex
+        h3(id='event-'+eventName)= eventName
+        dl
+          each source in eventInfo
+            dt
+              a(href='plugins.html#plugin-'+source.plugin)= source.plugin
+            -if (source.event.args)
+              dd.signature
+                span.name= eventName
+                ul.parameterList
+                  each param in source.event.args
+                    -if (param.name)
+                      li
+                        span.name= param.name 
+                        -if (!builtins[param.type])
+                          a.type(href="datatypes.html#type-" + param.type)= ':' + param.type
+                        -else
+                          span.type= ':' + param.type
+                    -else
+                      li
+                        -if (!builtins[param.type])
+                          a.type.name(href="datatypes.html#type-" + param.type)= param.type
+                        -else
+                          span.type= param.type
+
+            dd= source.event.description
