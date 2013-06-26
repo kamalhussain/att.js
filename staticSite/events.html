@@ -1,1 +1,136 @@
-[object Object]
+<!DOCTYPE html>
+<html>
+  <head>
+    <link type="text/css" rel="stylesheet" href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="container">
+      <h1><a href="index.html">ATT.js Documentation</a></h1>
+      <div class="navbar navbar-fixed">
+        <div class="navbar-inner">
+          <ul class="nav">
+            <li><a href="plugins.html">Plugins</a></li>
+            <li><a href="datatypes.html">Data Types</a></li>
+            <li><a href="events.html">Event Index</a></li>
+          </ul>
+        </div>
+      </div>
+<h2>Event Index</h2>
+<h3 id="event-addressBookReady">addressBookReady</h3>
+<dl>
+  <dt><a href="plugins.html#plugin-att.addressbook">att.addressbook</a></dt>
+  <dd>Raised when the addressbook object has been created with an access token.</dd>
+</dl>
+<h3 id="event-user">user</h3>
+<dl>
+  <dt><a href="plugins.html#plugin-att.me">att.me</a></dt>
+  <dd class="signature"><span class="name">user</span>
+    <ul class="parameterList">
+      <li><a href="datatypes.html#type-UserProfile" class="type name">UserProfile</a>
+      </li>
+    </ul>
+  </dd>
+  <dd>Raised when the user's profile information has been retrieved. Suitable for other plugins to listen for to finish their own initialization steps</dd>
+</dl>
+<h3 id="event-messagesReady">messagesReady</h3>
+<dl>
+  <dt><a href="plugins.html#plugin-att.messages">att.messages</a></dt>
+  <dd>Raised when the messages object has been created with an access token.</dd>
+</dl>
+<h3 id="event-phoneReady">phoneReady</h3>
+<dl>
+  <dt><a href="plugins.html#plugin-att.phone.generic">att.phone.generic</a></dt>
+  <dd>Raised when the phone backend has been initialized and is ready to make or receive calls.</dd>
+</dl>
+<h3 id="event-phoneError">phoneError</h3>
+<dl>
+  <dt><a href="plugins.html#plugin-att.phone.generic">att.phone.generic</a></dt>
+  <dd>Raised when the phone backend could not be initialized.</dd>
+</dl>
+<h3 id="event-calling">calling</h3>
+<dl>
+  <dt><a href="plugins.html#plugin-att.phone.generic">att.phone.generic</a></dt>
+  <dd class="signature"><span class="name">calling</span>
+    <ul class="parameterList">
+      <li><span class="type">string</span>
+      </li>
+    </ul>
+  </dd>
+  <dd>Raised with the phone number being dialed on an outgoing call.</dd>
+</dl>
+<h3 id="event-outgoingCall">outgoingCall</h3>
+<dl>
+  <dt><a href="plugins.html#plugin-att.phone.generic">att.phone.generic</a></dt>
+  <dd class="signature"><span class="name">outgoingCall</span>
+    <ul class="parameterList">
+      <li><a href="datatypes.html#type-Call" class="type name">Call</a>
+      </li>
+      <li><span class="name">callerDisplayName</span><span class="type">:string</span>
+      </li>
+    </ul>
+  </dd>
+  <dd>Raised with a Call object for managing an outgoing call, and the phone number that is being dialed.</dd>
+</dl>
+<h3 id="event-incomingCall">incomingCall</h3>
+<dl>
+  <dt><a href="plugins.html#plugin-att.phone.generic">att.phone.generic</a></dt>
+  <dd class="signature"><span class="name">incomingCall</span>
+    <ul class="parameterList">
+      <li><a href="datatypes.html#type-Call" class="type name">Call</a>
+      </li>
+      <li><span class="name">callerDisplayName</span><span class="type">:string</span>
+      </li>
+    </ul>
+  </dd>
+  <dd>Raised with a Call object for managing an incoming call, and the phone number of the caller.</dd>
+</dl>
+<h3 id="event-ring">ring</h3>
+<dl>
+  <dt><a href="plugins.html#plugin-att.phone.generic">att.phone.generic</a></dt>
+  <dd class="signature"><span class="name">ring</span>
+    <ul class="parameterList">
+      <li><a href="datatypes.html#type-Call" class="type name">Call</a>
+      </li>
+      <li><span class="name">callerDisplayName</span><span class="type">:string</span>
+      </li>
+    </ul>
+  </dd>
+  <dd>A signal that a call request is in progress.</dd>
+</dl>
+<h3 id="event-callBegin">callBegin</h3>
+<dl>
+  <dt><a href="plugins.html#plugin-att.phone.generic">att.phone.generic</a></dt>
+  <dd class="signature"><span class="name">callBegin</span>
+    <ul class="parameterList">
+      <li><a href="datatypes.html#type-Call" class="type name">Call</a>
+      </li>
+    </ul>
+  </dd>
+  <dd>Raised when a call has been answered and is ready for use.</dd>
+</dl>
+<h3 id="event-callEnd">callEnd</h3>
+<dl>
+  <dt><a href="plugins.html#plugin-att.phone.generic">att.phone.generic</a></dt>
+  <dd class="signature"><span class="name">callEnd</span>
+    <ul class="parameterList">
+      <li><a href="datatypes.html#type-Call" class="type name">Call</a>
+      </li>
+    </ul>
+  </dd>
+  <dd>Raised when a call has been hung up.</dd>
+</dl>
+<h3 id="event-callError">callError</h3>
+<dl>
+  <dt><a href="plugins.html#plugin-att.phone.generic">att.phone.generic</a></dt>
+  <dd class="signature"><span class="name">callError</span>
+    <ul class="parameterList">
+      <li><a href="datatypes.html#type-Call" class="type name">Call</a>
+      </li>
+    </ul>
+  </dd>
+  <dd>Emitted when an error has occured while establishing or during a call.</dd>
+</dl>
+    </div>
+  </body>
+</html>
