@@ -4,7 +4,8 @@ test("Basic init and event tests for WCG plugin: make a call", function () {
     // how many assertions to expect
     var client_id = "bnaetrgxhg1hwcqqgczteolaokbugmvg";
     var redirect_uri = "http://localhost/testing";
-    var nb_to_dial = '1-804-222-1111';
+    var nb_to_dial = '1 (804) 222-1111';
+    //var nb_to_dial = 'sip:zia@webims.tfoundry.com';
     //N.B.: Before running this test, make sure that index.html page is located under http://localhost/testing.
     //If not, change the client_id and the redirect_uri accordingly.
     expect(12);
@@ -13,7 +14,6 @@ test("Basic init and event tests for WCG plugin: make a call", function () {
         clientID: client_id,
         scope: 'profile,webrtc',
         redirectURI: redirect_uri,
-        server: "alpha1"
     });
     ok(att, "att is instantiated");
 
@@ -48,15 +48,34 @@ test("Basic init and event tests for WCG plugin: make a call", function () {
 
         att.on("calling", function (dialedNumber) {
             ok("calling", "calling: calling " + dialedNumber);
-            equal(ATT.phoneNumber.parse(nb_to_dial), dialedNumber, "calling: Dialed number: " + dialedNumber);
+            var number = dialedNumber;
+            var sipOccurence = dialedNumber.match(/sip\:([^@]*)@/);
+            if (!sipOccurence) {
+                number = ATT.phoneNumber.parse(dialedNumber);
+                number = ATT.phoneNumber.getCallable(number);
+
+                nb_to_dial = ATT.phoneNumber.parse(nb_to_dial);
+                nb_to_dial = ATT.phoneNumber.getCallable(nb_to_dial);
+            }
+
+            equal(number, nb_to_dial, "calling: Dialed number: " + dialedNumber);
         });
 
 
-        att.on("ring", function (call) {
-            ok("outgoingCall", "ring: Number has been dialed");
-            var numberToMatch = call.remotePeer.match(/sip\:([^@]*)@/);
-            var number = numberToMatch ? numberToMatch[1] : null;
-            equal(number, ATT.phoneNumber.parse(nb_to_dial), "Dialed number: " + number);
+        att.on("outgoingCall", function (call) {
+            ok("outgoingCall", "outgoingCall: Number has been dialed");
+
+            var number = call.remotePeer;
+            var sipOccurence = number.match(/sip\:([^@]*)@/);
+            if (sipOccurence) {
+                number = sipOccurence[1];
+            }
+
+            nb_to_dial = ATT.phoneNumber.parse(nb_to_dial);
+            nb_to_dial = ATT.phoneNumber.getCallable(nb_to_dial);
+
+
+            equal(number, nb_to_dial, "Dialed number: " + call.remotePeer);
 
         });
 
@@ -87,8 +106,7 @@ test("Basic init and event tests for WCG plugin: make a call", function () {
 
         });
 
-    }
-    else {
+    } else {
         window.location.href = att.oauth2.authorizeURL();
     }
 

@@ -1,13 +1,12 @@
-module('wcg.phonehangup');
+module('wcg.receivephonecall');
 
-test("Basic init and event tests for WCG plugin: hangup a phone call", function () {
+test("Basic init and event tests for WCG plugin: receive a call", function () {
     // how many assertions to expect
     var client_id = "bnaetrgxhg1hwcqqgczteolaokbugmvg";
     var redirect_uri = "http://localhost/testing";
     var nb_to_dial = '1-804-222-1111';
     //N.B.: Before running this test, make sure that index.html page is located under http://localhost/testing.
     //If not, change the client_id and the redirect_uri accordingly.
-    expect(12);
 
     att = new ATT({
         clientID: client_id,
@@ -37,52 +36,20 @@ test("Basic init and event tests for WCG plugin: hangup a phone call", function 
             ok("phoneReady", "phoneReady: Phone is ready");
             ok(att.wcgBackend.wcgService._sessionID, "User has a session id: registered");
             //make a call to a test number that automatically reads your phone number and ends the call: callBegin should be raised.
-            att.dial(nb_to_dial);
-
         });
 
-        att.on("ring", function (call) {
-            ok("ring", "ring: Phone has rung");
+        att.on("incomingCall", function (call) {
+            ok("incomingCall", "incomingCall: Call from " + call.remotePeer);
+            setTimeout(function () {
+                call.answer();
+            }, 10000);
         });
-
-        att.on("calling", function (dialedNumber) {
-            ok("calling", "calling: calling " + dialedNumber);
-            var number = dialedNumber;
-            var sipOccurence = dialedNumber.match(/sip\:([^@]*)@/);
-            if (!sipOccurence) {
-                number = ATT.phoneNumber.parse(dialedNumber);
-                number = ATT.phoneNumber.getCallable(number);
-
-                nb_to_dial = ATT.phoneNumber.parse(nb_to_dial);
-                nb_to_dial = ATT.phoneNumber.getCallable(nb_to_dial);
-            }
-
-            equal(number, nb_to_dial, "calling: Dialed number: " + dialedNumber);
-        });
-
-        att.on("outgoingCall", function (call) {
-            ok("outgoingCall", "outgoingCall: Number has been dialed");
-
-            var number = call.remotePeer;
-            var sipOccurence = number.match(/sip\:([^@]*)@/);
-            if (sipOccurence) {
-                number = sipOccurence[1];
-            }
-
-            nb_to_dial = ATT.phoneNumber.parse(nb_to_dial);
-            nb_to_dial = ATT.phoneNumber.getCallable(nb_to_dial);
-
-
-            equal(number, nb_to_dial, "Dialed number: " + call.remotePeer);
-
-        });
-
 
         att.on("callBegin", function (call) {
-            ok("callBegin", "callBegin: Call has begun");
-            setTimeout(function() {
+
+            setTimeout(function () {
                 call.hangup();
-            }, 3000);
+            }, 15000);
         });
 
         att.on("callEnd", function (call) {
@@ -91,9 +58,9 @@ test("Basic init and event tests for WCG plugin: hangup a phone call", function 
         });
 
         att.on("phoneClose", function () {
-            ok("phoneClose", "Phone is close");
+            ok("phoneClose", "phoneClose: Phone is close");
             //check if user has logged out
-            equal(att.wcgBackend.wcgService, null, "phoneClose: User has logged out");
+            equal(att.wcgBackend.wcgService, null, "User has logged out");
             start();
         });
 
