@@ -12,7 +12,6 @@
 
     <script src="../src/att.js"></script>
     <script src="../src/att.me.js"></script>
-    <script src="../src/att.oauth2.js"></script>
     <script src="../src/att.phonenumber.js"></script>
 
 
@@ -20,10 +19,6 @@
     <script src="../vendor/wcg/WCGapi.js"></script>
     <script src="../vendor/wcg/att.wcg.js"></script>
 
-    <!--
-    <script src="../vendor/phono.06.js"></script>
-    <script src="../vendor/phono-webrtc.js"></script>
-    -->
 
 </head>
 
@@ -32,7 +27,7 @@
 
 <div id="main" class="container">
     <div class="page-header">
-        <h1>WCG PSTN Breakout</h1>
+        <h1>WCG Video</h1>
     </div>
 
     <div class="row">
@@ -49,7 +44,7 @@
 
                     <div class="control-group">
                         <label for="number">to</label>
-                        <input type="text" id="number" class="input-medium" type="" value="1-804-222-1111"/>
+                        <input type="text" id="number" class="input-medium" type="" value="sip:stoffe@webims.tfoundry.com"/>
                     </div>
                     <div>
                         <!--<input type="button" id="dial" class="btn btn-primary btn-large input-block-level" value="Dial" disabled>-->
@@ -58,126 +53,59 @@
                 </fieldset>
 
             </form>
+            <form id="form-video" class="well, hide">
+                <video id="localView" class=""
+                       pwidth="320" height="240" autoplay>
+                </video>
+                <video id="remoteView" class=""
+                       width="320" height="240" autoplay>
+                </video>
+                <video id="remoteView2" class=""
+                       width="320" height="240" autoplay>
+                </video>
+            </form>
 
         </div>
     </div>
 
-    <h3>Code</h3>
-
-    <div class="row">
-        <div class="span6">
-            <p>
-
-                <!--////////////////////////    PRE-FORMATTED CODE  /////////////////////////-->
-<pre>
-<span id="code-login">$("#login").click(function () {
-  window.location.href = <span id="code-loginfn">att.oauth2.authorizeURL()</span>;
-});</span>
-
-<span id="code-logout">$("#logout").click(function() {
-    <span id="code-logoutfn">att.logout();</span>
-});</span>
-
-
-<span id="code-att">window.att = new ATT({
-    clientID: "ro5rhicseujhlqqec2d1wax6foi3gkyg",
-    scope: 'profile,webrtc',
-    redirectURI: "http://localhost/examples/wcgphoneoauth.html" ,
-    server: "alpha1"
-});</span>
-<span id="code-oauthlogin">att.oauth2.login(function(me){});</span>
-
-<span id="code-onuser">att.on(<span id="code-userevent">'user'</span>, function (user) {
-    $("#logout").val(<span id="code-username">user.first_name</span>);
-});</span>
-
-<span id="code-onphoneready">att.on(<span id="code-phonereadyevent">'phoneReady'</span>, function () {
-    <span id="code-dial">$("#dial").click(function () {
-        if ($("#dial").html() == "Dial") {
-            <span id="code-dialfn">att.dial(<span id="code-dialnb">$("#number").val())</span>)</span>;
-        }
-    });</span>
-});</span>
-</pre>
-
-            </p>
-        </div>
-        <div class="span6">
-            <p>
-
-<pre>
-<span id="code-oncalling">att.on(<span id="code-callingevent">'calling'</span>, function (number) {
-    //Calling <span id="code-number">number</span>
-});</span>
-
-
-<span id="code-onoutgoingcall">att.on(<span id="code-outgoingcallevent">'outgoingCall'</span>, function (call) {
-    //...
-});</span>
-
-<span id="code-onring">att.on(<span id="code-ringevent">'ring'</span>, function (call) {
-    //...
-});</span>
-
-<span id="code-oncallbegin">att.on(<span id="code-callbeginevent">'callBegin'</span>, function (call) {
-    //DO SOMETHING WITH THIS CALL
-    <span id="code-hangup">$("#dial").click(function () {
-        if ($("#dial").html() == "Hangup") {
-            <span id="code-hangupfn">call.hangup();</span>
-        }
-    });</span>
-});</span>
-
-<span id="code-oncallend">att.on(<span id="code-callendevent">'callEnd'</span>, function (call) {
-    //DO SOMETHING WITH THIS CALL
-});</span>
-
-<span id="code-oncallerror">att.on(<span id="code-callerrorevent">'callError'</span>, function (call) {
-    //DO SOMETHING HERE WITH THIS ERROR
-});</span>
-
-<span id="code-onphoneclose">att.on(<span id="code-phonecloseevent">'phoneClose'</span>, function () {
-    //DO SOMETHING HERE
-});</span>
-<span id="code-onphoneerror">att.on(<span id="code-phoneerrorevent">'phoneError'</span>, function () {
-    //DO SOMETHING HERE WITH THIS ERROR
-});</span>
-
-</pre>
-            <!--/////////////////////   END OF PRE-FORMATTED CODE   ////////////////////////////-->
-
-
-            </p>
-        </div>
-    </div>
 
 </div>
 
 <script>
-    $(document).ready(function () {
+$(document).ready(function () {
+    var oauthParams = {},
+            queryString = window.parent.location.hash.substring(1),
+            regex = /([^&=]+)=([^&]*)/g,
+            m,
+            html = '';
+
+    var access_token = '';
+    var wcgcall;
+
+
+    while (m = regex.exec(queryString)) {
+        oauthParams[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+    }
+
+    access_token = oauthParams['access_token'];
+    if (access_token) {
+        /////////////////////////////////////////////////
+        $("#code-login").css("color", "#3498db");
+        $("#code-att").css("color", "#3498db");
+        $("#code-accesstoken").html("'" + access_token + "'");
+        $("#code-accesstoken").addClass("badge");
+        $("#code-accesstoken").addClass("badge-success");
+        /////////////////////////////////////////////////
+
 
         window.att = new ATT({
-            clientID: "ro5rhicseujhlqqec2d1wax6foi3gkyg",
-            scope: 'profile,webrtc',
-            redirectURI: "http://localhost/examples/wcgphoneoauth.html",
+            accessToken: access_token,
             server: "webims"
-        });
-
-
-        att.oauth2.login(function (me) {
         });
 
 
         att.on('user', function (user) {
             /////////////////////////////////////////////////
-            $("#code-att").css("color", "#3498db");
-            $("#code-oauthlogin").addClass("badge");
-            $("#code-oauthlogin").addClass("badge-success");
-            $("#code-login").css("color", "#3498db");
-            $("#code-loginfn").addClass("badge");
-            $("#code-loginfn").addClass("badge-success");
-
-
             $("#code-onuser").css("color", "#3498db");
             $("#code-username").html(user.first_name);
             $("#code-userevent").addClass("badge");
@@ -209,13 +137,13 @@
             $("#dial").click(function () {
                 if ($("#dial").html() == "Dial") {
                     ///////////////////////////////////////////////
-                    $("#code-dialnb").html("'" + $.trim($("#number").val()) + "'");
+                    $("#code-dialnb").html($.trim($("#number").val()));
                     $("#code-dial").css("color", "#3498db");
                     $("#code-dialfn").addClass("badge");
                     $("#code-dialfn").addClass("badge-success");
                     /////////////////////////////////////////////////
 
-                    att.dial($.trim($("#number").val()));
+                    att.dial($.trim($("#number").val()), true);
 
                 }
 
@@ -272,7 +200,7 @@
             $("#code-outgoingcallevent").addClass("badge-warning");
             /////////////////////////////////////////////////
 
-            $("#dial").html("Calling...");
+            $("#dial").html("Call sent...");
             $("#dial").removeClass('btn-primary');
             $("#dial").addClass('btn-warning');
 
@@ -292,7 +220,6 @@
                 }
 
             });
-
 
         });
         att.on('incomingCall', function (call) {
@@ -314,9 +241,43 @@
             $("#code-callbeginevent").addClass("badge");
             $("#code-callbeginevent").addClass("badge-warning");
             /////////////////////////////////////////////////
-
+            $("#form-video").show();
 
         });
+
+        att.on('localVideo', function(stream) {
+            $("#code_localstream").css("font-weight", "bolder");
+            $("#code_localstream").css("color", "#00285F");
+
+            var url = webkitURL.createObjectURL(stream);
+
+            var localvideo = document.getElementById('localView');
+            localvideo.style.opacity = 1;
+            localvideo.src = url;
+
+        });
+
+        att.on('remoteVideo', function(stream) {
+            $("#code_remotestream").css("font-weight", "bolder");
+            $("#code_remotestream").css("color", "#00285F");
+
+            var url = webkitURL.createObjectURL(stream);
+
+            var remotevideo = document.getElementById('remoteView');
+            remotevideo.style.opacity = 1;
+            remotevideo.src = url;
+        });
+        att.on('remoteVideo2', function(stream) {
+            $("#code_remotestream").css("font-weight", "bolder");
+            $("#code_remotestream").css("color", "#00285F");
+
+            var url = webkitURL.createObjectURL(stream);
+
+            var remotevideo2 = document.getElementById('remoteView2');
+            remotevideo2.style.opacity = 1;
+            remotevideo2.src = url;
+        });
+
         att.on('callEnd', function (call) {
             console.log("call end", call);
             ///////////////////////////////////////////////
@@ -329,48 +290,56 @@
             $("#dial").removeClass('btn-danger');
             $("#dial").removeClass('btn-warning');
             $("#dial").addClass('btn-primary');
+
+            $("#form-video").hide();
+            var remotevideo = document.getElementById('remoteView');
+            remotevideo.style.opacity = 0;
+            remotevideo.src = "";
+
+            var localvideo = document.getElementById('localView');
+            localvideo.style.opacity = 0;
+            localvideo.src = "";
+
         });
 
         att.on('callError', function (call) {
+            console.log("ERROR");
             ///////////////////////////////////////////////
             $("#code-oncallerror").css("color", "#3498db");
             $("#code-callerrorevent").addClass("badge");
             $("#code-callerrorevent").addClass("badge-warning");
             /////////////////////////////////////////////////
 
-
             $("#dial").html("Dial");
             $("#dial").removeClass('btn-danger');
             $("#dial").removeClass('btn-warning');
             $("#dial").addClass('btn-primary');
-
         });
 
-        $("#login").click(function () {
-            ///////////////////////////////////////////////
-            $("#code-login").css("color", "#3498db");
-            $("#code-loginfn").addClass("badge");
-            $("#code-loginfn").addClass("badge-success");
 
-            ///////////////////////////////////////////////
-            window.location.href = att.oauth2.authorizeURL();
+    }
 
-        });
 
-        $("#logout").click(function () {
-            ///////////////////////////////////////////////
-            $("#code-logout").css("color", "#3498db");
-            $("#code-logoutfn").addClass("badge");
-            $("#code-logoutfn").addClass("badge-success");
-            /////////////////////////////////////////////////
-
-            console.log("Logging out");
-            att.logout();
-
-        });
-
+    $("#login").click(function () {
+        $("#code-login").css("color", "#3498db");
+        window.location.href = "https://auth.tfoundry.com/oauth/authorize?client_id=kdbaxzfairnbiezp0q5yacx2spnxm2jo&response_type=token&scope=profile,webrtc&redirect_uri=http://localhost/examples/wcgvideo.html";
 
     });
+
+    $("#logout").click(function () {
+        ///////////////////////////////////////////////
+        $("#code-logout").css("color", "#3498db");
+        $("#code-logoutfn").addClass("badge");
+        $("#code-logoutfn").addClass("badge-success");
+        /////////////////////////////////////////////////
+
+        console.log("Logging out");
+        att.logout();
+
+    });
+
+
+});
 
 </script>
 
