@@ -217,6 +217,8 @@ In order to automatically generate useful documentation for all att.js plugins, 
           }
         }
 
+The `npm run-script build` command will compile all `.spec` files in the source directory into a single `att.spec.js` file, which can be included like any other ATT.js plugin. This can be useful for building an introspection tool, or for validating plugin behaviour against the defined spec.
+
 ## Testing
 
 Testing is done through [QUnit](http://qunitjs.com/) test suites which run in the browser.

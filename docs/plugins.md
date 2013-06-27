@@ -93,10 +93,10 @@ This plugin allows easy user login and authorization from the att oauth system
 
 ### Methods
 
-  - authorizeURL()
+  - att.oauth2.authorizeURL()
 
     Returns an oauth authorize url for the configured client.
-  - login()
+  - att.oauth2.login()
 
     Validated accessToken or updates elements with btn-att-login class with authroizeURL to fetch an accessToken.
 

@@ -9,12 +9,17 @@
         <div id="qunit"></div>
         <div id="qunit-fixture"></div>
         <script src="qunit.js"></script>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
         <!-- the scripts we're testing -->
         <script src="../src/att.js"></script>
+        <script src="../src/att.spec.js"></script>
         <script src="../src/att.me.js"></script>
         <script src="../src/att.oauth2.js"></script>
         <script src="../src/att.phonenumber.js"></script>
+        <script src="../src/att.phone.phono.js"></script>
+        <script src="../src/att.messages.js"></script>
+        <script src="../src/att.addressbook.js"></script>
 
         <script src="../vendor/wcg/BrowserDetect.js"></script>
         <script src="../vendor/wcg/WCGapi.js"></script>
@@ -22,6 +27,7 @@
 
         <!-- the tests -->
         <script src="tests/core.js"></script>
+        <script src="tests/spec.js"></script>
         <script src="tests/phoneNumber.js"></script>
         <script src="tests/wcg.phonedial.js"></script>
         <script src="tests/wcg.phonehangup.js"></script>
