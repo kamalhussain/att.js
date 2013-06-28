@@ -5,7 +5,7 @@ var fs = require('fs'),
     _ = require('underscore');
 
 module.exports = function () {
-    var localFiles = fs.readdirSync('./src'),
+    var localFiles = fs.readdirSync(__dirname+'/../src'),
     specFiles = [];
 
     localFiles.forEach(function (filename) {
@@ -28,7 +28,7 @@ module.exports = function () {
 
 
     specFiles.forEach(function (specFile) {
-        var data = JSON.parse(fs.readFileSync('./src/' + specFile, 'utf8'));
+        var data = JSON.parse(fs.readFileSync(__dirname+'/../src/' + specFile, 'utf8'));
         result.spec[data.plugin] = data;
 
         _.forEach(data.events, function (desc, eventName) {
