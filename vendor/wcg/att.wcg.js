@@ -155,27 +155,7 @@
         }
     };
 
-    /**
-     * Make a video call
-     */
-    /*
-     ATT.fn.videocall = function (callee) {
-     var self = this;
-     var call = new WCGCall(self, callee, true);
-     self.emit('outgoingCall', call);
 
-     return call;
-
-     };
-     ATT.fn.voicecall = function (callee) {
-     var self = this;
-     var call = new WCGCall(self, callee, false);
-     self.emit('outgoingCall', call);
-
-     return call;
-
-     };
-     */
 
     ATT.fn.wcgBackend = {
         wcgService: null
@@ -188,6 +168,7 @@
 
         var sipOccurence = number.match(/sip\:([^@]*)@/);
         var sipuser = null;
+
         if (sipOccurence) {
             //it's a sip address
             sipuser = number;
@@ -228,16 +209,7 @@
 
     }
 
-    ATT.fn.video = function (callee) {
-        var self = this;
-        var call = new WCGCall(self, callee, true);
 
-        var numberToMatch = call.remotePeer.match(/sip\:([^@]*)@/);
-        var matchedNb = numberToMatch ? numberToMatch[1] : null;
-
-        self.emit('calling', matchedNb);
-        self.emit('outgoingCall', call);
-    };
 
     ATT.initPlugin(function (att) {
         console.log('Load WCG Plugin');
