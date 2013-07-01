@@ -1,0 +1,239 @@
+<html>
+  <head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" ></script>
+    <script src="src/wildemitter.js"></script>
+    <script src="src/att.js"></script>
+    <script src="src/att.me.alu.js"></script>
+    <script src="src/att.phonenumber.js"></script>
+    <script src="vendor/alu/orca.js"></script>
+    <script src="vendor/alu/orcaALU.js"></script>
+    <script src="vendor/alu/sip.js"></script>
+    <script src="vendor/alu/att.phone.alu.js"></script>
+    
+    <script type="text/javascript">
+      $(document).ready(function() {
+        WildEmitter.call(this);
+
+        var opts = {
+            settings: {
+                        userid: "sip:+14047241222@foundry.att.com",
+                        token: {
+                            id: "4047241222@private.att.net",
+                            key: "1222pla"
+                        }
+                    }
+        };
+         
+       var att =  new ATT(opts);
+       //var att =  new ATT( { apiKey: "abcd"} );
+        var thecall = null;
+
+        att.on('*', function (eventName, payload) {
+          console.debug("received ATT event: " + eventName);
+          console.debug("event payload: " + payload);
+
+          if (eventName === 'ready') {onReady(payload)}
+          else if (eventName === 'calling') {onCalling(payload)} 
+          else if (eventName === 'ring') {onRing(payload)} 
+          else if (eventName === 'callBegin') {onCallBegin(payload)} 
+          else if (eventName === 'callEnd') {onCallEnd(payload)} 
+          else if (eventName === 'hold') {onHold(payload)} 
+          else if (eventName === 'retrieve') {onRetrieve(payload)} 
+          else if (eventName === 'waiting') {onWaiting(payload)} 
+          else if (eventName === 'unready') {onUnReady(payload)} 
+          else if (eventName === 'outgoingCall') {onOutgoingCall(payload)} 
+          else if (eventName === 'incomingCall') {onIncomingCall(payload)} 
+          else if (eventName === 'error') {onError(payload)} 
+          else {
+            console.error('Received an unknown event from ATT (' + eventName + ')')
+          };
+        });
+
+        var onReady = function(payload) {
+          console.warn("onReady() not defined")
+        }
+
+        var onCalling = function(call) {
+          $('#call').css('opacity', 0);
+          $('#hangup').css('opacity', 1);
+        }
+
+        var onRing = function(payload) {
+          console.warn("onRing() not defined")
+        }
+
+        var onCallBegin = function(call) {
+          var remoteRendererElement = document.createElement("video");
+          remoteRendererElement.id = "remoteRenderer";
+          remoteRendererElement.autoplay = "autoplay";
+
+          $("#remote").html(remoteRendererElement);
+          if (call.remoteMediaStream) {
+              var url = webkitURL.createObjectURL(call.remoteMediaStream);
+              remoteRendererElement.src = url;
+          }
+          $('#answer').css('opacity', 0);
+        }
+
+        var onCallEnd = function(call) {
+          $('#call').css('opacity', 1);
+          $('#hangup').css('opacity', 0);
+          $('#answer').css('opacity', 0);
+          $("#local"). html('&nbsp');
+        }
+
+        var onHold = function(payload) {
+          console.warn("onHold() not defined")
+        }
+
+        var onRetrieve = function(payload) {
+          console.warn("onRetrieve() not defined")
+        }
+
+        var onWaiting = function(payload) {
+          console.warn("onWaiting() not defined")
+        }
+
+        var onUnReady = function(payload) {
+          console.warn("onUnReady() not defined")
+        }
+
+        var onOutgoingCall = function(call) {
+          thecall = call;
+          console.log("onOutgoingCall()");
+          var localRendererElement = document.createElement("video");
+          localRendererElement.id = "localRenderer";
+          localRendererElement.autoplay = "autoplay";
+
+          $("#local").html(localRendererElement);
+          if (call.localMediaStream) {
+              var url = webkitURL.createObjectURL(call.localMediaStream);
+              localRendererElement.src = url;
+          }
+        }
+
+        var onIncomingCall = function(call, phonenumber) {
+          thecall = call;
+          console.log("onIncomingCall()");
+
+          var localRendererElement = document.createElement("video");
+          localRendererElement.id = "localRenderer";
+          localRendererElement.autoplay = "autoplay";
+
+          $("#local").html(localRendererElement);
+          if (call.localMediaStream) {
+              var url = webkitURL.createObjectURL(call.localMediaStream);
+              localRendererElement.src = url;
+          }
+          $('#call').css('opacity', 0);
+          $('#hangup').css('opacity', 1);
+          $('#answer').css('opacity', 1);
+        }
+
+        var onError = function(payload) {
+          $('#call').css('opacity', 1);
+          $('#hangup').css('opacity', 0);
+          $('#answer').css('opacity', 0);
+          $("#local"). html('&nbsp');
+        }
+
+
+        $('#call').click(function() {
+//            att.dial("sip:david@ims.alcatel-lucent.com");
+            att.dial("sip:+14047241223@foundry.att.com");
+        });
+
+        $('#hangup').click(function() {
+          if (thecall) {
+            thecall.hangup();
+          }
+        });
+
+        $('#answer').click(function() {
+          if (thecall) {
+            thecall.answer();
+          }
+        });
+
+      });
+    </script>
+    <style type="text/css">
+      body {
+        margin:0;
+        padding: 0;
+      }
+
+      #container {
+        background-color: #000000;
+        height: 100%;
+        width: 100%;
+        font-family:Verdana, Arial, Helvetica, sans-serif;
+      }
+
+      #local {
+          position: relative;
+          float: left;
+          height: 50%;
+          width: 40%;
+          margin:5%;
+          background-color: #444444;
+      }
+
+      #remote {
+          position: relative;
+          float:left;
+          height: 50%;
+          width: 40%;
+          margin:5%;
+          background-color: #AAAAAA;
+      }
+      .button {
+        width: auto;
+        background: #2ba6cb;
+        border: 1px solid #1e728c;
+        -webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.5) inset;
+        Unknown property name.-moz-box-shadow: 0 1px 0 rgba(255,255,255,0.5) inset;
+        box-shadow: 0 1px 0 rgba(255,255,255,0.5) inset;
+        color: #fff;
+        cursor: pointer;
+        display: inline-block;
+        font-family: "Helvetica Neue","Helvetica",Helvetica,Arial,sans-serif;
+        font-size: 14px;
+        font-weight: bold;
+        line-height: 1;
+        margin: 0;
+        outline: none;
+        padding: 10px 20px 11px;
+        position: relative;
+        text-align: center;
+        text-decoration: none;
+      }
+      .button:hover {
+        color: #fff;
+        background-color: #2284a1;
+      }
+      .button.round {
+        -webkit-border-radius: 1000px;
+        border-radius: 1000px;
+      }
+      #call, #hangup, #answer {
+        width:100px;
+        font-size: 20px;
+        margin:auto;
+      }
+      #localRenderer {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="local"></div>
+      <div id="remote"></div>
+      <a id="call" class="round button" href="#">Call</a>
+      <a id="hangup" class="round button" href="#" style="opacity:0">Hangup</a>
+      <a id="answer" class="round button" href="#" style="opacity:0">Answer</a>
+    </div>
+  </body>
+</html>
