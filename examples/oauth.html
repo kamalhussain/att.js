@@ -1,0 +1,121 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" ></script>
+
+    <script src="../vendor/socket.io.js"></script>
+    <script src="../vendor/wcg/BrowserDetect.js"></script>
+    <script src="../vendor/wcg/WCGapi.js"></script>
+    <script src="../src/att.js"></script>
+    <script src="../src/att.oauth2.js"></script>
+    <script src="../src/att.me.js"></script>
+    <script src="../src/att.phonenumber.js"></script>
+    <script src="../vendor/wcg/att.wcg.js"></script>
+    <link href="//netdna.bootstrapcdn.com/bootswatch/2.3.2/flatly/bootstrap.min.css" rel="stylesheet">
+    
+  </head>
+  <body>
+      <div id="main" class='container-fluid'>
+        <div class="">
+        <h1>WebRTC Phone</h1>
+            
+        <div class="well">
+          <form class='phone' action="#" method="get" class="form-horizontal">
+            <fieldset id="" class="">
+              <legend> Make A Call</legend>
+              <label for="from">From </label>
+              <a class='btn btn-success btn-att-login' href="authorize_url_that_the_js_will_insert">Login</a>
+           
+             <label for="Number to Dial">To </label>
+             <input type="text" id='number_to_dial' name="number_to_dial" value="1-804-222-1111" class="input-block-level" placeholder="1-804-222-1111" autofocus>
+             
+             <!-- <input type="submit" name="action" value="register" class="input-block-level btn btn-large btn-primary" disabled='true' id='dial'> -->
+             <a href='#' class="input-block-level btn btn-large" id='dial'>register</a>
+            </fieldset>
+          </form>
+          
+          <pre id='debuglog' style='display:none'>
+            <ol id='debuglist'></ol>
+          </pre>
+          
+      </div>
+          
+        </div> <!-- /container -->
+    
+      </div>
+    
+      <script type="text/javascript" charset="utf-8">
+        $(document).ready(function(){
+          $("#dial").hide();
+          window.att = new ATT({
+            clientID: "ro5rhicseujhlqqec2d1wax6foi3gkyg",
+            scope: 'profile,webrtc',
+            redirectURI: "http://localhost/examples/oauth.html" ,
+              server: "alpha1"
+          });
+          console.debug(att.config);
+          att.oauth2.login( function(me){} );
+          att.on('user', function () {
+            $("#dial").show();
+            $("#dial").html('registering');
+          })
+
+          att.on('outgoingCall', function(call) {
+            console.log("Outgoing call");
+          });
+
+
+
+    // Below was tested with phono event emitter branch
+          att.on('phoneReady', function() {
+              console.log('webphone is ready');
+              $("#debuglist").show();
+              $("#debuglist").append('<li>phone is ready</li>');
+              $('#dial').attr("disabled", false).html("dial");
+              $("#dial").html("dial").addClass('btn-primary');
+            
+              $('#dial').on('click.phone', function (event) {
+                event.preventDefault();
+                $("#dial").html("Connecting").removeClass('btn-primary').addClass('btn-info');
+                window.att.dial( $('#number_to_dial').val());
+                $('#dial').off('click.phone');
+
+
+              });
+            
+           });
+            att.on('ring', function(call) {
+                console.log('ringing');
+                $("#dial").html("Ringing").removeClass('btn-info').addClass('btn-warning');
+            });
+
+            att.on('callBegin', function(call) {
+                console.log('answered, callBegin');
+                $("#dial").addClass("call");
+                $("#dial").html("Hangup").removeClass('btn-warning').addClass('btn-danger');
+                $('#dial').on('click.call', function (event) {
+                        call.hangup();
+                } );
+
+            });
+
+            att.on('callEnd', function(call) {
+                console.log('hungup callEnd');
+                $("#dial").removeClass("call");
+                $('#dial').off('click.call').on('click.phone'); // TODO: fixme
+                $("#call").attr("disabled", false).val("Call");
+                $("#dial").html("dial").removeClass('btn-warning btn-danger btn-info').addClass('btn-primary');
+
+            });
+
+
+
+
+        });
+      </script>
+    
+    </body>
+    
+    
+  </body>
+</html>

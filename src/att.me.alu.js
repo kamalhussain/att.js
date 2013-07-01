@@ -5,7 +5,7 @@
         var self = this,
             baseUrl = "https://auth.tfoundry.com",
             data = {
-                access_token: self.config.apiKey
+                access_token: self.config.accessToken
             },
             version;
 

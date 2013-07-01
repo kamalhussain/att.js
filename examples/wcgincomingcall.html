@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Receive a phone call</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="//netdna.bootstrapcdn.com/bootswatch/2.3.2/flatly/bootstrap.min.css" rel="stylesheet">
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="../vendor/socket.io.js"></script>
+
+
+    <script src="../src/att.js"></script>
+    <script src="../src/att.me.js"></script>
+    <script src="../src/att.oauth2.js"></script>
+    <script src="../src/att.phonenumber.js"></script>
+
+
+    <script src="../vendor/wcg/BrowserDetect.js"></script>
+    <script src="../vendor/wcg/WCGapi.js"></script>
+    <script src="../vendor/wcg/att.wcg.js"></script>
+
+
+</head>
+
+
+<body>
+
+<div id="main" class="container">
+    <div class="page-header">
+        <h1>WCG PSTN Breakin</h1>
+    </div>
+
+    <div class="row">
+        <div class="span12">
+
+            <form class="well form-horizontal">
+                <fieldset>
+                    <div class="control-group">
+                        <label for="login">Call from</label>
+                        <input type="button" id="login" class="btn btn-primary" value="Login">
+                        <input type="button" id="logout" class="btn btn-success hide" value="Logout">
+                    </div>
+
+
+                    <div>
+                        <a href='#' class="input-block-level btn btn-primary btn-large" id='status' disabled>Offline</a>
+                        <a href='#' class="input-block-level btn btn-warning btn-large hide" id='answer'>Answer</a>
+                        <a href='#' class="input-block-level btn btn-danger btn-large hide" id='hangup'>Hangup</a>
+                    </div>
+                </fieldset>
+
+            </form>
+
+        </div>
+    </div>
+
+    <h3>Code</h3>
+
+    <div class="row">
+        <div class="span6">
+            <p>
+
+
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        window.att = new ATT({
+            clientID: "6s2gls5gvvvbvasatjx2glhftwede4ng",
+            scope: 'profile,webrtc',
+            redirectURI: "http://localhost/examples/wcgincomingcall.html",
+            server: "webims"
+        });
+
+
+        att.oauth2.login(function (me) {
+        });
+
+
+        att.on('user', function (user) {
+
+            $("#logout").val(user.first_name + "       x");
+            $("#login").hide();
+            $("#logout").show();
+        });
+
+        //PHONE EVENTS
+        att.on('phoneReady', function () {
+
+
+            $("#status").html("Ready to receive calls");
+            $("#status").attr("disabled", false);
+
+        });
+
+        att.on('phoneClose', function () {
+
+            $("#login").val("Login");
+            $("#login").removeClass('btn-success');
+            $("#login").addClass('btn-primary');
+            $("#status").html("Offline");
+            $("#status").attr("disabled", true);
+            $("#answer").hide();
+            $("#hangup").hide();
+            $("#login").show();
+            $("#logout").hide();
+
+        });
+
+        att.on('phoneError', function () {
+            console.log("ERROR");
+        });
+
+        att.on('incomingCall', function (call) {
+            console.log("INCOMING CALL", call);
+
+            $("#answer").html("Call from " + call.remotePeer + ". Click to answer.");
+            $("#answer").show();
+            $("#status").hide();
+
+            $("#answer").click(function () {
+                call.answer();
+
+            });
+        });
+
+        att.on('callBegin', function (call) {
+            console.log("call begin", call);
+
+            $("#answer").hide();
+            $("#hangup").show();
+
+            $("#hangup").click(function () {
+
+                call.hangup();
+
+            });
+
+        });
+        att.on('callEnd', function (call) {
+            console.log("call end", call);
+
+            $("#hangup").hide();
+            $("#status").show();
+
+            $("#status").html("Ready to receive calls");
+
+        });
+
+        att.on('callError', function (call) {
+            console.log("ERROR");
+        });
+
+
+        $("#login").click(function () {
+            window.location.href = att.oauth2.authorizeURL();
+
+        });
+
+        $("#logout").click(function () {
+            console.log("Logging out");
+            att.logout();
+
+        });
+
+
+    });
+
+</script>
+
+</body>
+</html>

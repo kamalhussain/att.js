@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Make a video call</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="//netdna.bootstrapcdn.com/bootswatch/2.3.2/flatly/bootstrap.min.css" rel="stylesheet">
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="../vendor/socket.io.js"></script>
+
+
+    <script src="../src/att.js"></script>
+    <script src="../src/att.me.js"></script>
+    <script src="../src/att.phonenumber.js"></script>
+
+
+    <script src="../vendor/wcg/BrowserDetect.js"></script>
+    <script src="../vendor/wcg/WCGapi.js"></script>
+    <script src="../vendor/wcg/att.wcg.js"></script>
+
+
+</head>
+
+
+<body>
+
+<div id="main" class="container">
+    <div class="page-header">
+        <h1>WCG Video</h1>
+    </div>
+
+    <div class="row">
+        <div class="span12">
+
+            <form class="well form-horizontal">
+                <fieldset>
+                    <div class="control-group">
+                        <label for="login">Call from</label>
+                        <input type="button" id="login" class="btn btn-primary" value="Login">
+                        <input type="button" id="logout" class="btn btn-success hide" value="Logout">
+                    </div>
+
+
+                    <div class="control-group">
+                        <label for="number">to</label>
+                        <input type="text" id="number" class="input-medium" type="" value="sip:stoffe@webims.tfoundry.com"/>
+                    </div>
+                    <div>
+                        <!--<input type="button" id="dial" class="btn btn-primary btn-large input-block-level" value="Dial" disabled>-->
+                        <a href='#' class="input-block-level btn btn-primary btn-large" id='dial' disabled>Offline</a>
+                    </div>
+                </fieldset>
+
+            </form>
+            <form id="form-video" class="well, hide">
+                <video id="localView" class=""
+                       pwidth="320" height="240" autoplay>
+                </video>
+                <video id="remoteView" class=""
+                       width="320" height="240" autoplay>
+                </video>
+                <video id="remoteView2" class=""
+                       width="320" height="240" autoplay>
+                </video>
+            </form>
+
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+$(document).ready(function () {
+    var oauthParams = {},
+            queryString = window.parent.location.hash.substring(1),
+            regex = /([^&=]+)=([^&]*)/g,
+            m,
+            html = '';
+
+    var access_token = '';
+    var wcgcall;
+
+
+    while (m = regex.exec(queryString)) {
+        oauthParams[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+    }
+
+    access_token = oauthParams['access_token'];
+    if (access_token) {
+        /////////////////////////////////////////////////
+        $("#code-login").css("color", "#3498db");
+        $("#code-att").css("color", "#3498db");
+        $("#code-accesstoken").html("'" + access_token + "'");
+        $("#code-accesstoken").addClass("badge");
+        $("#code-accesstoken").addClass("badge-success");
+        /////////////////////////////////////////////////
+
+
+        window.att = new ATT({
+            accessToken: access_token,
+            server: "webims"
+        });
+
+
+        att.on('user', function (user) {
+            /////////////////////////////////////////////////
+            $("#code-onuser").css("color", "#3498db");
+            $("#code-username").html(user.first_name);
+            $("#code-userevent").addClass("badge");
+            $("#code-userevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
+
+            $("#logout").val(user.first_name + "       x");
+            $("#login").hide();
+            $("#logout").show();
+        });
+
+        //PHONE EVENTS
+        att.on('phoneReady', function () {
+            ///////////////////////////////////////////////
+            $("#code-onphoneready").css("color", "#3498db");
+            $("#code-phonereadyevent").addClass("badge");
+            $("#code-phonereadyevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
+
+            $("#dial").attr("disabled", false);
+            $("#dial").html("Dial");
+
+            $("#number").on('mousedown', function () {
+                if ($("#number").val() == "1-804-222-1111") {
+                    $("#number").val("");
+                }
+            });
+
+            $("#dial").click(function () {
+                if ($("#dial").html() == "Dial") {
+                    ///////////////////////////////////////////////
+                    $("#code-dialnb").html($.trim($("#number").val()));
+                    $("#code-dial").css("color", "#3498db");
+                    $("#code-dialfn").addClass("badge");
+                    $("#code-dialfn").addClass("badge-success");
+                    /////////////////////////////////////////////////
+
+                    att.dial($.trim($("#number").val()), true);
+
+                }
+
+            });
+        });
+
+        att.on('phoneClose', function () {
+            ///////////////////////////////////////////////
+            $("#code-onphoneclose").css("color", "#3498db");
+            $("#code-phonecloseevent").addClass("badge");
+            $("#code-phonecloseevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
+
+            $("#login").val("Login");
+            $("#login").removeClass('btn-success');
+            $("#login").addClass('btn-primary');
+            $("#dial").attr("disabled", true);
+            $("#dial").html("Offline");
+            $("#login").show();
+            $("#logout").hide();
+
+        });
+
+        att.on('phoneError', function () {
+            console.log("ERROR");
+            ///////////////////////////////////////////////
+            $("#code-onphoneerror").css("color", "#3498db");
+            $("#code-phoneerrorevent").addClass("badge");
+            $("#code-phoneerrorevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
+        });
+
+        att.on('calling', function (number) {
+            console.log("CALLING", number);
+            ///////////////////////////////////////////////
+            $("#code-oncalling").css("color", "#3498db");
+            $("#code-callingevent").addClass("badge");
+            $("#code-callingevent").addClass("badge-warning");
+            $("#code-number").html(number);
+            /////////////////////////////////////////////////
+
+            $("#dial").html("Calling...");
+            $("#dial").removeClass('btn-primary');
+            $("#dial").addClass('btn-warning');
+
+
+        });
+
+        att.on('outgoingCall', function (call) {
+            console.log("OUTGOING CALL", call);
+            ///////////////////////////////////////////////
+            $("#code-onoutgoingcall").css("color", "#3498db");
+            $("#code-outgoingcallevent").addClass("badge");
+            $("#code-outgoingcallevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
+
+            $("#dial").html("Call sent...");
+            $("#dial").removeClass('btn-primary');
+            $("#dial").addClass('btn-warning');
+
+            $("#dial").html("Hangup");
+            $("#dial").removeClass('btn-primary');
+            $("#dial").addClass('btn-danger');
+            $("#dial").click(function () {
+                if ($("#dial").html() == "Hangup") {
+                    ///////////////////////////////////////////////
+                    $("#code-hangup").css("color", "#3498db");
+                    $("#code-hangupfn").addClass("badge");
+                    $("#code-hangupfn").addClass("badge-success");
+                    /////////////////////////////////////////////////
+
+                    call.hangup();
+
+                }
+
+            });
+
+        });
+        att.on('incomingCall', function (call) {
+            console.log("INCOMING CALL", call);
+
+        });
+        att.on('ring', function (call) {
+            console.log("ring");
+            ///////////////////////////////////////////////
+            $("#code-onring").css("color", "#3498db");
+            $("#code-ringevent").addClass("badge");
+            $("#code-ringevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
+        });
+        att.on('callBegin', function (call) {
+            console.log("call begin", call);
+            ///////////////////////////////////////////////
+            $("#code-oncallbegin").css("color", "#3498db");
+            $("#code-callbeginevent").addClass("badge");
+            $("#code-callbeginevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
+            $("#form-video").show();
+
+        });
+
+        att.on('localVideo', function(stream) {
+            $("#code_localstream").css("font-weight", "bolder");
+            $("#code_localstream").css("color", "#00285F");
+
+            var url = webkitURL.createObjectURL(stream);
+
+            var localvideo = document.getElementById('localView');
+            localvideo.style.opacity = 1;
+            localvideo.src = url;
+
+        });
+
+        att.on('remoteVideo', function(stream) {
+            $("#code_remotestream").css("font-weight", "bolder");
+            $("#code_remotestream").css("color", "#00285F");
+
+            var url = webkitURL.createObjectURL(stream);
+
+            var remotevideo = document.getElementById('remoteView');
+            remotevideo.style.opacity = 1;
+            remotevideo.src = url;
+        });
+        att.on('remoteVideo2', function(stream) {
+            $("#code_remotestream").css("font-weight", "bolder");
+            $("#code_remotestream").css("color", "#00285F");
+
+            var url = webkitURL.createObjectURL(stream);
+
+            var remotevideo2 = document.getElementById('remoteView2');
+            remotevideo2.style.opacity = 1;
+            remotevideo2.src = url;
+        });
+
+        att.on('callEnd', function (call) {
+            console.log("call end", call);
+            ///////////////////////////////////////////////
+            $("#code-oncallend").css("color", "#3498db");
+            $("#code-callendevent").addClass("badge");
+            $("#code-callendevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
+
+            $("#dial").html("Dial");
+            $("#dial").removeClass('btn-danger');
+            $("#dial").removeClass('btn-warning');
+            $("#dial").addClass('btn-primary');
+
+            $("#form-video").hide();
+            var remotevideo = document.getElementById('remoteView');
+            remotevideo.style.opacity = 0;
+            remotevideo.src = "";
+
+            var localvideo = document.getElementById('localView');
+            localvideo.style.opacity = 0;
+            localvideo.src = "";
+
+        });
+
+        att.on('callError', function (call) {
+            console.log("ERROR");
+            ///////////////////////////////////////////////
+            $("#code-oncallerror").css("color", "#3498db");
+            $("#code-callerrorevent").addClass("badge");
+            $("#code-callerrorevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
+
+            $("#dial").html("Dial");
+            $("#dial").removeClass('btn-danger');
+            $("#dial").removeClass('btn-warning');
+            $("#dial").addClass('btn-primary');
+        });
+
+
+    }
+
+
+    $("#login").click(function () {
+        $("#code-login").css("color", "#3498db");
+        window.location.href = "https://auth.tfoundry.com/oauth/authorize?client_id=kdbaxzfairnbiezp0q5yacx2spnxm2jo&response_type=token&scope=profile,webrtc&redirect_uri=http://localhost/examples/wcgvideo.html";
+
+    });
+
+    $("#logout").click(function () {
+        ///////////////////////////////////////////////
+        $("#code-logout").css("color", "#3498db");
+        $("#code-logoutfn").addClass("badge");
+        $("#code-logoutfn").addClass("badge-success");
+        /////////////////////////////////////////////////
+
+        console.log("Logging out");
+        att.logout();
+
+    });
+
+
+});
+
+</script>
+
+</body>
+</html>

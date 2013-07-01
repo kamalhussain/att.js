@@ -128,7 +128,9 @@ if ( typeof Logs === "undefined") {
 	MediaServices = function(gwUrl, username, authentication, services) {
 		var _state = MediaServices.State.INITIALISED, _services = services, _turnConfig = "NONE", _username = username;
 		//_token = 'Bearer ' + _Base64encode(authentication.substring(6, authentication.length));
-		_token = 'Bearer ' + authentication.substring(6, authentication.length);
+		 var substring = authentication.replace ("oauth", "");
+		_token = 'Bearer ' + substring;
+
 
 		/**
 		 Base URL including session ID ("baseURL"/"sessionID"/)

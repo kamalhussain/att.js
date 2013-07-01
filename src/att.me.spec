@@ -2,7 +2,7 @@
     "plugin": "att.me",
     "description": "Helper method for retrieving a user's ATT profile information.",
     "methods": {
-        "getMe": {
+        "att.getMe": {
             "description": "Make an AJAX request to retrieve the user's profile information.",
             "parameters": [],
             "callbackArgs": [

@@ -1,0 +1,36 @@
+.parameterList {
+    display: inline;
+    font-family: monospace;
+    margin: 0px;
+    padding: 0px;
+}
+
+.parameterList:before {
+    content: '(';
+}
+
+.parameterList:after {
+    content: ')';
+}
+
+.parameterList li {
+    display: inline;
+    padding: 0px;
+    margin: 0px;
+}
+
+.parameterList li:after {
+    content: ',';
+}
+
+.parameterList li:last-child:after {
+    content: '';
+}
+
+.signature .type {
+    font-style: italic;
+}
+
+.signature .name {
+    font-weight: bold;
+}

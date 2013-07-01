@@ -1,7 +1,6 @@
 node_modules
 src
 vendor
-build/att.min.js
-build/att.pluschat.min.js
-build/att.phonenumber.min.js
 static
+testing
+examples
