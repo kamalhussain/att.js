@@ -69,7 +69,7 @@
     };
 
     ATT.initPlugin(function(att) {
-        att.on('init', function() {
+        att.on('accessToken', function() {
 
             if ((typeof att.config.settings.userid === 'undefined') ||
                     (typeof att.config.settings.token.id === 'undefined') ||
