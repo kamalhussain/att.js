@@ -19,3 +19,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+END OF TERMS AND CONDITIONS
+
+
+ATT.JS includes the Open Source Software Applications WildEmitter, QUnit, and jQuery and socket.io (“Open Source Software”), also licensed under MIT terms and conditions
+
+In addition to the MIT terms and conditions, ATT.JS includes the Open Source Software phono.js and orca.js (“Open Source Software”). Licensed under the Apache 2.0 License
