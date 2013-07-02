@@ -286,4 +286,9 @@ Running the entire collection of test suites is done by opening `testing/index.h
 - [Lance Stout](http://andyet.com/team/lance/) – [&yet](http://andyet.com)
 - Kamal Hussain - Alcatel-Lucent
 - Thao Nguyen  - WCG
+- Michael Fairchild - AT&T, oauth2 plugin
+
+### License
+
+  [MIT](/LICENSE)
 
