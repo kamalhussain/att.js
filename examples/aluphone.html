@@ -9,6 +9,7 @@
         <script src="../vendor/alu/orcaALU.js"></script>
         <script src="../vendor/alu/sip.js"></script>
         <script src="../vendor/alu/att.phone.alu.js"></script>
+        <script src="config/aluphone.js"></script>
 
         <script type="text/javascript">
             $(document).ready(function() {
@@ -24,7 +25,7 @@
                 }
 
                 var access_token = oauthParams['access_token'];
-               
+
                 startCall();
 
                 function startCall(opts) {
@@ -40,15 +41,15 @@
                         $('.call0 .call').hide();
                     }
 
-                    var att = new ATT({'accessToken' : access_token});
-                    
+                    var att = new ATT({'accessToken': access_token});
+
                     var thecall = null;
 
                     att.on('*', function(eventName, payload) {
                         console.debug("received ATT event: " + eventName);
                         console.debug("event payload: " + payload);
 
-                        if (eventName === 'ready') {
+                        if (eventName === 'phoneReady') {
                             onReady(payload)
                         }
                         else if (eventName === 'calling') {
@@ -81,8 +82,14 @@
                         else if (eventName === 'incomingCall') {
                             onIncomingCall(payload)
                         }
+                        else if (eventName === 'phoneError') {
+                            onError(payload)
+                        }
                         else if (eventName === 'error') {
                             onError(payload)
+                        }
+                        else if (eventName == 'user') {
+                            console.log("Got user event");
                         }
                         else {
                             console.error('Received an unknown event from ATT (' + eventName + ')')
@@ -91,7 +98,7 @@
                     });
 
                     var onReady = function(payload) {
-                        console.warn("onReady() not defined")
+                        console.log("onReady() not defined")
                     }
 
                     var onCalling = function(call) {
@@ -192,7 +199,10 @@
                     });
 
                     $('.call0 .login').click(function() {
-                        window.location.href = "https://auth.tfoundry.com/oauth/authorize?client_id=ulhnzsveuiijkdmm3v6lj5dm2khh4hk7&response_type=token&scope=profile,webrtc&redirect_uri=http://work.localhost/att.js-kamal/att.js/examples/aluphone.html";
+                        window.location.href = window.defaultConfig[authorize_uri] + '?client_id=' +
+                                window.defaultConfig[client_id] +
+                                '&response_type=token&scope=profile,webrtc&redirect_uri=' +
+                                window.defaultConfig[redirect_uri];
                     });
                 }
 

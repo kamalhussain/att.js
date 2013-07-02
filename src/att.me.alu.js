@@ -44,8 +44,8 @@
                         // if we've got an explicit version use it.
                         var explicitVersion = res && res.version,
                                 explicitNumber = res && res.options && res.options.phone_number,
-                                pubId = res && res.options && res.options.pubId,
-                                prvId = res && res.options && res.options.prvId,
+                                publicId = res && res.options && res.options.publicId,
+                                privateId = res && res.options && res.options.privateId,
                                 password = res && res.options && res.options.password;
 
                         if (explicitVersion) {
@@ -54,8 +54,8 @@
                             user.version = 'alu';
                         }
                         user.number = explicitNumber || user.phone_number;
-                        user.pubId = pubId || '';
-                        user.prvId = prvId || '';
+                        user.publicId = publicId || '';
+                        user.privateId = privateId || '';
                         user.key = password || '';
 
                         cb(user);
