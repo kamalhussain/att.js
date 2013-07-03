@@ -19,11 +19,6 @@
     <script src="../vendor/wcg/WCGapi.js"></script>
     <script src="../vendor/wcg/att.wcg.js"></script>
 
-    <!--
-    <script src="../vendor/phono.06.js"></script>
-    <script src="../vendor/phono-webrtc.js"></script>
-    -->
-
 </head>
 
 
@@ -70,7 +65,7 @@
 <!--////////////////////////    PRE-FORMATTED CODE  /////////////////////////-->
 <pre>
 <span id="code-login">$("#login").click(function () {
-  window.location.href = "https://auth.tfoundry.com/oauth/authorize?client_id=cdoso6wgycs073sk5zpmacgxuxc7mezz&response_type=token&scope=profile,webrtc&redirect_uri=http://localhost/examples/wcgphone.html";
+  window.location.href = "https://auth.tfoundry.com/oauth/authorize?client_id=6no7qyrt3joiux1hi5hwkibcrtj6efp4&response_type=token&scope=profile,webrtc&redirect_uri=http://att.inovate.github.io/att.js/examples/wcgphone.html";
 });</span>
 
 <span id="code-logout">$("#logout").click(function() {
@@ -245,7 +240,6 @@
             });
 
             att.on('phoneError', function () {
-                console.log("ERROR");
                 ///////////////////////////////////////////////
                 $("#code-onphoneerror").css("color", "#3498db");
                 $("#code-phoneerrorevent").addClass("badge");
@@ -299,10 +293,6 @@
                 });
 
             });
-            att.on('incomingCall', function (call) {
-                console.log("INCOMING CALL", call);
-
-            });
             att.on('ring', function (call) {
                 console.log("ring");
                 ///////////////////////////////////////////////
@@ -336,7 +326,6 @@
             });
 
             att.on('callError', function (call) {
-                console.log("ERROR");
                 ///////////////////////////////////////////////
                 $("#code-oncallerror").css("color", "#3498db");
                 $("#code-callerrorevent").addClass("badge");

@@ -167,12 +167,18 @@
         var self = this;
 
         var sipOccurence = number.match(/sip\:([^@]*)@/);
+        var telOccurence = number.match(/tel\:\+(.*)/);
         var sipuser = null;
 
         if (sipOccurence) {
             //it's a sip address
             sipuser = number;
-        } else {
+        }
+        else if (telOccurence) {
+            sipuser = number;
+            console.log("tel user" + sipuser);
+        }
+        else {
 
             //otherwise parse the number
             var userid = number;

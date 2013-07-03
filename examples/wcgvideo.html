@@ -69,6 +69,112 @@
     </div>
 
 
+
+    <h3>Code</h3>
+
+    <div class="row">
+        <div class="span6">
+            <p>
+
+                <!--////////////////////////    PRE-FORMATTED CODE  /////////////////////////-->
+<pre>
+<span id="code-login">$("#login").click(function () {
+  window.location.href = "https://auth.tfoundry.com/oauth/authorize?client_id=mhyblzwt0xhm0iquqbwycbzpvs71uepd&response_type=token&scope=profile,webrtc&redirect_uri=http://att.inovate.github.io/att.js/examples/wcgvideo.html";
+});</span>
+
+<span id="code-logout">$("#logout").click(function() {
+    <span id="code-logoutfn">att.logout();</span>
+});</span>
+
+
+<span id="code-att">window.att = new ATT({
+    accessToken: <span id="code-accesstoken">access_token</span>,
+    server: "alpha1"
+});</span>
+
+<span id="code-onuser">att.on(<span id="code-userevent">'user'</span>, function (user) {
+    $("#logout").val(<span id="code-username">user.first_name</span>);
+});</span>
+
+<span id="code-onphoneready">att.on(<span id="code-phonereadyevent">'phoneReady'</span>, function () {
+    <span id="code-dial">$("#dial").click(function () {
+        if ($("#dial").html() == "Dial") {
+            <span id="code-dialfn">att.dial(<span id="code-dialnb">$("#number").val())</span>)</span>;
+        }
+    });</span>
+});</span>
+</pre>
+
+            </p>
+        </div>
+        <div class="span6">
+            <p>
+
+<pre>
+<span id="code-oncalling">att.on(<span id="code-callingevent">'calling'</span>, function (number) {
+    //Calling <span id="code-number">number</span>
+});</span>
+
+<span id="code-onoutgoingcall">att.on(<span id="code-outgoingcallevent">'outgoingCall'</span>, function (call) {
+    //...
+});</span>
+
+<span id="code-onring">att.on(<span id="code-ringevent">'ring'</span>, function (call) {
+    //...
+});</span>
+
+<span id="code-oncallbegin">att.on(<span id="code-callbeginevent">'callBegin'</span>, function (call) {
+    //DO SOMETHING WITH THIS CALL
+    <span id="code-hangup">$("#dial").click(function () {
+        if ($("#dial").html() == "Hangup") {
+            <span id="code-hangupfn">call.hangup();</span>
+        }
+    });</span>
+});</span>
+
+<span id="code-onlocalvideo">att.on(<span id="code-localvideoevent">'localVideo'</span>, function (stream) {
+    var url = webkitURL.createObjectURL(stream);
+
+    var localvideo = document.getElementById('localView');
+    localvideo.style.opacity = 1;
+    localvideo.src = url;
+
+});</span>
+
+<span id="code-onremotevideo">att.on(<span id="code-remotevideoevent">'remoteVideo'</span>, function (stream) {
+    var url = webkitURL.createObjectURL(stream);
+
+    var remotevideo = document.getElementById('remoteView');
+    remotevideo.style.opacity = 1;
+    remotevideo.src = url;
+
+});</span>
+
+
+<span id="code-oncallend">att.on(<span id="code-callendevent">'callEnd'</span>, function (call) {
+    //DO SOMETHING WITH THIS CALL
+});</span>
+
+<span id="code-oncallerror">att.on(<span id="code-callerrorevent">'callError'</span>, function (call) {
+    //DO SOMETHING HERE WITH THIS ERROR
+});</span>
+
+<span id="code-onphoneclose">att.on(<span id="code-phonecloseevent">'phoneClose'</span>, function () {
+    //DO SOMETHING HERE
+});</span>
+
+<span id="code-onphoneerror">att.on(<span id="code-phoneerrorevent">'phoneError'</span>, function () {
+    //DO SOMETHING HERE WITH THIS ERROR
+});</span>
+
+</pre>
+            <!--/////////////////////   END OF PRE-FORMATTED CODE   ////////////////////////////-->
+
+
+            </p>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -222,7 +328,7 @@ $(document).ready(function () {
             });
 
         });
-        att.on('incomingCall', function (call) {
+        att.on('incomingCall', function (call, callerDisplayName) {
             console.log("INCOMING CALL", call);
 
         });
@@ -246,8 +352,11 @@ $(document).ready(function () {
         });
 
         att.on('localVideo', function(stream) {
-            $("#code_localstream").css("font-weight", "bolder");
-            $("#code_localstream").css("color", "#00285F");
+            ///////////////////////////////////////////////
+            $("#code-onlocalvideo").css("color", "#3498db");
+            $("#code-localvideoevent").addClass("badge");
+            $("#code-localvideoevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
 
             var url = webkitURL.createObjectURL(stream);
 
@@ -258,24 +367,17 @@ $(document).ready(function () {
         });
 
         att.on('remoteVideo', function(stream) {
-            $("#code_remotestream").css("font-weight", "bolder");
-            $("#code_remotestream").css("color", "#00285F");
+            ///////////////////////////////////////////////
+            $("#code-onremotevideo").css("color", "#3498db");
+            $("#code-remotevideoevent").addClass("badge");
+            $("#code-remotevideoevent").addClass("badge-warning");
+            /////////////////////////////////////////////////
 
             var url = webkitURL.createObjectURL(stream);
 
             var remotevideo = document.getElementById('remoteView');
             remotevideo.style.opacity = 1;
             remotevideo.src = url;
-        });
-        att.on('remoteVideo2', function(stream) {
-            $("#code_remotestream").css("font-weight", "bolder");
-            $("#code_remotestream").css("color", "#00285F");
-
-            var url = webkitURL.createObjectURL(stream);
-
-            var remotevideo2 = document.getElementById('remoteView2');
-            remotevideo2.style.opacity = 1;
-            remotevideo2.src = url;
         });
 
         att.on('callEnd', function (call) {
