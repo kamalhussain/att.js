@@ -1,19 +1,3 @@
-/**
- *  Copyright (c) 2013 Alcatel-Lucent
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-
 (function(ATT, $) {
     var cache = {};
 
@@ -60,8 +44,8 @@
                         // if we've got an explicit version use it.
                         var explicitVersion = res && res.version,
                                 explicitNumber = res && res.options && res.options.phone_number,
-                                pubId = res && res.options && res.options.pubId,
-                                prvId = res && res.options && res.options.prvId,
+                                publicId = res && res.options && res.options.publicId,
+                                privateId = res && res.options && res.options.privateId,
                                 password = res && res.options && res.options.password;
 
                         if (explicitVersion) {
@@ -70,8 +54,8 @@
                             user.version = 'alu';
                         }
                         user.number = explicitNumber || user.phone_number;
-                        user.pubId = pubId || '';
-                        user.prvId = prvId || '';
+                        user.publicId = publicId || '';
+                        user.privateId = privateId || '';
                         user.key = password || '';
 
                         cb(user);
@@ -85,14 +69,14 @@
     };
 
     ATT.initPlugin(function(att) {
-        att.on('init', function() {
+        att.on('accessToken', function() {
 
             if ((typeof att.config.settings.userid === 'undefined') ||
                     (typeof att.config.settings.token.id === 'undefined') ||
                     (typeof att.config.settings.token.key === 'undefined')) {
                 att.getMe(function(me) {
                     // make it possible to override guessed version
-                    me.version = att.config.version || _.getQueryParam('version') || me.version;
+                    me.version = att.config.version || ATT._.getQueryParam('version') || me.version;
                     att.config.version = me.version;
                     att.config.myNumber = me.number;
 

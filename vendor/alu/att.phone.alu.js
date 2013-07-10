@@ -1,5 +1,17 @@
 /**
  *  Copyright (c) 2013 Alcatel-Lucent
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 (function(ATT, $) {
@@ -19,7 +31,7 @@
             var mediaTypes = 'audio, video';
             self._call = att.aluBackend.session.createCall([param], mediaTypes);
         } else {
-            self.emit('error');
+            self.emit('phoneError');
             return;
         }
 
@@ -218,16 +230,34 @@
                 var mediaTypes = 'audio,video';
                 att.config.settings.sessionConfig = {'uri': uri, 'provider': orcaALU, 'mediaTypes': mediaTypes};
             }
-            
-            var token = {
-                id: user.prvId,
-                key: user.key
+
+            var token = {};
+
+            if (att.config.accessToken) {
+                token = {
+                    id: att.config.accessToken,
+                    imsauth: 'sso-token',
+                    key: att.config.accessToken
+                }
+
+            } else {
+                token = {
+                    id: user.privateId,
+                    key: user.key
+                }
+            }
+
+            orcaALU.mediaOptions = {
+                stun: '',
+                bundle: '',
+                iceType: 'standard-ice',
+                crypto: 'sdes-sbc'
             };
-            
-            att.aluBackend.session = orca.createSession(user.pubId, token, att.config.settings.sessionConfig);
-            
+
+            att.aluBackend.session = orca.createSession(user.publicId, token, att.config.settings.sessionConfig);
             var sessionBind = att.aluBackend.bindNumberToSession.bind(att);
             att.aluBackend.sessionId = this.sessionId;
+
             sessionBind(user.number, att.aluBackend.sessionId, function() {
                 att.aluBackend.session.connect();
             });
@@ -235,13 +265,13 @@
             att.aluBackend.session.onConnected = function(event) {
                 console.log("[ALU Plug] ALU ORCA Session Ready");
                 att.aluBackend.connected = true;
-                att.emit('ready');
+                att.emit('phoneReady');
             }
 
             att.aluBackend.session.onDisconnected = function(event) {
                 console.log("[ALU Plug] ALU ORCA Session closed");
                 att.aluBackend.connected = false;
-                att.emit("unready");
+                att.emit("callEnd");
             }
 
             att.aluBackend.session.onError = function(status, event) {
@@ -250,7 +280,7 @@
                 att.aluBackend.connected = false;
                 console.debug(status);
                 console.debug(event);
-                att.emit("unready")
+                att.emit("phoneError")
             }
 
             att.aluBackend.session.onStatus = function(status, event) {

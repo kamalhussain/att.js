@@ -1,17 +1,11 @@
-/**
- *  Copyright (c) 2013 Alcatel-Lucent
+/*
+ * orca.js
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Copyright 2012, ALU 5900 Media Server team (http://www.alcatel-lucent.com)
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * https://acos.alcatel-lucent.com/wiki/g/flashgateway/HomePage
+ *   
+ * $Id: orca.js 167 2013-04-24 19:01:35Z skapauan $
  */
 
 /*jslint devel: true */
@@ -385,12 +379,12 @@
             c.setItem('+sip.instance', this.instanceId);
             request.setItem('Supported', new sip.Header('path, gruu', 'Supported'));
             request.setItem('Contact', c);
-
+            // Raju:sso-token
             if (this.token.imsauth != undefined && this.token.imsauth == "sso-token") {
                 console.debug("this.token.imsauth is set to 'sso-token'\n");
                 request.setItem('Authorization', new sip.Header("SSO  " + "token=\"" + this.token.key + "\"", 'Authorization'));
+                //request.setItem('Authorization', new sip.Header("SSO " + "username=\"" + this.token.key + "\",token=" + this.token.key, 'Authorization'));
             }
-
             return request;
         };
 
@@ -1019,76 +1013,6 @@
         };
 
         /**
-         * Upgrade to audiovideo call
-         */
-        //TODO: discuss API change with Orca working group
-        this.startVideo = function() {
-            this.updateCall({audio: undefined, video: "sendrecv"});
-        };
-
-        /**
-         * Downgrade to audio call
-         */
-        //TODO: discuss API change with Orca working group
-        this.stopVideo = function() {
-            this.updateCall({audio: undefined, video: "none"});
-        };
-
-        /**
-         * @summary Change media stream directions
-         * @private
-         */
-        this.updateCall = function(params) {
-            var reinvite = false;
-            var has_audio = false;
-            var has_video = false;
-
-            // update call's audio stream
-            if (params.audio !== this.audioMediaDirection) {
-                console.debug("updateCall() audio: " + this.audioMediaDirection + " => " + params.audio);
-                reinvite = true;
-                this.audioMediaDirection = params.audio;
-
-            }
-            // update call's video stream
-            if (params.video !== this.videoMediaDirection) {
-                console.debug("updateCall() video: " + this.videoMediaDirection + " => " + params.video);
-                reinvite = true;
-                this.videoMediaDirection = params.video;
-            }
-
-            if (params.audio === undefined) {
-                has_audio = false;
-            } else {
-                has_audio = true;
-            }
-
-            if (params.video === undefined) {
-                has_video = false;
-            } else {
-                has_video = true;
-            }
-
-            if (has_audio == true) {
-                if (has_video == true) {
-                    this.mediaType = "audiovideo";
-                } else {
-                    this.mediaType = "audio";
-                }
-            } else {
-                if (has_video == true) {
-                    this.mediaType = "video";
-                } else {
-                    this.mediaType = undefined;
-                }
-            }
-
-            if (reinvite) {
-                this.invite();
-            }
-        }
-
-        /**
          * @summary Sends a SIP request INVITE to make a call.
          * @private
          */
@@ -1158,7 +1082,8 @@
                     case this.CallStatus.ACCEPTED:
                         if (this.sdpOffer !== undefined) {
                             // we already received a SDP offer
-                            if (this.session.config.providerConfig.iceType === "google-ice") {
+                            console.debug("Raju:onStableStatus() " + this.session.mediaOptions.iceType);
+                            if (this.session.mediaOptions.iceType === "google-ice") {
                                 this.sdpOffer = this.updateSDPMediaIceOption(this.sdpOffer, "offer", "google-ice");
                             }
 
@@ -1168,13 +1093,13 @@
                                 try {
                                     self = this;
                                     this.pc.createAnswer(function(sessionDescription) {
-                                        if (self.session.config.providerConfig.crypto === "sdes-sbc") {
+                                        if (self.session.mediaOptions.crypto === "sdes-sbc") {
                                             sessionDescription = self.updateSDPRemoveCrypto(sessionDescription);
                                         }
-                                        if (self.session.config.providerConfig.bundle === false) {
+                                        if (self.session.mediaOptions.bundle === false) {
                                             sessionDescription = self.updateSDPOfferMediaBundle(sessionDescription);
                                         }
-                                        if (self.session.config.providerConfig.iceType === "google-ice") {
+                                        if (self.session.mediaOptions.iceType === "google-ice") {
                                             sessionDescription = self.updateSDPMediaIceOption(sessionDescription, "answer", "google-ice");
                                         }
                                         console.debug("onStableStatus() setLocalDescription sdp = " + sessionDescription.sdp);
@@ -1210,7 +1135,7 @@
                         } //else if (webkitPeerConnection00 !== undefined) {
                         //sdp = pc.localDescription.toSdp();
                         //}
-                        if (this.session.config.providerConfig.iceType === "google-ice") {
+                        if (this.session.mediaOptions.iceType === "google-ice") {
                             sdp = this.updateSDPMediaIceOption(sdp, "answer", "google-ice");
                         }
                         this.createAndSendInviteResponse(sdp);
@@ -1352,10 +1277,10 @@
             var request, contact, rls, idx, mtp;
             if (this.uaCall === null) {
                 this.uaCall = new sip.UserAgent(this.session.stack);
-                if (typeof this.targetAOR == 'string' || this.targetAOR.length === 1) {
+                if (this.targetAOR.length === 1) {
                     this.uaCall.remoteParty = new sip.Address(this.targetAOR[0]);
                 } else {
-                    this.uaCall.remoteParty = new sip.Address(this.session.config.providerConfig.conferenceFactoryURI);
+                    this.uaCall.remoteParty = new sip.Address(this.session.conferenceFactoryURI);
                 }
                 this.uaCall.localParty = new sip.Address(this.localAOR);
                 this.uaCall.routeSet = [this.getRouteHeader()];
@@ -1453,13 +1378,13 @@
                 try {
                     this.pc.createOffer(function(sdp) {
                         sdpOffer = self.updateSDPOfferMediaDirection(sdp, {audio: self.audioMediaDirection, video: self.videoMediaDirection});
-                        if (self.session.config.providerConfig.crypto === "sdes-sbc") {
+                        if (self.session.mediaOptions.crypto === "sdes-sbc") {
                             sdpOffer = self.updateSDPRemoveCrypto(sdpOffer);
                         }
-                        if (self.session.config.providerConfig.bundle === false) {
+                        if (self.session.mediaOptions.bundle === false) {
                             sdpOffer = self.updateSDPOfferMediaBundle(sdpOffer);
                         }
-                        if (self.session.config.providerConfig.iceType === "google-ice") {
+                        if (self.session.mediaOptions.iceType === "google-ice") {
                             sdpOffer = self.updateSDPMediaIceOption(sdpOffer, "offer", "google-ice");
                         }
                         if (sdpOffer.sdp !== self.sdpOffer) {
@@ -1476,13 +1401,13 @@
                     try {
                         this.pc.createOffer(function(sdp) {
                             sdpOffer = self.updateSDPOfferMediaDirection(sdp, {audio: self.audioMediaDirection, video: self.videoMediaDirection});
-                            if (self.session.config.providerConfig.crypto === "sdes-sbc") {
+                            if (self.session.mediaOptions.crypto === "sdes-sbc") {
                                 sdpOffer = self.updateSDPRemoveCrypto(sdpOffer);
                             }
-                            if (self.session.config.providerConfig.bundle === false) {
+                            if (self.session.mediaOptions.bundle === false) {
                                 sdpOffer = self.updateSDPOfferMediaBundle(sdpOffer);
                             }
-                            if (self.session.config.providerConfig.iceType === "google-ice") {
+                            if (self.session.mediaOptions.iceType === "google-ice") {
                                 sdpOffer = self.updateSDPMediaIceOption(sdpOffer, "offer", "google-ice");
                             }
                             if (sdpOffer.sdp !== self.sdpOffer) {
@@ -1697,13 +1622,15 @@
                 outsdp = sdp;
             }
 
-            idx = outsdp.indexOf("a=ice-options:google-ice");
-            if (idx === -1) {
-                outsdp = outsdp.replace(/\r\na=ice-ufrag/g, "\x0d\x0aa=ice-options:" + iceoption + "\x0d\x0aa=ice-ufrag");
-                // remove "a=ice-lite" string
-                //outsdp = outsdp.replace("a=ice-lite\r\n", ""); 
-            }
-
+            /* Raju: Always gets google-ice
+             idx = outsdp.indexOf("a=ice-options:google-ice");
+             if (idx === -1) {
+             outsdp = outsdp.replace(/\r\na=ice-ufrag/g, "\x0d\x0aa=ice-options:"+ iceoption + "\x0d\x0aa=ice-ufrag");
+             // remove "a=ice-lite" string
+             //outsdp = outsdp.replace("a=ice-lite\r\n", ""); 
+             } 
+             */
+            console.debug("Raju: Not doing google-ice");
             // Raju: Begin
             // Quick change!
             // Chrom26 is strict about getting RTP/SAVPF in SDP answer. if RTP/SAVP is received
@@ -1902,7 +1829,7 @@
                 if (request.body !== undefined && request.body !== null) {
                     // we receive the SDP answer in ACK
                     sdp = request.body;
-                    if (this.session.config.providerConfig.iceType === "google-ice") {
+                    if (this.session.mediaOptions.iceType === "google-ice") {
                         sdp = this.updateSDPMediaIceOption(sdp, "answer", "google-ice");
                     }
 
@@ -1934,7 +1861,8 @@
                     case "conference" :
                         break;
                     default:
-                        console.debug("receivedNotify() event not supported: " + event);
+                        if (isDebugEnabled() == true)
+                            onDebug("receivedNotify() event not supported: " + event);
                         break;
                 }
             }
@@ -2001,7 +1929,7 @@
                                         console.debug("Call.receivedInviteResponse() remove remote stream (label=)" + remoteStream.label + ")");
                                     }
                                 }
-                                if (this.session.config.providerConfig.iceType === "google-ice") {
+                                if (this.session.mediaOptions.iceType === "google-ice") {
                                     sdp = this.updateSDPMediaIceOption(sdp, "answer", "google-ice");
                                 }
 
@@ -2218,8 +2146,8 @@
 
 
         try {
-            if (session.config.providerConfig && typeof session.config.providerConfig.stun == 'string') {//////////////
-                var s = session.config.providerConfig.stun.replace(/^\s+|\s+$/g, '');
+            if (session.mediaOptions && typeof session.mediaOptions.stun == 'string') {
+                var s = session.mediaOptions.stun.replace(/^\s+|\s+$/g, '');
                 if (s !== '') {
                     this.iceServers = [{"url": "stun:" + s}];
                 }
@@ -2658,27 +2586,28 @@
          * @returns {orca.Session}
          */
         createSession: function(userid, token, sessionConfig, callback) {
-            //TODO: validation? what happens if sessionConfig is invalid object?
-            var config = {
-                uri: sessionConfig.uri,
-                mediatypes: sessionConfig.mediatypes,
-                providerConfig: {}
-            };
-            var fields = ['stun', 'bundle', 'iceType', 'crypto', 'conferenceFactoryURI'];
-            var values = ['', true, 'standard-ice', '', ''];
-            for (var i = 0; i < fields.length; i++) {
-                if (sessionConfig.providerConfig && sessionConfig.providerConfig.hasOwnProperty(fields[i])) {
-                    config.providerConfig[fields[i]] = sessionConfig.providerConfig[fields[i]];
-                } else {
-                    config.providerConfig[fields[i]] = values[i];
-                }
+            var session = new Session(userid, token, sessionConfig, callback);
+            if (this.mediaOptions !== undefined) {
+                session.mediaOptions = this.mediaOptions;
+                session.conferenceFactoryURI = this.conferenceFactoryURI;
             }
-            return new Session(userid, token, config, callback);
+            return session;
         },
         // orca.createManagedStream() is implemented in orca.js
 
+        /**
+         * Media options for ALU solution.
+         * @private 
+         */
+        mediaOptions: {stun: "", bundle: false, iceType: "google-ice", crypto: 'sdes-sbc'},
+        /**
+         * Conference Factory URI.
+         * @private 
+         */
+        conferenceFactoryURI: "sip:conference@example.com"
     };
 
     this.orcaALU = orcaALU;
+
 
 }());
