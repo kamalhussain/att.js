@@ -230,23 +230,34 @@
                 var mediaTypes = 'audio,video';
                 att.config.settings.sessionConfig = {'uri': uri, 'provider': orcaALU, 'mediaTypes': mediaTypes};
             }
-            
-            var token = {
-                id: user.privateId,
-                key: user.key
-            };
-            
+
+            var token = {};
+
+            if (att.config.accessToken) {
+                token = {
+                    id: att.config.accessToken,
+                    imsauth: 'sso-token',
+                    key: att.config.accessToken
+                }
+
+            } else {
+                token = {
+                    id: user.privateId,
+                    key: user.key
+                }
+            }
+
             orcaALU.mediaOptions = {
                 stun: '',
                 bundle: '',
                 iceType: 'standard-ice',
                 crypto: 'sdes-sbc'
             };
-            
+
             att.aluBackend.session = orca.createSession(user.publicId, token, att.config.settings.sessionConfig);
             var sessionBind = att.aluBackend.bindNumberToSession.bind(att);
             att.aluBackend.sessionId = this.sessionId;
-            
+
             sessionBind(user.number, att.aluBackend.sessionId, function() {
                 att.aluBackend.session.connect();
             });

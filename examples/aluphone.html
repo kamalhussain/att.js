@@ -3,214 +3,135 @@
         <link href="css/alu-webrtc.css" rel="stylesheet">
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" ></script>
         <script src="../src/att.js"></script>
-        <script src="../src/att.me.alu.js"></script>
+        <script src="../src/att.me.js"></script>
+        <script src="../src/att.oauth2.js"></script>
         <script src="../src/att.phonenumber.js"></script>
         <script src="../vendor/alu/orca.js"></script>
         <script src="../vendor/alu/orcaALU.js"></script>
         <script src="../vendor/alu/sip.js"></script>
         <script src="../vendor/alu/att.phone.alu.js"></script>
-        <script src="config/aluphone.js"></script>
 
         <script type="text/javascript">
             $(document).ready(function() {
 
-                var oauthParams = {},
-                        queryString = window.parent.location.hash.substring(1),
-                        regex = /([^&=]+)=([^&]*)/g,
-                        m,
-                        html = '';
+                $(".call0 .call").hide();
+                $('.call0 .hangup').hide();
+                $('.call0 .answer').hide();
 
-                while (m = regex.exec(queryString)) {
-                    oauthParams[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
-                }
+                window.att = new ATT({
+                    clientID: "ulhnzsveuiijkdmm3v6lj5dm2khh4hk7",
+                    scope: 'profile,webrtc',
+                    redirectURI: "http://work.localhost/att.js-kamal/att.js/examples/aluphone.html"
+                });
 
-                var access_token = oauthParams['access_token'];
+                console.debug(att.config);
 
-                startCall();
+                att.oauth2.login(function(me) {
+                });
 
-                function startCall(opts) {
-                    WildEmitter.call(this);
+                att.on('user', function() {
+                    $(".call0 .login").h();
+                    $(".call0 .call").show();
+                });
 
+                att.on('outgoingCall', function() {
+                    console.log("outgoingCall event");
+                });
+
+                att.on('phoneReady', function() {
+                    console.log('phoneReady event');
+                });
+
+                att.on('calling', function() {
+                    $('.call0 .call').hide();
+                    $('.call0 .hangup').show();
+                    $('.call0 .answer').hide();
+                });
+
+                att.on('ring', function() {
+                    console.log('ring event');
+                });
+
+                att.on('callBegin', function() {
+                    if (call.remoteMediaStream) {
+                        var url = webkitURL.createObjectURL(call.remoteMediaStream);
+                        $('.call0 .remoteVideo').attr('src', url);
+                    }
+
+                    $('.call0 .answer').hide();
+                });
+
+                att.on('callEnd', function() {
+                    console.log("callEnd event");
+
+                    $('.call0 .call').show();
                     $('.call0 .hangup').hide();
                     $('.call0 .answer').hide();
+                    $('.call0 .remoteVideo').attr('src', '');
+                });
 
-                    if (access_token) {
-                        $('.call0 .login').hide();
 
-                    } else {
-                        $('.call0 .call').hide();
+                att.on('incomingCall', function(call, phonenumber) {
+                    console.log("incomingCall event");
+                    thecall = call;
+
+                    if (call.localMediaStream) {
+                        var url = webkitURL.createObjectURL(call.localMediaStream);
+                        $('.call0 .localVideo').attr('src', url);
                     }
 
-                    var att = new ATT({'accessToken': access_token});
+                    $('.call0 .call').hide();
+                    $('.call0 .hangup').show();
+                    $('.call0 .answer').show();
+                    $('.call0 .call_to').hide();
+                });
 
-                    var thecall = null;
+                att.on('outgoingCall', function() {
+                    console.log("outgoingCall event");
+                    thecall = call;
 
-                    att.on('*', function(eventName, payload) {
-                        console.debug("received ATT event: " + eventName);
-                        console.debug("event payload: " + payload);
-
-                        if (eventName === 'phoneReady') {
-                            onReady(payload)
-                        }
-                        else if (eventName === 'calling') {
-                            onCalling(payload)
-                        }
-                        else if (eventName === 'ring') {
-                            onRing(payload)
-                        }
-                        else if (eventName === 'callBegin') {
-                            onCallBegin(payload)
-                        }
-                        else if (eventName === 'callEnd') {
-                            onCallEnd(payload)
-                        }
-                        else if (eventName === 'hold') {
-                            onHold(payload)
-                        }
-                        else if (eventName === 'retrieve') {
-                            onRetrieve(payload)
-                        }
-                        else if (eventName === 'waiting') {
-                            onWaiting(payload)
-                        }
-                        else if (eventName === 'unready') {
-                            onUnReady(payload)
-                        }
-                        else if (eventName === 'outgoingCall') {
-                            onOutgoingCall(payload)
-                        }
-                        else if (eventName === 'incomingCall') {
-                            onIncomingCall(payload)
-                        }
-                        else if (eventName === 'phoneError') {
-                            onError(payload)
-                        }
-                        else if (eventName === 'error') {
-                            onError(payload)
-                        }
-                        else if (eventName == 'user') {
-                            console.log("Got user event");
-                        }
-                        else {
-                            console.error('Received an unknown event from ATT (' + eventName + ')')
-                        }
-                        ;
-                    });
-
-                    var onReady = function(payload) {
-                        console.log("onReady() not defined")
+                    if (call.localMediaStream) {
+                        var url = webkitURL.createObjectURL(call.localMediaStream);
+                        $('.call0 .localVideo').attr('src', url);
                     }
+                });
 
-                    var onCalling = function(call) {
-                        $('.call0 .call').hide();
-                        $('.call0 .hangup').show();
-                        $('.call0 .answer').hide();
+                att.on('phoneError', function() {
+                    console.log("phoneError event");
+
+                    $('.call0 .call').show();
+                    $('.call0 .hangup').hide();
+                    $('.call0 .answer').hide();
+                    $(".call0 .localVideo").attr('src', '');
+
+                });
+
+                $('.call0 .call').click(function() {
+                    var callee = $('.call0 .call_to').val();
+                    var pub_id = "sip:+1" + callee + "@foundry.att.com";
+                    att.dial(pub_id);
+                });
+
+                $('.call0 .hangup').click(function() {
+                    if (thecall) {
+                        thecall.hangup();
                     }
+                });
 
-                    var onRing = function(payload) {
-                        console.warn("onRing() not defined")
+                $('.call0 .answer').click(function() {
+                    if (thecall) {
+                        thecall.answer();
                     }
+                });
 
-                    var onCallBegin = function(call) {
-                        if (call.remoteMediaStream) {
-                            var url = webkitURL.createObjectURL(call.remoteMediaStream);
-                            $('.call0 .remoteVideo').attr('src', url);
-                        }
-
-                        $('.call0 .answer').hide();
-                    }
-
-                    var onCallEnd = function(call) {
-                        console.log("onCallEnd()");
-
-                        $('.call0 .call').show();
-                        $('.call0 .hangup').hide();
-                        $('.call0 .answer').hide();
-                        $('.call0 .remoteVideo').attr('src', '');
-                    }
-
-                    var onHold = function(payload) {
-                        console.warn("onHold() not defined")
-                    }
-
-                    var onRetrieve = function(payload) {
-                        console.warn("onRetrieve() not defined")
-                    }
-
-                    var onWaiting = function(payload) {
-                        console.warn("onWaiting() not defined")
-                    }
-
-                    var onUnReady = function(payload) {
-                        console.warn("onUnReady() not defined")
-                    }
-
-                    var onOutgoingCall = function(call) {
-                        console.log("onOutgoingCall()");
-                        thecall = call;
-
-                        if (call.localMediaStream) {
-                            var url = webkitURL.createObjectURL(call.localMediaStream);
-                            $('.call0 .localVideo').attr('src', url);
-                        }
-                    }
-
-                    var onIncomingCall = function(call, phonenumber) {
-                        console.log("onIncomingCall()");
-                        thecall = call;
-
-                        if (call.localMediaStream) {
-                            var url = webkitURL.createObjectURL(call.localMediaStream);
-                            $('.call0 .localVideo').attr('src', url);
-                        }
-
-                        $('.call0 .call').hide();
-                        $('.call0 .hangup').show();
-                        $('.call0 .answer').show();
-                        $('.call0 .call_to').hide();
-
-                    }
-
-                    var onError = function(payload) {
-                        console.log("onError()");
-
-                        $('.call0 .call').show();
-                        $('.call0 .hangup').hide();
-                        $('.call0 .answer').hide();
-                        $(".call0 .localVideo").attr('src', '');
-                    }
-
-                    $('.call0 .call').click(function() {
-                        var callee = $('.call0 .call_to').val();
-                        var pub_id = "sip:+1" + callee + "@foundry.att.com";
-                        att.dial(pub_id);
-                    });
-
-                    $('.call0 .hangup').click(function() {
-                        if (thecall) {
-                            thecall.hangup();
-                        }
-                    });
-
-                    $('.call0 .answer').click(function() {
-                        if (thecall) {
-                            thecall.answer();
-                        }
-                    });
-
-                    $('.call0 .login').click(function() {
-                        window.location.href = window.defaultConfig[authorize_uri] + '?client_id=' +
-                                window.defaultConfig[client_id] +
-                                '&response_type=token&scope=profile,webrtc&redirect_uri=' +
-                                window.defaultConfig[redirect_uri];
-                    });
-                }
-
+                $('.call0 .login').click(function() {
+                    window.location.href = att.oauth2.authorizeURL();
+                });
             });
         </script>
     </head>
+    
     <body>
-
         <div id="webrtc-container">
             <!-- video call windows-->  
             <div class="webrtc-row">
@@ -245,8 +166,6 @@
                 </div>
             </div>  
         </div>
-
-
 
         <div class="contaner">
             <div class="row">
