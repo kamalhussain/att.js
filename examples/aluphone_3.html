@@ -1,0 +1,176 @@
+<html>
+    <head>
+        <title>Make WebRTC Video Call</title>
+        <link href="css/alu-webrtc.css" rel="stylesheet">
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" ></script>
+        <script src="../src/att.js"></script>
+        <script src="../src/att.me.js"></script>
+        <script src="../src/att.oauth2.js"></script>
+        <script src="../src/att.phonenumber.js"></script>
+        <script src="../vendor/alu/orca.js"></script>
+        <script src="../vendor/alu/orcaALU.js"></script>
+        <script src="../vendor/alu/sip.js"></script>
+        <script src="../vendor/alu/att.phone.alu.js"></script>
+
+        <script type="text/javascript">
+            $(document).ready(function() {
+
+                $(".call0 .call").hide();
+                $('.call0 .hangup').hide();
+                $('.call0 .answer').hide();
+
+                window.att = new ATT({
+                    clientID: "ulhnzsveuiijkdmm3v6lj5dm2khh4hk7",
+                    scope: 'profile,webrtc',
+                    redirectURI: "http://work.localhost/att.js-kamal/att.js/examples/aluphone.html"
+                });
+                
+                var thecall = null;
+                
+                console.debug(att.config);
+                
+                att.oauth2.login(function(me) {
+                });
+
+                att.on('user', function() {
+                    $(".call0 .login").hide();
+                    $(".call0 .call").show();
+                });
+
+                att.on('phoneReady', function() {
+                    console.log('phoneReady event');
+                });
+
+                att.on('calling', function() {
+                    $('.call0 .call').hide();
+                    $('.call0 .hangup').show();
+                    $('.call0 .answer').hide();
+                });
+
+                att.on('ring', function() {
+                    console.log('ring event');
+                });
+
+                att.on('callBegin', function() {
+                    if (call.remoteMediaStream) {
+                        var url = webkitURL.createObjectURL(call.remoteMediaStream);
+                        $('.call0 .remoteVideo').attr('src', url);
+                    }
+
+                    $('.call0 .answer').hide();
+                });
+
+                att.on('callEnd', function() {
+                    console.log("callEnd event");
+
+                    $('.call0 .call').show();
+                    $('.call0 .hangup').hide();
+                    $('.call0 .answer').hide();
+                    $('.call0 .remoteVideo').attr('src', '');
+                });
+
+                att.on('incomingCall', function(call, phonenumber) {
+                    console.log("incomingCall event");
+                    thecall = call;
+
+                    if (call.localMediaStream) {
+                        var url = webkitURL.createObjectURL(call.localMediaStream);
+                        $('.call0 .localVideo').attr('src', url);
+                    }
+
+                    $('.call0 .call').hide();
+                    $('.call0 .hangup').show();
+                    $('.call0 .answer').show();
+                    $('.call0 .call_to').hide();
+                });
+
+                att.on('outgoingCall', function() {
+                    console.log("outgoingCall event");
+                    thecall = call;
+
+                    if (call.localMediaStream) {
+                        var url = webkitURL.createObjectURL(call.localMediaStream);
+                        $('.call0 .localVideo').attr('src', url);
+                    }
+                });
+
+                att.on('phoneError', function() {
+                    console.log("phoneError event");
+
+                    $('.call0 .call').show();
+                    $('.call0 .hangup').hide();
+                    $('.call0 .answer').hide();
+                    $(".call0 .localVideo").attr('src', '');
+
+                });
+
+                $('.call0 .call').click(function() {
+                    var callee = $('.call0 .call_to').val();
+                    var pub_id = "sip:+1" + callee + "@foundry.att.com";
+                    att.dial(pub_id);
+                });
+
+                $('.call0 .hangup').click(function() {
+                    if (thecall) {
+                        thecall.hangup();
+                    }
+                });
+
+                $('.call0 .answer').click(function() {
+                    if (thecall) {
+                        thecall.answer();
+                    }
+                });
+
+                $('.call0 .login').click(function() {
+                    window.location.href = att.oauth2.authorizeURL();
+                });
+            });
+        </script>
+    </head>
+    
+    <body>
+        <div id="webrtc-container">
+            <!-- video call windows-->  
+            <div class="webrtc-row">
+                <div class="span8">
+                    <div class="videoContainer call0" style="height: 400px; width: 400px;">
+                        <video class="remoteVideo" style="height: 400px; width: 400px;" autoplay="autoplay" src=""></video>
+                    </div>
+                    <!-- video call navigation-->  
+                    <div class="call0 numberBox">
+                        <input type="text" class="call_to" placeholder="e.g. 5552223333">  
+                    </div>
+                    <div class="wrtc-buttons call0">
+                        <p class="status"></p>
+                        <input type="button" class="wrtc-button login" value="Login"/>
+                        <input type="button" class="wrtc-button call" value="Call"/>
+                        <input type="button" class="wrtc-button hangup" value="Hangup"/>
+                        <input type="button" class="wrtc-button answer" value="Answer"/>
+                    </div>  
+                    <!--end video call nav-->
+                </div>
+
+                <div class="span4">
+                    <div>
+                        <div class="videoContainer call0">
+                            <video class="localVideo" style="height: 130px; width: 130px;" autoplay="autoplay" src=""></video>
+                        </div>
+                    </div>
+
+                    <div class="call0">
+                        <p class="status"></p>
+                    </div>
+                </div>
+            </div>  
+        </div>
+
+        <div class="contaner">
+            <div class="row">
+                <div class="span8 offset2">
+
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
