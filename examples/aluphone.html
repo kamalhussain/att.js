@@ -1,5 +1,6 @@
 <html>
     <head>
+        <title>Make WebRTC Video Call</title>
         <link href="css/alu-webrtc.css" rel="stylesheet">
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" ></script>
         <script src="../src/att.js"></script>
@@ -23,19 +24,17 @@
                     scope: 'profile,webrtc',
                     redirectURI: "http://work.localhost/att.js-kamal/att.js/examples/aluphone.html"
                 });
-
+                
+                var thecall = null;
+                
                 console.debug(att.config);
-
+                
                 att.oauth2.login(function(me) {
                 });
 
                 att.on('user', function() {
                     $(".call0 .login").h();
                     $(".call0 .call").show();
-                });
-
-                att.on('outgoingCall', function() {
-                    console.log("outgoingCall event");
                 });
 
                 att.on('phoneReady', function() {
@@ -69,7 +68,6 @@
                     $('.call0 .answer').hide();
                     $('.call0 .remoteVideo').attr('src', '');
                 });
-
 
                 att.on('incomingCall', function(call, phonenumber) {
                     console.log("incomingCall event");

@@ -41,17 +41,11 @@
                     // if we get a 200
                     success: function (res) {
                         // if we've got an explicit version use it.
-                        var explicitVersion = res && res.version,
-                            explicitNumber = res && res.options && res.options.phone_number,
-                            publicId = res && res.options && res.options.publicId;
-                    
-                        if (explicitVersion) {
-                            user.version = 'a' + explicitVersion;
-                        } else {
-                            user.version = 'a1';
-                        }
-                        user.number = explicitNumber || user.phone_number;
-                        user.publicId = publicId;
+                        var options = (res && res.options) ? JSON.parse(options.replace(/\\/g, '')) : '';
+                        
+                        user.version = (res && res.version) ? 'a' + explicitVersion : 'a1';
+                        user.number = (options && options.phone_number) ? options.phone_number : user.phone_number;
+                        user.publicId = ( options && options.publicId) ? options.publicId : '';
                         
                         cb(user);
                     }
