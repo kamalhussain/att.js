@@ -45,8 +45,8 @@
 
                     <div>
                         <a href='#' class="input-block-level btn btn-primary btn-large" id='status' disabled>Offline</a>
-                        <a href='#' class="input-block-level btn btn-warning btn-large hide" id='answer'>Answer</a>
-                        <a href='#' class="input-block-level btn btn-danger btn-large hide" id='hangup'>Hangup</a>
+                        <a href='#' class="input-block-level btn btn-warning btn-large" id='answer'>Answer</a>
+                        <a href='#' class="input-block-level btn btn-danger btn-large" id='hangup'>Hangup</a>
                     </div>
                 </fieldset>
 
@@ -139,6 +139,8 @@
 
 <script>
     $(document).ready(function () {
+        $("#hangup").hide();
+        $("#answer").hide();
 
         window.att = new ATT({
             clientID: "6s2gls5gvvvbvasatjx2glhftwede4ng",

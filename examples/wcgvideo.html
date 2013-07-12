@@ -46,9 +46,13 @@
                         <label for="number">to</label>
                         <input type="text" id="number" class="input-medium" type="" value="sip:stoffe@webims.tfoundry.com"/>
                     </div>
+
                     <div>
                         <!--<input type="button" id="dial" class="btn btn-primary btn-large input-block-level" value="Dial" disabled>-->
                         <a href='#' class="input-block-level btn btn-primary btn-large" id='dial' disabled>Offline</a>
+                        <a href='#' class="input-block-level btn btn-warning btn-large" id='answer'>Answer</a>
+                        <a href='#' class="input-block-level btn btn-danger btn-large" id='hangup'>Hangup</a>
+
                     </div>
                 </fieldset>
 
@@ -111,6 +115,12 @@
             <p>
 
 <pre>
+
+<span id="code-onincomingcall">att.on(<span id="code-incomingcallevent">'incomingCall'</span>, function (call, callerDisplayName) {
+    <span id="code-callerdisplayname">//Do something with the received call</span>
+});</span>
+
+
 <span id="code-oncalling">att.on(<span id="code-callingevent">'calling'</span>, function (number) {
     //Calling <span id="code-number">number</span>
 });</span>
@@ -179,6 +189,9 @@
 
 <script>
 $(document).ready(function () {
+    $("#hangup").hide();
+    $("#answer").hide();
+
     var oauthParams = {},
             queryString = window.parent.location.hash.substring(1),
             regex = /([^&=]+)=([^&]*)/g,
@@ -268,6 +281,9 @@ $(document).ready(function () {
             $("#login").addClass('btn-primary');
             $("#dial").attr("disabled", true);
             $("#dial").html("Offline");
+            $("#answer").hide();
+            $("#hangup").hide();
+
             $("#login").show();
             $("#logout").hide();
 
@@ -300,6 +316,7 @@ $(document).ready(function () {
 
         att.on('outgoingCall', function (call) {
             console.log("OUTGOING CALL", call);
+            wcgcall = call;
             ///////////////////////////////////////////////
             $("#code-onoutgoingcall").css("color", "#3498db");
             $("#code-outgoingcallevent").addClass("badge");
@@ -310,30 +327,36 @@ $(document).ready(function () {
             $("#dial").removeClass('btn-primary');
             $("#dial").addClass('btn-warning');
 
-            $("#dial").html("Hangup");
-            $("#dial").removeClass('btn-primary');
-            $("#dial").addClass('btn-danger');
-            $("#dial").click(function () {
-                if ($("#dial").html() == "Hangup") {
-                    ///////////////////////////////////////////////
-                    $("#code-hangup").css("color", "#3498db");
-                    $("#code-hangupfn").addClass("badge");
-                    $("#code-hangupfn").addClass("badge-success");
-                    /////////////////////////////////////////////////
+            $("#dial").hide();
 
-                    call.hangup();
-
-                }
-
-            });
+            $("#hangup").show();
 
         });
+
         att.on('incomingCall', function (call, callerDisplayName) {
             console.log("INCOMING CALL", call);
+            wcgcall = call;
+            ///////////////////////////////////////////////
+            $("#code-onincomingcall").css("color", "#3498db");
+            $("#code-incomingcallevent").addClass("badge");
+            $("#code-incomingcallevent").addClass("badge-warning");
+            $("#code-callerdisplayname").html("Call from " + callerDisplayName);
+            /////////////////////////////////////////////////
+
+            $("#answer").html("Call from " + callerDisplayName + ". Click to answer.");
+            $("#answer").show();
+            $("#dial").hide();
+
+            $("#answer").click(function () {
+                call.answer();
+                $("#answer").hide();
+                $("#hangup").show();
+            });
 
         });
         att.on('ring', function (call) {
             console.log("ring");
+            wcgcall = call;
             ///////////////////////////////////////////////
             $("#code-onring").css("color", "#3498db");
             $("#code-ringevent").addClass("badge");
@@ -342,6 +365,7 @@ $(document).ready(function () {
         });
         att.on('callBegin', function (call) {
             console.log("call begin", call);
+            wcgcall = call;
             ///////////////////////////////////////////////
             $("#code-oncallbegin").css("color", "#3498db");
             $("#code-callbeginevent").addClass("badge");
@@ -382,6 +406,7 @@ $(document).ready(function () {
 
         att.on('callEnd', function (call) {
             console.log("call end", call);
+            wcgcall = call;
             ///////////////////////////////////////////////
             $("#code-oncallend").css("color", "#3498db");
             $("#code-callendevent").addClass("badge");
@@ -392,6 +417,9 @@ $(document).ready(function () {
             $("#dial").removeClass('btn-danger');
             $("#dial").removeClass('btn-warning');
             $("#dial").addClass('btn-primary');
+
+            $("#dial").show();
+            $("#hangup").hide();
 
             $("#form-video").hide();
             var remotevideo = document.getElementById('remoteView');
@@ -406,6 +434,7 @@ $(document).ready(function () {
 
         att.on('callError', function (call) {
             console.log("ERROR");
+            wcgcall = call;
             ///////////////////////////////////////////////
             $("#code-oncallerror").css("color", "#3498db");
             $("#code-callerrorevent").addClass("badge");
@@ -416,6 +445,10 @@ $(document).ready(function () {
             $("#dial").removeClass('btn-danger');
             $("#dial").removeClass('btn-warning');
             $("#dial").addClass('btn-primary');
+
+            $("#dial").show();
+            $("#hangup").hide();
+            $("#answer").hide();
         });
 
 
@@ -438,6 +471,17 @@ $(document).ready(function () {
         console.log("Logging out");
         att.logout();
 
+    });
+
+
+    $("#hangup").click(function () {
+        ///////////////////////////////////////////////
+        $("#code-hangup").css("color", "#3498db");
+        $("#code-hangupfn").addClass("badge");
+        $("#code-hangupfn").addClass("badge-success");
+        /////////////////////////////////////////////////
+
+        wcgcall.hangup();
     });
 
 
