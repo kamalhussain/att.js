@@ -1,5 +1,6 @@
 <html>
     <head>
+        <title>Make WebRTC Video Call</title>
         <link href="css/alu-webrtc.css" rel="stylesheet">
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" ></script>
         <script src="../src/att.js"></script>
@@ -14,35 +15,55 @@
         <script type="text/javascript">
             $(document).ready(function() {
 
+                function getOAuthUrl() {
+                    var oauth_server   = "https://auth.tfoundry.com";
+                    var authorize_path = "/oauth/authorize";
+                    
+                    var clientID = "ulhnzsveuiijkdmm3v6lj5dm2khh4hk7";
+                    var scope = 'profile,webrtc';
+                    var redirectURI = "http://work.localhost/att.js-kamal/att.js/examples/aluphone.html";
+                    
+                    return oauth_server + authorize_path + "?response_type=token&client_id=" +
+                           clientID+"&scope=" + scope + "&redirect_uri=" + redirectURI;
+                }
+                
                 $(".call0 .call").hide();
                 $('.call0 .hangup').hide();
                 $('.call0 .answer').hide();
 
-                window.att = new ATT({
-                    clientID: "ulhnzsveuiijkdmm3v6lj5dm2khh4hk7",
-                    scope: 'profile,webrtc',
-                    redirectURI: "http://work.localhost/att.js-kamal/att.js/examples/aluphone.html"
-                });
+                var oauthParams = {},
+                    queryString = window.parent.location.hash.substring(1),
+                    regex = /([^&=]+)=([^&]*)/g,
+                    m,
+                    html = '';
 
-                console.debug(att.config);
+                while (m = regex.exec(queryString)) {
+                    oauthParams[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+                }
 
-                att.oauth2.login(function(me) {
-                });
+                var access_token = oauthParams['access_token'];
+                
+                var thecall, att;
+                
+                if (access_token) {
+                    $('.call0 .login').hide();
+                    att = new ATT({'accessToken': access_token});
+                    
+                } else {
+                    $('.call0 .login').show();
+                    $('.call0 .call').hide();
+                }
 
                 att.on('user', function() {
-                    $(".call0 .login").h();
+                    $(".call0 .login").hide();
                     $(".call0 .call").show();
-                });
-
-                att.on('outgoingCall', function() {
-                    console.log("outgoingCall event");
                 });
 
                 att.on('phoneReady', function() {
                     console.log('phoneReady event');
                 });
 
-                att.on('calling', function() {
+                att.on('calling', function(call) {
                     $('.call0 .call').hide();
                     $('.call0 .hangup').show();
                     $('.call0 .answer').hide();
@@ -52,7 +73,7 @@
                     console.log('ring event');
                 });
 
-                att.on('callBegin', function() {
+                att.on('callBegin', function(call) {
                     if (call.remoteMediaStream) {
                         var url = webkitURL.createObjectURL(call.remoteMediaStream);
                         $('.call0 .remoteVideo').attr('src', url);
@@ -61,7 +82,7 @@
                     $('.call0 .answer').hide();
                 });
 
-                att.on('callEnd', function() {
+                att.on('callEnd', function(call) {
                     console.log("callEnd event");
 
                     $('.call0 .call').show();
@@ -69,7 +90,6 @@
                     $('.call0 .answer').hide();
                     $('.call0 .remoteVideo').attr('src', '');
                 });
-
 
                 att.on('incomingCall', function(call, phonenumber) {
                     console.log("incomingCall event");
@@ -86,7 +106,7 @@
                     $('.call0 .call_to').hide();
                 });
 
-                att.on('outgoingCall', function() {
+                att.on('outgoingCall', function(call) {
                     console.log("outgoingCall event");
                     thecall = call;
 
@@ -96,7 +116,7 @@
                     }
                 });
 
-                att.on('phoneError', function() {
+                att.on('phoneError', function(payload) {
                     console.log("phoneError event");
 
                     $('.call0 .call').show();
@@ -125,7 +145,7 @@
                 });
 
                 $('.call0 .login').click(function() {
-                    window.location.href = att.oauth2.authorizeURL();
+                    window.location.href = getOAuthUrl;
                 });
             });
         </script>
