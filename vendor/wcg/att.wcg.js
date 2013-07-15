@@ -207,7 +207,7 @@
         }
 
 
-        self.emit('calling', tobecalled);
+        self.emit('calling', number);
         self.emit('outgoingCall', call);
 
 
