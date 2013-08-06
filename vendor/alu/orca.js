@@ -230,18 +230,16 @@
         * @param {orca.ManagedStream} stream local media stream 
         */
         this.addStream = function (stream) {
-            if(preConnect){
-                var managed = stream;
-                if(stream !== null){
-                    if(stream.constructor.name !== 'ManagedStream'){
-                        managed = orca.createManagedStream(stream);
-                    }
-					if(typeof callImp.addStream == 'function'){
-						callImp.addStream(managed);
-					}
-                    localStreams.push(managed);
-                    return managed;
+            var managed = stream;
+            if(stream !== null){
+                if(stream.constructor.name !== 'ManagedStream'){
+                    managed = orca.createManagedStream(stream);
                 }
+                if(typeof callImp.addStream == 'function'){
+                    callImp.addStream(managed);
+                }
+                localStreams.push(managed);
+                return managed;
             }
         };
 
@@ -347,6 +345,19 @@
         };
         
         /**
+        * Gets the media stream types used in this call
+        * @returns {string}
+        */
+        //TODO: discuss API change with Orca working group
+        this.mediaTypes = function () {
+            if (typeof callImp.mediaTypes != 'function') {
+                warning('mediaTypes is not implemented');
+                return '';
+            }
+            return callImp.mediaTypes.apply(callImp, arguments);
+        };
+        
+        /**
         * Add a new participant to a group call of which you are the initiator.
         * @param {string} target The user to add
         */
@@ -389,7 +400,111 @@
                 return callImp.transfer(target);
             }
         }
+
+        /**
+        * Upgrade to audiovideo call
+        */
+		//TODO: discuss API change with Orca working group
+        this.startVideo = function() {
+            if(callImp){
+                return callImp.startVideo();
+            }
+        };
+
+        /**
+        * Downgrade to audio call
+        */
+		//TODO: discuss API change with Orca working group
+        this.stopVideo = function() {
+            if(callImp){
+                return callImp.stopVideo();
+            }
+        };
         
+		/**^
+         *  Locally mute audio and/or video
+         */
+        this.mute = function( media_types ) {
+				var streams = this.streams('local');
+
+                if ( media_types === undefined )
+                {
+                        // no argument provided so mute both    
+                        console.debug("Entered mute() no arguments, so muting both audio and video");
+                        for ( i = 0; i < streams.length; i++ )
+                        {
+                                streams[i].stop();
+                        }
+
+                        return;
+                }
+
+                console.debug("Entered mute() media_types = " + media_types );
+
+                if ( media_types.indexOf( "audio" ) >= 0 )
+                {
+                        console.debug("Muting audio");
+                        for ( i = 0; i < streams.length; i++ )
+                        {
+                                setTrackListEnabled(streams[i].stream().getAudioTracks(), false);
+                        }
+
+                }
+
+		        if ( media_types.indexOf( "video" ) >= 0 )
+                {
+                        console.debug("Muting video");
+                        for ( i = 0; i < streams.length; i++ )
+                        {
+                                setTrackListEnabled(streams[i].stream().getVideoTracks(), false);
+                        }
+
+                }            
+        }
+
+        /**
+         *  Locally un-mute audio and/or video
+         */
+        this.unmute = function( media_types ) {
+         
+				var streams = this.streams('local');
+
+                if ( media_types === undefined )
+                {
+                        // no argument provided so mute both    
+                        console.debug("Entered unmute() no arguments, so unmuting both audio and video");
+                        for ( i = 0; i < streams.length; i++ )
+                        {
+                                streams[i].resume();
+                        }
+
+                        return;
+                }
+
+                console.debug("Entered unmute() media_types = " + media_types );
+
+                if ( media_types.indexOf( "audio" ) >= 0 )
+                {
+                        console.debug("Un-Muting audio");
+                        for ( i = 0; i < streams.length; i++ )
+                        {
+                                setTrackListEnabled(streams[i].stream().getAudioTracks(), true);
+                        }
+
+                }
+
+                if ( media_types.indexOf( "video" ) >= 0 )
+                {
+                        console.debug("Un-Muting video");
+                        for ( i = 0; i < streams.length; i++ )
+                        {
+                                setTrackListEnabled(streams[i].stream().getVideoTracks(), true);
+                        }
+
+                }	
+				
+        }
+		
         /**
         * @summary Triggered when a remote stream is added to the call
         * @event

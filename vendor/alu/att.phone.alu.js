@@ -29,7 +29,7 @@
             self._call = param;
         } else if (att.aluBackend.session) {
             var mediaTypes = 'audio, video';
-            self._call = att.aluBackend.session.createCall([param], mediaTypes);
+            self._call = att.aluBackend.session.createCall(param, mediaTypes);
         } else {
             self.emit('phoneError');
             return;
@@ -166,23 +166,50 @@
             this._call.disconnect();
     };
 
+    Call.prototype.mute = function(mediaTypes) {
+        if (this._call) {
+            this._call.mute(mediaTypes);
+        }
+    };
+
+    Call.prototype.unmute = function(mediaTypes) {
+        if (this._call) {
+            this._call.unmute(mediaTypes);
+        }
+    };
+
     Call.prototype.__defineGetter__("initiator", function() {
         return this._call.initiator;
     });
 
 
-    ATT.fn.dial = function(number) {
+    ATT.fn.dial = function(numbers) {
         var self = this,
-                callable = this.phoneNumber.getCallable(number);
+                callable = this.phoneNumber.getCallable(numbers);
 
-        self.emit('calling', number);
+        var toListRaw = numbers.split(',');
 
-        var call = new Call(self, number);
+        var toList = [];
 
-        //self.emit('outgoingCall', call);
-        //call.emit('ring');
+        for (var i = 0; i < toListRaw.length; i++) {
+            if (toListRaw[i].trim() !== '')
+                toList.push(this.config.puidPrefix + toListRaw[i].trim() + this.config.puidSuffix);
+        }
 
-        return call;
+        if (!toList.length) {
+            console.log("[ALU Plugin] cannot make call. No call recipients found");
+            self.emit("phoneError");
+            return;
+
+        } else {
+            self.emit('calling', toList);
+
+            var call = new Call(self, toList);
+
+            //self.emit('outgoingCall', call);
+            //call.emit('ring');
+            return call;
+        }
     };
 
     ATT.fn.disconnect = function() {
@@ -225,11 +252,8 @@
         att.on('user', function(user) {
             console.log('Setting up ALU ORCA');
 
-            if (typeof att.config.settings.sessionConfig === 'undefined') {
-                var uri = "ws://12.230.212.85:8080/ws";
-                var mediaTypes = 'audio,video';
-                att.config.settings.sessionConfig = {'uri': uri, 'provider': orcaALU, 'mediaTypes': mediaTypes};
-            }
+            att.config.puidPrefix = 'sip:+1';
+            att.config.puidSuffix = '@foundry.att.com';
 
             var token = {};
 
@@ -247,12 +271,24 @@
                 }
             }
 
-            orcaALU.mediaOptions = {
+            var mediaOptions = {
                 stun: '',
                 bundle: '',
                 iceType: 'standard-ice',
-                crypto: 'sdes-sbc'
+                crypto: 'sdes-sbc',
+                conferenceFactoryURI: 'sip:ALU_CONF@foundry.att.com'
             };
+
+            if (typeof att.config.settings.sessionConfig === 'undefined') {
+                var uri = "ws://12.230.212.85:8080/ws";
+                var mediaTypes = 'audio,video';
+                att.config.settings.sessionConfig = {
+                    'uri': uri,
+                    'provider': orcaALU,
+                    'mediaTypes': mediaTypes,
+                    'providerConfig': mediaOptions
+                };
+            }
 
             att.aluBackend.session = orca.createSession(user.publicId, token, att.config.settings.sessionConfig);
             var sessionBind = att.aluBackend.bindNumberToSession.bind(att);
