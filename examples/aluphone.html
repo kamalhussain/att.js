@@ -128,8 +128,8 @@
 
                 $('.call0 .call').click(function() {
                     var callee = $('.call0 .call_to').val();
-                    var pub_id = "sip:+1" + callee + "@foundry.att.com";
-                    att.dial(pub_id);
+                    //var pub_id = "sip:+1" + callee + "@foundry.att.com";
+                    att.dial(callee);
                 });
 
                 $('.call0 .hangup').click(function() {

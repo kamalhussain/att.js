@@ -674,9 +674,9 @@ if (typeof sip == "undefined") {
         return value.length >= 2 && value[0] == '"' && value[value.length-1] == '"' ? value.substr(1, value.length-2) : value;
     }
     
-    sip._address = ['contact', 'from', 'record-route', 'refer-to', 'referred-by', 'route', 'to'];
+    sip._address = ['contact', 'from', 'record-route', 'refer-to', 'referred-by', 'route', 'to', 'p-preferred-identity'];
     sip._comma = ['authorization', 'proxy-authenticate', 'proxy-authorization', 'www-authenticate'];
-    sip._unstructured = ['call-id', 'cseq', 'date', 'expires', 'max-forwards', 'organization', 'server', 'subject', 'timestamp', 'user-agent'];
+    sip._unstructured = ['call-id', 'cseq', 'date', 'expires', 'max-forwards', 'organization', 'server', 'subject', 'timestamp', 'user-agent', 'accept-contact'];
     sip._short = ['allow-events', 'u', 'call-id', 'i', 'contact', 'm', 'content-encoding', 'e', 'content-length', 'l', 'content-type', 'c', 'event', 'o', 'from', 'f', 'subject', 's', 'supported', 'k', 'to', 't', 'via', 'v'];
     sip._exception = {'call-id':'Call-ID','cseq':'CSeq','www-authenticate':'WWW-Authenticate'};
     
