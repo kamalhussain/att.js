@@ -110,6 +110,10 @@
                 token: att.config.accessToken,
                 apiKey: '7826110523f1241fcfd001859a67128d',
                 connectionUrl: 'http://gw.att.io:8080/http-bind',
+                media: {
+                    audio: true,
+                    video: false
+                },                
                 phone: {
                     onIncomingCall: att.phonoBackend.normalizeHandlers.bind(att),
                     ringTone: '',
