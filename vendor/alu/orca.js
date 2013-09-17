@@ -235,11 +235,22 @@
                 if(stream.constructor.name !== 'ManagedStream'){
                     managed = orca.createManagedStream(stream);
                 }
+                localStreams.push(managed);
                 if(typeof callImp.addStream == 'function'){
                     callImp.addStream(managed);
                 }
-                localStreams.push(managed);
                 return managed;
+            }
+        };
+
+        this.removeStream = function (stream) {
+            var managed = stream;
+            if(stream !== null){
+                if(typeof callImp.removeStream == 'function'){
+                    callImp.removeStream(managed);
+                }
+                localStreams.shift();//TODO: suppose it should be only one instance
+                console.log('removeStream() localStream.length:' + localStreams.length);
             }
         };
 
@@ -249,7 +260,7 @@
         */
         this.connect = function () {
             if(preConnect){
-                preConnect = false;
+                //preConnect = false;
                 return callImp.connect();
             }else{
                 this.onError(CallError.INVALID, {name: 'CallError', value: CallError.INVALID});
@@ -343,7 +354,7 @@
                 return CallStatus.DISCONNECTED;
             }
         };
-        
+	
         /**
         * Gets the media stream types used in this call
         * @returns {string}
@@ -504,6 +515,22 @@
                 }	
 				
         }
+
+	/**
+	* Places a call on hold
+	*/
+        this.hold = function( type ) {
+		console.debug("Entered call.hold type =" + type );
+		callImp.hold( type );
+	}
+
+	/**
+	* Takes a call off hold
+	*/
+        this.resume = function( ) {
+		console.debug("Entered call.resume");
+		callImp.resume();
+	}
 		
         /**
         * @summary Triggered when a remote stream is added to the call
@@ -684,7 +711,6 @@
     * @property {String} uri The address of the gateway server
     * @property {Object} provider Reference to implementation providing actual functionality
     * @property {String} mediatypes The types of media streams that the created session will support; defaults if not provided
-    * 
     */
 
     /** 
