@@ -1,28 +1,4 @@
 
-/*!
- * Copyright 2013 Voxeo Labs, Inc.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you
- * may not use this file except in compliance with the License.
- *
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * permissions and limitations under the License.
- *
- * Includes third party software from various sources. Portions of this
- * software are copyright their respective owners. See
- * http://phono.com/license for copyright statements from Adobe Systems
- * Incorporated, Kyle Simpson, Getify Solutions, Inc., Paul Johnston, and
- * Flowplayer.
- *
- */
-
 /*
 Copyright 2007 Adobe Systems Incorporated
 
@@ -71,13 +47,13 @@ FABridge.userTypes = {};
 
 FABridge.addToUserTypes = function()
 {
-	for (var i = 0; i < arguments.length; i++)
-	{
-		FABridge.userTypes[arguments[i]] = {
-			'typeName': arguments[i], 
-			'enriched': false
-		};
-	}
+    for (var i = 0; i < arguments.length; i++)
+    {
+        FABridge.userTypes[arguments[i]] = {
+            'typeName': arguments[i], 
+            'enriched': false
+        };
+    }
 }
 
 FABridge.argsToArray = function(args)
@@ -360,66 +336,66 @@ FABridge.prototype =
     },
 
     // Object Types and Proxies
-	getUserTypeDescriptor: function(objTypeName)
-	{
-		var simpleType = objTypeName.replace(/^([^:]*)\:\:([^:]*)$/, "$2");
-    	var isUserProto = ((typeof window[simpleType] == "function") && (typeof FABridge.userTypes[simpleType] != "undefined"));
+    getUserTypeDescriptor: function(objTypeName)
+    {
+        var simpleType = objTypeName.replace(/^([^:]*)\:\:([^:]*)$/, "$2");
+        var isUserProto = ((typeof window[simpleType] == "function") && (typeof FABridge.userTypes[simpleType] != "undefined"));
 
-    	var protoEnriched = false;
-    	
-    	if (isUserProto) {
-	    	protoEnriched = FABridge.userTypes[simpleType].enriched;
-    	}
-    	var toret = {
-    		'simpleType': simpleType, 
-    		'isUserProto': isUserProto, 
-    		'protoEnriched': protoEnriched
-    	};
-    	return toret;
-	}, 
-	
+        var protoEnriched = false;
+        
+        if (isUserProto) {
+            protoEnriched = FABridge.userTypes[simpleType].enriched;
+        }
+        var toret = {
+            'simpleType': simpleType, 
+            'isUserProto': isUserProto, 
+            'protoEnriched': protoEnriched
+        };
+        return toret;
+    }, 
+    
     // accepts an object reference, returns a type object matching the obj reference.
     getTypeFromName: function(objTypeName)
     {
-    	var ut = this.getUserTypeDescriptor(objTypeName);
-    	var toret = this.remoteTypeCache[objTypeName];
-    	if (ut.isUserProto)
-		{
-    		//enrich both of the prototypes: the FABridge one, as well as the class in the page. 
-	    	if (!ut.protoEnriched)
-			{
+        var ut = this.getUserTypeDescriptor(objTypeName);
+        var toret = this.remoteTypeCache[objTypeName];
+        if (ut.isUserProto)
+        {
+            //enrich both of the prototypes: the FABridge one, as well as the class in the page. 
+            if (!ut.protoEnriched)
+            {
 
-		    	for (i in window[ut.simpleType].prototype)
-				{
-		    		toret[i] = window[ut.simpleType].prototype[i];
-		    	}
-				
-				window[ut.simpleType].prototype = toret;
-				this.remoteTypeCache[objTypeName] = toret;
-				FABridge.userTypes[ut.simpleType].enriched = true;
-	    	}
-    	}
+                for (i in window[ut.simpleType].prototype)
+                {
+                    toret[i] = window[ut.simpleType].prototype[i];
+                }
+                
+                window[ut.simpleType].prototype = toret;
+                this.remoteTypeCache[objTypeName] = toret;
+                FABridge.userTypes[ut.simpleType].enriched = true;
+            }
+        }
         return toret;
     },
 
     createProxy: function(objID, typeName)
     {
-    	//get user created type, if it exists
-    	var ut = this.getUserTypeDescriptor(typeName);
+        //get user created type, if it exists
+        var ut = this.getUserTypeDescriptor(typeName);
 
         var objType = this.getTypeFromName(typeName);
 
-		if (ut.isUserProto)
-		{
-			var instFactory = window[ut.simpleType];
-			var instance = new instFactory(this.name, objID);
-			instance.fb_instance_id = objID;
-		}
-		else
-		{
-	        instanceFactory.prototype = objType;
-	        var instance = new instanceFactory(objID);
-		}
+        if (ut.isUserProto)
+        {
+            var instFactory = window[ut.simpleType];
+            var instance = new instFactory(this.name, objID);
+            instance.fb_instance_id = objID;
+        }
+        else
+        {
+            instanceFactory.prototype = objType;
+            var instance = new instanceFactory(objID);
+        }
 
         this.remoteInstanceCache[objID] = instance;
         return instance;
@@ -668,167 +644,62 @@ ASProxy.prototype =
 
 
 // FIXME: Needed by flXHR
-var flensed;
-
-if (typeof phonoFlensedOverride != 'undefined') {
-    flensed = phonoFlensedOverride;
-} else {
-    flensed = {base_path:"//s.phono.com/deps/flensed/1.0/"};
-}
+var flensed={base_path:"//s.phono.com/deps/flensed/1.0/"};
 
 (function($) {
 
 
-var Strophe = null;
+;function Phono(config) {
 
-;
-function Phono(config) {
-    Strophe = PhonoStrophe;
-    // Define defualt config and merge from constructor
-    this.config = Phono.util.extend({
-        gateway: "gw-v6.d.phono.com",
-        connectionUrl: window.location.protocol+"//app.v1-1.phono.com/http-bind"
-    }, config);
-    if (this.config.connectionUrl.indexOf("file:")==0){
-        this.config.connectionUrl = "https://app.v1-1.phono.com/http-bind";
-    }
+   // Define defualt config and merge from constructor
+   this.config = Phono.util.extend({
+      gateway: "gw-v6.d.phono.com",
+      connectionUrl: window.location.protocol+"//app.phono.com/http-bind"
+   }, config);
+   if (this.config.connectionUrl.indexOf("file:")==0){
+      this.config.connectionUrl = "https://app.phono.com/http-bind";
+   }
 
-    // Bind 'on' handlers
-    Phono.events.bind(this, config);
-
-    // Wrap ourselves with logging
-    Phono.util.loggify("Phono", this);
+   // Bind 'on' handlers
+   Phono.events.bind(this, config);
    
-    if(!config.apiKey) {
-        this.config.apiKey = prompt("Please enter your Phono API Key.\n\nTo get a new one sign up for a free account at: http://www.phono.com");
-        if(!this.config.apiKey) {
-            var message = "A Phono API Key is required. Please get one at http://www.phono.com";
-            Phono.events.trigger(this, "error", {
-                reason: message
-            });
-            throw message;
-        }
-    }
+   if(!config.apiKey) {
+      this.config.apiKey = prompt("Please enter your Phono API Key.\n\nTo get a new one sign up for a free account at: http://www.phono.com");
+      if(!this.config.apiKey) {
+         var message = "A Phono API Key is required. Please get one at http://www.phono.com";
+         Phono.events.trigger(this, "error", {
+            reason: message
+         });
+         throw message;
+      }
+   }
    
-    // Initialize Fields
-    this.sessionId = null;
-    this.connTimers = [];
-    Phono.log.debug("[CONFIG] ConnectionUrl: " + this.config.connectionUrl);
+   // Initialize Fields
+   this.sessionId = null;
+   Phono.log.debug("ConnectionUrl: " + this.config.connectionUrl);
 
-    if(navigator.appName.indexOf('Internet Explorer')>0){
-        xmlSerializer = {};
-        xmlSerializer.serializeToString = function(body) {
-            return body.xml;
-        };
-    } else {
-        xmlSerializer = new XMLSerializer();
-    }
+   // Existing connection?
+   this.connection = this.config.connection || new Strophe.Connection(this.config.connectionUrl);
 
-    // Existing connection? do some voodoo to make sure we use their Strophe not PhonoStrophe
-    if (this.config.connection != null) {
-        Strophe = window.Strophe;
-        Strophe.build = $build;
-        Strophe.msg = $msg;
-        Strophe.iq = $iq;
-        Strophe.pres = $pres;
-        this.connection = this.config.connection;
-    } else {
-        // We need to make a connection
-        var phono = this;
-        var cfunc = function(curl) {
-            if (!phono.connected()) { 
-                Phono.log.debug("trying connection URL "+curl);
-                if (phono.connection != null){
-                    phono.connection.disconnect();
-                }
-                phono.connection = new Strophe.Connection(curl);
-                
-                phono.connection.xmlInput = function (body) {
-                    Phono.log.debug("[WIRE] (i) " + xmlSerializer.serializeToString(body));
-                };
-                
-                phono.connection.xmlOutput = function (body) {
-                Phono.log.debug("[WIRE] (o) " + xmlSerializer.serializeToString(body));
-                };
-                
-                phono.connect();
-            } else {
-            Phono.log.debug("[LB] already connected... not trying URL "+curl);
-            }
-        }  
-        
-        Phono.log.debug("[LB] Invoke loadbalancer");
-        // Create a dummy object so that the Strophe plugins get loaded
-        var dummy = connection = new PhonoStrophe.Connection(this.config.connectionUrl);
-        var a="",b= function (){} ,c="";
-        var sr = new PhonoStrophe.Request(a,b,c,0);
-        var srvreq = sr.xhr;
-        var curls = [];
-        var uri = document.createElement('a');
-        var srv = "_phono";
-        uri.href = this.config.connectionUrl
-        Phono.log.debug("[LB] OrigT ="+uri.hostname+" path ="+uri.pathname);
-        if(uri.protocol == "https:"){
-           srv = srv+"s";
-        }
-        var dnsUrl = uri.protocol+"//"+uri.host+"/Phono/srvlookup/"+srv+"._tcp."+uri.hostname;
-        srvreq.open("GET", dnsUrl, false);     // this blocks because there is really nothing else we can do untill we have a server to talk to.
+   if(navigator.appName.indexOf('Internet Explorer')>0){
+    xmlSerializer = {};
+    xmlSerializer.serializeToString = function(body) {return body.xml;};
+   } else {
+    xmlSerializer = new XMLSerializer();
+   }
+   this.connection.xmlInput = function (body) {
+       Phono.log.debug("[WIRE] (i) " + xmlSerializer.serializeToString(body));
+   };
 
-        if (srvreq.overrideMimeType) {
-            srvreq.overrideMimeType("application/json");
-        }
-        try {
-            // Set the ready state handler
-            srvreq.onreadystatechange = function() {
-                if (srvreq.readyState == 4) {
-                    Phono.log.debug("[LB] Got reply :" + srvreq.status)
-                    if (srvreq.status == 200) {
-                        Phono.log.debug("[LB] Reply was "+srvreq.responseText);
-                        var srv = eval('(' +srvreq.responseText+ ')');
-                        for (var s in srv.servers) {
-                            var nexts = srv.servers[s];
-                            var curl = "";
-                            // if the target matches the original connectionURL then use the path from that
-                            // otherwise just append /http-bind
-                            var path = uri.pathname;
-                            if (uri.hostname == nexts.target) {
-                                if (path.indexOf('/') != 0) path = "/" + path; 
-                            } else {
-                                path = "/http-bind";
-                            }
-                            curl = uri.protocol+"//"+nexts.target +":"+nexts.port+path;
-                            if (typeof nexts.target != 'undefined') {
-                                Phono.log.debug("[LB] Adding connection URL "+curl);
-                                curls.push(curl);
-                            }
-                        }
-                        Phono.log.debug("[LB] Adding default connection URL "+phono.config.connectionUrl);
-                        curls.push(phono.config.connectionUrl);
-                        Phono.log.debug("[LB] Initial connection URL "+curls[0]);        
-                        
-                        // add timers for all possible srv entries (and default)
-                        // if any work, we will skip the rest
-                        var t = 0;
-                        for (var c in curls) {
-                            if (curls[c].substring) {
-                                setTimeout(function(){if (curls[t].substring) cfunc(curls[t]);t = t+1;},20+(c*10000));
-                            }
-                        }
-                    } else {
-                        Phono.log.debug("[LB] loadbalancer status was "+srvreq.status);
-                        Phono.log.debug("[LB] Using default connection URL "+phono.config.connectionUrl);
-                        cfunc(phono.config.connectionUrl);
-                    }
-                }
-            }
-            // Send the request
-            srvreq.send(null);
-        } catch (e) {
-            Phono.log.debug("[LB] error - ignoring a loadbalance error "+e);
-            Phono.log.debug("[LB] Using default connection URL "+phono.config.connectionUrl);
-            cfunc(phono.config.connectionUrl);
-        }
-    } 
+   this.connection.xmlOutput = function (body) {
+       Phono.log.debug("[WIRE] (o) " + xmlSerializer.serializeToString(body));
+   };
+
+   // Wrap ourselves with logging
+   Phono.util.loggify("Phono", this);
+
+   this.connect();
+   
 };
 
 (function() {
@@ -841,109 +712,109 @@ function Phono(config) {
    },
    escapeXmppNode: function(input) {
       var node = input;
-		node = node.replace(/\\/g, "\\5c");
-		node = node.replace(/ /g, "\\20");
-		node = node.replace(/\"/, "\\22");
-		node = node.replace(/&/g, "\\26");
-		node = node.replace(/\'/, "\\27");
-		node = node.replace(/\//g, "\\2f");
-		node = node.replace(/:/g, "\\3a");
-		node = node.replace(/</g, "\\3c");
-		node = node.replace(/>/g, "\\3e");
-		node = node.replace(/@/g, "\\40");         
+        node = node.replace(/\\/g, "\\5c");
+        node = node.replace(/ /g, "\\20");
+        node = node.replace(/\"/, "\\22");
+        node = node.replace(/&/g, "\\26");
+        node = node.replace(/\'/, "\\27");
+        node = node.replace(/\//g, "\\2f");
+        node = node.replace(/:/g, "\\3a");
+        node = node.replace(/</g, "\\3c");
+        node = node.replace(/>/g, "\\3e");
+        node = node.replace(/@/g, "\\40");         
       return node;
    },
    // From jQuery 1.4.2
-	each: function( object, callback, args ) {
-		var name, i = 0,
-			length = object.length,
-			isObj = length === undefined || $.isFunction(object);
+    each: function( object, callback, args ) {
+        var name, i = 0,
+            length = object.length,
+            isObj = length === undefined || $.isFunction(object);
 
-		if ( args ) {
-			if ( isObj ) {
-				for ( name in object ) {
-					if ( callback.apply( object[ name ], args ) === false ) {
-						break;
-					}
-				}
-			} else {
-				for ( ; i < length; ) {
-					if ( callback.apply( object[ i++ ], args ) === false ) {
-						break;
-					}
-				}
-			}
+        if ( args ) {
+            if ( isObj ) {
+                for ( name in object ) {
+                    if ( callback.apply( object[ name ], args ) === false ) {
+                        break;
+                    }
+                }
+            } else {
+                for ( ; i < length; ) {
+                    if ( callback.apply( object[ i++ ], args ) === false ) {
+                        break;
+                    }
+                }
+            }
 
-		// A special, fast, case for the most common use of each
-		} else {
-			if ( isObj ) {
-				for ( name in object ) {
-					if ( callback.call( object[ name ], name, object[ name ] ) === false ) {
-						break;
-					}
-				}
-			} else {
-				for ( var value = object[0];
-					i < length && callback.call( value, i, value ) !== false; value = object[++i] ) {}
-			}
-		}
+        // A special, fast, case for the most common use of each
+        } else {
+            if ( isObj ) {
+                for ( name in object ) {
+                    if ( callback.call( object[ name ], name, object[ name ] ) === false ) {
+                        break;
+                    }
+                }
+            } else {
+                for ( var value = object[0];
+                    i < length && callback.call( value, i, value ) !== false; value = object[++i] ) {}
+            }
+        }
 
-		return object;
-	},   
-	isFunction: function( obj ) {
-		return toString.call(obj) === "[object Function]";
-	},
+        return object;
+    },   
+    isFunction: function( obj ) {
+        return toString.call(obj) === "[object Function]";
+    },
 
-	isArray: function( obj ) {
-		return toString.call(obj) === "[object Array]";
-	},   
-	isPlainObject: function( obj ) {
-		if ( !obj || toString.call(obj) !== "[object Object]" || obj.nodeType || obj.setInterval ) {
-			return false;
-		}
-		if ( obj.constructor
-			&& !hasOwnProperty.call(obj, "constructor")
-			&& !hasOwnProperty.call(obj.constructor.prototype, "isPrototypeOf") ) {
-			return false;
-		}
-		var key;
-		for ( key in obj ) {}
-		
-		return key === undefined || hasOwnProperty.call( obj, key );
-	},	
+    isArray: function( obj ) {
+        return toString.call(obj) === "[object Array]";
+    },   
+    isPlainObject: function( obj ) {
+        if ( !obj || toString.call(obj) !== "[object Object]" || obj.nodeType || obj.setInterval ) {
+            return false;
+        }
+        if ( obj.constructor
+            && !hasOwnProperty.call(obj, "constructor")
+            && !hasOwnProperty.call(obj.constructor.prototype, "isPrototypeOf") ) {
+            return false;
+        }
+        var key;
+        for ( key in obj ) {}
+        
+        return key === undefined || hasOwnProperty.call( obj, key );
+    },  
    extend: function() {
-   	var target = arguments[0] || {}, i = 1, length = arguments.length, deep = false, options, name, src, copy;
-   	if ( typeof target === "boolean" ) {
-   		deep = target;
-   		target = arguments[1] || {};
-   		i = 2;
-   	}
-   	if ( typeof target !== "object" && !$.isFunction(target) ) {
-   		target = {};
-   	}
-   	if ( length === i ) {
-   		target = this;
-   		--i;
-   	}
-   	for ( ; i < length; i++ ) {
-   		if ( (options = arguments[ i ]) != null ) {
-   			for ( name in options ) {
-   				src = target[ name ];
-   				copy = options[ name ];
-   				if ( target === copy ) {
-   					continue;
-   				}
-   				if ( deep && copy && ( $.isPlainObject(copy) || $.isArray(copy) ) ) {
-   					var clone = src && ( $.isPlainObject(src) || $.isArray(src) ) ? src
-   						: $.isArray(copy) ? [] : {};
-   					target[ name ] = $.extend( deep, clone, copy );
-   				} else if ( copy !== undefined ) {
-   					target[ name ] = copy;
-   				}
-   			}
-   		}
-   	}
-   	return target;
+    var target = arguments[0] || {}, i = 1, length = arguments.length, deep = false, options, name, src, copy;
+    if ( typeof target === "boolean" ) {
+        deep = target;
+        target = arguments[1] || {};
+        i = 2;
+    }
+    if ( typeof target !== "object" && !$.isFunction(target) ) {
+        target = {};
+    }
+    if ( length === i ) {
+        target = this;
+        --i;
+    }
+    for ( ; i < length; i++ ) {
+        if ( (options = arguments[ i ]) != null ) {
+            for ( name in options ) {
+                src = target[ name ];
+                copy = options[ name ];
+                if ( target === copy ) {
+                    continue;
+                }
+                if ( deep && copy && ( $.isPlainObject(copy) || $.isArray(copy) ) ) {
+                    var clone = src && ( $.isPlainObject(src) || $.isArray(src) ) ? src
+                        : $.isArray(copy) ? [] : {};
+                    target[ name ] = $.extend( deep, clone, copy );
+                } else if ( copy !== undefined ) {
+                    target[ name ] = copy;
+                }
+            }
+        }
+    }
+    return target;
    },
    
    
@@ -952,42 +823,42 @@ function Phono(config) {
    // with input from Tino Zijdel, Matthias Miller, Diego Perini   
    eventCounter: 1,
    addEvent: function(target, type, handler) {
-		// assign each event handler a unique ID
-		if (!handler.$$guid) handler.$$guid = this.eventCounter++;
-		// create a hash table of event types for the target
-		if (!target.events) target.events = {};
-		// create a hash table of event handlers for each target/event pair
-		var handlers = target.events[type];
-		if (!handlers) {
-			handlers = target.events[type] = {};
-			// store the existing event handler (if there is one)
-			if (target["on" + type]) {
-				handlers[0] = target["on" + type];
-			}
-		}
-		// store the event handler in the hash table
-		handlers[handler.$$guid] = handler;
-		// assign a global event handler to do all the work
-		target["on" + type] = handleEvent;
+        // assign each event handler a unique ID
+        if (!handler.$$guid) handler.$$guid = this.eventCounter++;
+        // create a hash table of event types for the target
+        if (!target.events) target.events = {};
+        // create a hash table of event handlers for each target/event pair
+        var handlers = target.events[type];
+        if (!handlers) {
+            handlers = target.events[type] = {};
+            // store the existing event handler (if there is one)
+            if (target["on" + type]) {
+                handlers[0] = target["on" + type];
+            }
+        }
+        // store the event handler in the hash table
+        handlers[handler.$$guid] = handler;
+        // assign a global event handler to do all the work
+        target["on" + type] = handleEvent;
    },
    removeEvent: function(target, type, handler) {
-		// delete the event handler from the hash table
-		if (target.events && target.events[type]) {
-			delete target.events[type][handler.$$guid];
-		}
+        // delete the event handler from the hash table
+        if (target.events && target.events[type]) {
+            delete target.events[type][handler.$$guid];
+        }
    },
    handleEvent: function(event) {
-   	var returnValue = true;
-   	// get a reference to the hash table of event handlers
-   	var handlers = this.events[event.type];
-   	// execute each event handler
-   	for (var i in handlers) {
-   		this.$$handleEvent = handlers[i];
-   		if (this.$$handleEvent(event) === false) {
-   			returnValue = false;
-   		}
-   	}
-   	return returnValue;
+    var returnValue = true;
+    // get a reference to the hash table of event handlers
+    var handlers = this.events[event.type];
+    // execute each event handler
+    for (var i in handlers) {
+        this.$$handleEvent = handlers[i];
+        if (this.$$handleEvent(event) === false) {
+            returnValue = false;
+        }
+    }
+    return returnValue;
    },
     /* parseUri JS v0.1, by Steven Levithan (http://badassery.blogspot.com)
        Splits any well-formed URI into the following parts (all are optional):
@@ -1074,18 +945,16 @@ function Phono(config) {
     loggyFunction: function(objName, obj, funcName) {
         var original = obj[funcName];
         obj[funcName] = function() {
-            try { 
-                // Convert arguments to a real array
-                var sep = "";
-                var args = "";
-                for (var i = 0; i < arguments.length; i++) {
-                    args+= (sep + arguments[i]);
-                    sep = ",";
-                }
-                Phono.log.debug("[INVOKE] " + objName + "." + funcName + "(" + args  + ")");
-            } catch (e) {
-                Phono.log.debug("[INVOKE] " + objName + "." + funcName + "(...)");
+
+            // Convert arguments to a real array
+            var sep = "";
+            var args = "";
+            for (var i = 0; i < arguments.length; i++) {
+                args+= (sep + arguments[i]);
+                sep = ",";
             }
+            
+            Phono.log.debug("[INVOKE] " + objName + "." + funcName + "(" + args  + ")");
             return original.apply(obj, arguments);
         }
     },
@@ -1131,15 +1000,15 @@ function Phono(config) {
         return Base64.encode(key);
     },
     getAttributes: function(element) {
-	var res = {},
-	attr;
-	for(var i = 0, len = element.attributes.length; i < len; i++) {
-	    if(element.attributes.hasOwnProperty(i)) {
-		attr = element.attributes[i];
-		res[attr.name] = attr.value;
-	    }
-	}
-	return res;
+    var res = {},
+    attr;
+    for(var i = 0, len = element.attributes.length; i < len; i++) {
+        if(element.attributes.hasOwnProperty(i)) {
+        attr = element.attributes[i];
+        res[attr.name] = attr.value;
+        }
+    }
+    return res;
     }
 };
 
@@ -1153,8 +1022,8 @@ function Phono(config) {
          console = {};
          console.log = function(mess) {
          // last ditch loging uncomment this 
-	//		alert(mess)
-		};
+    //      alert(mess)
+        };
         }
         console.log("Phono Logger Initialized")
         logger.initialized = true;
@@ -1320,144 +1189,116 @@ function Phono(config) {
     // ======================================================================
 
    
-    // Global
-    Phono.version = "1.0";
+   // Global
+   Phono.version = "0.5";
    
-    Phono.log = new PhonoLogger();
+   Phono.log = new PhonoLogger();
    
-    Phono.registerPlugin = function(name, config) {
-        if(!Phono.plugins) {
-            Phono.plugins = {};
-        }
-        Phono.plugins[name] = config;
-    };
+   Phono.registerPlugin = function(name, config) {
+      if(!Phono.plugins) {
+         Phono.plugins = {};
+      }
+      Phono.plugins[name] = config;
+   };
 
-    // ======================================================================
+   // ======================================================================
 
+   Phono.prototype.connect = function() {
 
-    Phono.prototype.connect = function() {
-        var phono = this;
-        // If this is our own internal connection
-        if(!this.config.connection) {
-            if(!this.connection.connected) {
-                Phono.log.debug("Connecting....");
-                phono.connection.connect(
-                    phono.config.gateway, 
-                    null, 
-                    phono.handleStropheStatusChange,
-                    50
-                    );
-            }
-        }
-        else {
-            new PluginManager(this, this.config, function(plugins) {
-                this.handleConnect();
-            }).init();
-        }
-    };
+      // If this is our own internal connection
+      if(!this.config.connection) {
+         if(!this.connection.connected) {
+            this.connection.connect(
+               this.config.gateway, 
+               null, 
+               this.handleStropheStatusChange,
+               50
+            );
+         }
+      }
+      else {
+         this.handleConnect();  
+      }
 
-    Phono.prototype.disconnect = function() {
-        this.connection.disconnect();
-    };
+   };
 
-    Phono.prototype.connected = function() {
-        return (typeof(this.connection) != 'undefined' && this.connection.connected);
-    };
+   Phono.prototype.disconnect = function() {
+      this.connection.disconnect();
+   };
 
-    Phono.prototype.handleStropheStatusChange = function(status) {
-        if (status === Strophe.Status.CONNECTED) {
-            if (this.connTimer != null){ 
-                Phono.log.debug("Clear timeout");
-                clearTimeout(this.connTimer);
-            }
-            new PluginManager(this, this.config, function(plugins) {
-                this.handleConnect();
-            }).init();
-        } else if (status === Strophe.Status.DISCONNECTED) {
-            this.handleDisconnect();
-        } else if (status === Strophe.Status.ERROR
-            || status === Strophe.Status.CONNFAIL
-            || status === Strophe.Status.CONNFAIL
-            || status === Strophe.Status.AUTHFAIL) {
-            this.handleError();
-        }
-    };
+   Phono.prototype.connected = function() {
+      return this.connection.connected;
+   };
 
-    // Fires when the underlying Strophe Connection is estabilshed
-    Phono.prototype.handleConnect = function() {
-        var phono = this;
-        phono.sessionId = Strophe.getBareJidFromJid(this.connection.jid);
+   Phono.prototype.handleStropheStatusChange = function(status) {
+      if (status === Strophe.Status.CONNECTED) {
+          new PluginManager(this, this.config, function(plugins) {
+              this.handleConnect();
+          }).init();
+      } else if (status === Strophe.Status.DISCONNECTED) {
+          this.handleDisconnect();
+      } else if (status === Strophe.Status.ERROR 
+                 || status === Strophe.Status.CONNFAIL 
+                 || status === Strophe.Status.CONNFAIL 
+                 || status === Strophe.Status.AUTHFAIL) {
+          this.handleError();
+      }
+   };
 
-        if (!this.config.connection) {
-            var apiKeyIQ = Strophe.iq(
-            {
-                type:"set"
-            })
-            .c("apikey", {
-                xmlns:"http://phono.com/apikey"
-            })
-            .t(phono.config.apiKey).up()
-            .c("caps", {
-                xmlns:"http://phono.com/caps", 
-                ver:Phono.version
-                });
-           
-            // Loop over all plugins adding any caps that we have
-            for(pluginName in Phono.plugins) {
-                if (phono[pluginName] && phono[pluginName].getCaps) {
-                    apiKeyIQ = phono[pluginName].getCaps(apiKeyIQ.c(pluginName));
-                    apiKeyIQ.up();
-                }
-            }
-            apiKeyIQ = apiKeyIQ.c('browser',{
-                version:navigator.appVersion, 
-                agent:navigator.userAgent
-                }).up();
-           
-            phono.connection.sendIQ(apiKeyIQ, 
-                phono.handleKeySuccess,
-                function() {
-                    Phono.events.trigger(phono, "error", {
-                        reason: "API key rejected"
-                    });
-                });
-            if(phono.config.provisioningUrl) {
-                phono.connection.send(
-                    Strophe.iq({
-                        type:"set"
-                    })
-                    .c("provisioning", {
-                        xmlns:"http://phono.com/provisioning"
-                    })
-                    .t(phono.config.provisioningUrl)
-                    );
-            }
-        } else {
-            Phono.events.trigger(this, "ready");
-        }
-    };
+   // Fires when the underlying Strophe Connection is estabilshed
+   Phono.prototype.handleConnect = function() {
+       var phono = this;
+       phono.sessionId = Strophe.getBareJidFromJid(this.connection.jid);
 
-    Phono.prototype.handleKeySuccess = function() {
-        Phono.events.trigger(this, "ready");
-    }
-    // Fires when the underlying Strophe Connection errors out
-    Phono.prototype.handleError = function() {
-        // add load balance retry code here ?
-        Phono.log.debug("connection failed - logging in handleError");
+       var apiKeyIQ = $iq(
+           {type:"set"})
+           .c("apikey", {xmlns:"http://phono.com/apikey"})
+           .t(phono.config.apiKey).up()
+           .c("caps", {xmlns:"http://phono.com/caps", ver:Phono.version});
 
-        Phono.events.trigger(this, "error", {
-            reason: "Error connecting to XMPP server"
-        });
-    };
+       // Loop over all plugins adding any caps that we have
+       for(pluginName in Phono.plugins) {
+           if (phono[pluginName].getCaps) {
+               apiKeyIQ = phono[pluginName].getCaps(apiKeyIQ.c(pluginName));
+               apiKeyIQ.up();
+           }
+       }
+       apiKeyIQ = apiKeyIQ.c('browser',{version:navigator.appVersion, agent:navigator.userAgent}).up();
+       
+       phono.connection.sendIQ(apiKeyIQ, 
+                               phono.handleKeySuccess,
+                               function() {
+                                   Phono.events.trigger(phono, "error", {
+                                       reason: "API key rejected"
+                                   });
+                               });
+       if(phono.config.provisioningUrl) {
+           phono.connection.send(
+               $iq({type:"set"})
+                   .c("provisioning", {xmlns:"http://phono.com/provisioning"})
+                   .t(phono.config.provisioningUrl)
+           );
+       }
+   };
 
-    // Fires when the underlying Strophe Connection disconnects
-    Phono.prototype.handleDisconnect = function() {
-        Phono.events.trigger(this, "unready");
-    };
+   Phono.prototype.handleKeySuccess = function() {
+       Phono.events.trigger(this, "ready");
+   }
+   // Fires when the underlying Strophe Connection errors out
+   Phono.prototype.handleError = function() {
+      Phono.events.trigger(this, "error", {
+         reason: "Error connecting to XMPP server"
+      });
+   };
 
-    // ======================================================================
+   // Fires when the underlying Strophe Connection disconnects
+   Phono.prototype.handleDisconnect = function() {
+      Phono.events.trigger(this, "unready");
+   };
 
-/*	flXHR 1.0.5 <http://flxhr.flensed.com/> | Copyright (c) 2008-2010 Kyle Simpson, Getify Solutions, Inc. | This software is released under the MIT License <http://www.opensource.org/licenses/mit-license.php> */
+   // ======================================================================
+
+/*  flXHR 1.0.5 <http://flxhr.flensed.com/> | Copyright (c) 2008-2010 Kyle Simpson, Getify Solutions, Inc. | This software is released under the MIT License <http://www.opensource.org/licenses/mit-license.php> */
 (function(c){var E=c,h=c.document,z="undefined",a=true,L=false,g="",o="object",k="function",N="string",l="div",e="onunload",H=null,y=null,K=null,q=null,x=0,i=[],m=null,r=null,G="flXHR.js",n="flensed.js",P="flXHR.vbs",j="checkplayer.js",A="flXHR.swf",u=c.parseInt,w=c.setTimeout,f=c.clearTimeout,s=c.setInterval,v=c.clearInterval,O="instanceId",J="readyState",D="onreadystatechange",M="ontimeout",C="onerror",d="binaryResponseBody",F="xmlResponseText",I="loadPolicyURL",b="noCacheHeader",p="sendTimeout",B="appendToId",t="swfIdPrefix";if(typeof c.flensed===z){c.flensed={}}if(typeof c.flensed.flXHR!==z){return}y=c.flensed;w(function(){var Q=L,ab=h.getElementsByTagName("script"),V=ab.length;try{y.base_path.toLowerCase();Q=a}catch(T){y.base_path=g}function Z(ai,ah,aj){for(var ag=0;ag<V;ag++){if(typeof ab[ag].src!==z){if(ab[ag].src.indexOf(ai)>=0){break}}}var af=h.createElement("script");af.setAttribute("src",y.base_path+ai);if(typeof ah!==z){af.setAttribute("type",ah)}if(typeof aj!==z){af.setAttribute("language",aj)}h.getElementsByTagName("head")[0].appendChild(af)}if((typeof ab!==z)&&(ab!==null)){if(!Q){var ac=0;for(var U=0;U<V;U++){if(typeof ab[U].src!==z){if(((ac=ab[U].src.indexOf(n))>=0)||((ac=ab[U].src.indexOf(G))>=0)){y.base_path=ab[U].src.substr(0,ac);break}}}}}try{y.checkplayer.module_ready()}catch(aa){Z(j,"text/javascript")}var ad=null;(function ae(){try{y.ua.pv.join(".")}catch(af){ad=w(arguments.callee,25);return}if(y.ua.win&&y.ua.ie){Z(P,"text/vbscript","vbscript")}y.binaryToString=function(aj,ai){ai=(((y.ua.win&&y.ua.ie)&&typeof ai!==z)?(!(!ai)):!(y.ua.win&&y.ua.ie));if(!ai){try{return flXHR_vb_BinaryToString(aj)}catch(al){}}var am=g,ah=[];try{for(var ak=0;ak<aj.length;ak++){ah[ah.length]=String.fromCharCode(aj[ak])}am=ah.join(g)}catch(ag){}return am};y.bindEvent(E,e,function(){try{c.flensed.unbindEvent(E,e,arguments.callee);for(var ai in r){if(r[ai]!==Object.prototype[ai]){try{r[ai]=null}catch(ah){}}}y.flXHR=null;r=null;y=null;q=null;K=null}catch(ag){}})})();function Y(){f(ad);try{E.detachEvent(e,Y)}catch(af){}}if(ad!==null){try{E.attachEvent(e,Y)}catch(X){}}var S=null;function R(){f(S);try{E.detachEvent(e,R)}catch(af){}}try{E.attachEvent(e,R)}catch(W){}S=w(function(){R();try{y.checkplayer.module_ready()}catch(af){throw new c.Error("flXHR dependencies failed to load.")}},20000)},0);y.flXHR=function(aR){var ab=L;if(aR!==null&&typeof aR===o){if(typeof aR.instancePooling!==z){ab=!(!aR.instancePooling);if(ab){var aG=function(){for(var a0=0;a0<i.length;a0++){var a1=i[a0];if(a1[J]===4){a1.Reset();a1.Configure(aR);return a1}}return null}();if(aG!==null){return aG}}}}var aW=++x,ai=[],af=null,ah=null,X=null,Y=null,aM=-1,aF=0,aa=null,ac=null,ao=null,aE=null,aw=null,aV=null,ak=null,Q=null,aL=null,Z=a,aB=L,aY="flXHR_"+aW,au=a,aC=L,aA=a,aJ=L,S="flXHR_swf",ae="flXHRhideSwf",V=null,aH=-1,T=g,aK=null,aD=null,aO=null;var U=function(){if(typeof aR===o&&aR!==null){if((typeof aR[O]!==z)&&(aR[O]!==null)&&(aR[O]!==g)){aY=aR[O]}if((typeof aR[t]!==z)&&(aR[t]!==null)&&(aR[t]!==g)){S=aR[t]}if((typeof aR[B]!==z)&&(aR[B]!==null)&&(aR[B]!==g)){V=aR[B]}if((typeof aR[I]!==z)&&(aR[I]!==null)&&(aR[I]!==g)){T=aR[I]}if(typeof aR[b]!==z){au=!(!aR[b])}if(typeof aR[d]!==z){aC=!(!aR[d])}if(typeof aR[F]!==z){aA=!(!aR[F])}if(typeof aR.autoUpdatePlayer!==z){aJ=!(!aR.autoUpdatePlayer)}if((typeof aR[p]!==z)&&((H=u(aR[p],10))>0)){aH=H}if((typeof aR[D]!==z)&&(aR[D]!==null)){aK=aR[D]}if((typeof aR[C]!==z)&&(aR[C]!==null)){aD=aR[C]}if((typeof aR[M]!==z)&&(aR[M]!==null)){aO=aR[M]}}Y=S+"_"+aW;function a0(){f(af);try{E.detachEvent(e,a0)}catch(a3){}}try{E.attachEvent(e,a0)}catch(a1){}(function a2(){try{y.bindEvent(E,e,aI)}catch(a3){af=w(arguments.callee,25);return}a0();af=w(aT,1)})()}();function aT(){if(V===null){Q=h.getElementsByTagName("body")[0]}else{Q=y.getObjectById(V)}try{Q.nodeName.toLowerCase();y.checkplayer.module_ready();K=y.checkplayer}catch(a1){af=w(aT,25);return}if((q===null)&&(typeof K._ins===z)){try{q=new K(r.MIN_PLAYER_VERSION,aU,L,aq)}catch(a0){aP(r.DEPENDENCY_ERROR,"flXHR: checkplayer Init Failed","The initialization of the 'checkplayer' library failed to complete.");return}}else{q=K._ins;ag()}}function ag(){if(q===null||!q.checkPassed){af=w(ag,25);return}if(m===null&&V===null){y.createCSS("."+ae,"left:-1px;top:0px;width:1px;height:1px;position:absolute;");m=a}var a4=h.createElement(l);a4.id=Y;a4.className=ae;Q.appendChild(a4);Q=null;var a1={},a5={allowScriptAccess:"always"},a2={id:Y,name:Y,styleclass:ae},a3={swfCB:aS,swfEICheck:"reset"};try{q.DoSWF(y.base_path+A,Y,"1","1",a1,a5,a2,a3)}catch(a0){aP(r.DEPENDENCY_ERROR,"flXHR: checkplayer Call Failed","A call to the 'checkplayer' library failed to complete.");return}}function aS(a0){if(a0.status!==K.SWF_EI_READY){return}R();aV=y.getObjectById(Y);aV.setId(Y);if(T!==g){aV.loadPolicy(T)}aV.autoNoCacheHeader(au);aV.returnBinaryResponseBody(aC);aV.doOnReadyStateChange=al;aV.doOnError=aP;aV.sendProcessed=ap;aV.chunkResponse=ay;aM=0;ax();aX();if(typeof aK===k){try{aK(ak)}catch(a1){aP(r.HANDLER_ERROR,"flXHR::onreadystatechange(): Error","An error occurred in the handler function. ("+a1.message+")");return}}at()}function aI(){try{c.flensed.unbindEvent(E,e,aI)}catch(a3){}try{for(var a4=0;a4<i.length;a4++){if(i[a4]===ak){i[a4]=L}}}catch(bb){}try{for(var a6 in ak){if(ak[a6]!==Object.prototype[a6]){try{ak[a6]=null}catch(ba){}}}}catch(a9){}ak=null;R();if((typeof aV!==z)&&(aV!==null)){try{aV.abort()}catch(a8){}try{aV.doOnReadyStateChange=null;al=null}catch(a7){}try{aV.doOnError=null;doOnError=null}catch(a5){}try{aV.sendProcessed=null;ap=null}catch(a2){}try{aV.chunkResponse=null;ay=null}catch(a1){}aV=null;try{c.swfobject.removeSWF(Y)}catch(a0){}}aQ();aK=null;aD=null;aO=null;ao=null;aa=null;aL=null;Q=null}function ay(){if(aC&&typeof arguments[0]!==z){aL=((aL!==null)?aL:[]);aL=aL.concat(arguments[0])}else{if(typeof arguments[0]===N){aL=((aL!==null)?aL:g);aL+=arguments[0]}}}function al(){if(typeof arguments[0]!==z){aM=arguments[0]}if(aM===4){R();if(aC&&aL!==null){try{ac=y.binaryToString(aL,a);try{aa=flXHR_vb_StringToBinary(ac)}catch(a2){aa=aL}}catch(a1){}}else{ac=aL}aL=null;if(ac!==g){if(aA){try{ao=y.parseXMLString(ac)}catch(a0){ao={}}}}}if(typeof arguments[1]!==z){aE=arguments[1]}if(typeof arguments[2]!==z){aw=arguments[2]}ad(aM)}function ad(a0){aF=a0;ax();aX();ak[J]=Math.max(0,a0);if(typeof aK===k){try{aK(ak)}catch(a1){aP(r.HANDLER_ERROR,"flXHR::onreadystatechange(): Error","An error occurred in the handler function. ("+a1.message+")");return}}}function aP(){R();aQ();aB=a;var a3;try{a3=new y.error(arguments[0],arguments[1],arguments[2],ak)}catch(a4){function a1(){this.number=0;this.name="flXHR Error: Unknown";this.description="Unknown error from 'flXHR' library.";this.message=this.description;this.srcElement=ak;var a8=this.number,a7=this.name,ba=this.description;function a9(){return a8+", "+a7+", "+ba}this.toString=a9}a3=new a1()}var a5=L;try{if(typeof aD===k){aD(a3);a5=a}}catch(a0){var a2=a3.toString();function a6(){this.number=r.HANDLER_ERROR;this.name="flXHR::onerror(): Error";this.description="An error occured in the handler function. ("+a0.message+")\nPrevious:["+a2+"]";this.message=this.description;this.srcElement=ak;var a8=this.number,a7=this.name,ba=this.description;function a9(){return a8+", "+a7+", "+ba}this.toString=a9}a3=new a6()}if(!a5){w(function(){y.throwUnhandledError(a3.toString())},1)}}function W(){am();aB=a;if(typeof aO===k){try{aO(ak)}catch(a0){aP(r.HANDLER_ERROR,"flXHR::ontimeout(): Error","An error occurred in the handler function. ("+a0.message+")");return}}else{aP(r.TIMEOUT_ERROR,"flXHR: Operation Timed out","The requested operation timed out.")}}function R(){f(af);af=null;f(X);X=null;f(ah);ah=null}function aZ(a1,a2,a0){ai[ai.length]={func:a1,funcName:a2,args:a0};Z=L}function aQ(){if(!Z){Z=a;var a1=ai.length;for(var a0=0;a0<a1;a0++){try{ai[a0]=L}catch(a2){}}ai=[]}}function at(){if(aM<0){ah=w(at,25);return}if(!Z){for(var a0=0;a0<ai.length;a0++){try{if(ai[a0]!==L){ai[a0].func.apply(ak,ai[a0].args);ai[a0]=L}}catch(a1){aP(r.HANDLER_ERROR,"flXHR::"+ai[a0].funcName+"(): Error","An error occurred in the "+ai[a0].funcName+"() function.");return}}Z=a}}function aX(){try{ak[O]=aY;ak[J]=aF;ak.status=aE;ak.statusText=aw;ak.responseText=ac;ak.responseXML=ao;ak.responseBody=aa;ak[D]=aK;ak[C]=aD;ak[M]=aO;ak[I]=T;ak[b]=au;ak[d]=aC;ak[F]=aA}catch(a0){}}function ax(){try{aY=ak[O];if(ak.timeout!==null&&(H=u(ak.timeout,10))>0){aH=H}aK=ak[D];aD=ak[C];aO=ak[M];if(ak[I]!==null){if((ak[I]!==T)&&(aM>=0)){aV.loadPolicy(ak[I])}T=ak[I]}if(ak[b]!==null){if((ak[b]!==au)&&(aM>=0)){aV.autoNoCacheHeader(ak[b])}au=ak[b]}if(ak[d]!==null){if((ak[d]!==aC)&&(aM>=0)){aV.returnBinaryResponseBody(ak[d])}aC=ak[d]}if(aA!==null){aA=!(!ak[F])}}catch(a0){}}function aN(){am();try{aV.reset()}catch(a0){}aE=null;aw=null;ac=null;ao=null;aa=null;aL=null;aB=L;aX();T=g;ax()}function aU(a0){if(a0.checkPassed){ag()}else{if(!aJ){aP(r.PLAYER_VERSION_ERROR,"flXHR: Insufficient Flash Player Version","The Flash Player was either not detected, or the detected version ("+a0.playerVersionDetected+") was not at least the minimum version ("+r.MIN_PLAYER_VERSION+") needed by the 'flXHR' library.")}else{q.UpdatePlayer()}}}function aq(a0){if(a0.updateStatus===K.UPDATE_CANCELED){aP(r.PLAYER_VERSION_ERROR,"flXHR: Flash Player Update Canceled","The Flash Player was not updated.")}else{if(a0.updateStatus===K.UPDATE_FAILED){aP(r.PLAYER_VERSION_ERROR,"flXHR: Flash Player Update Failed","The Flash Player was either not detected or could not be updated.")}}}function ap(){if(aH!==null&&aH>0){X=w(W,aH)}}function am(){R();aQ();ax();aM=0;aF=0;try{aV.abort()}catch(a0){aP(r.CALL_ERROR,"flXHR::abort(): Failed","The abort() call failed to complete.")}aX()}function av(){ax();if(typeof arguments[0]===z||typeof arguments[1]===z){aP(r.CALL_ERROR,"flXHR::open(): Failed","The open() call requires 'method' and 'url' parameters.")}else{if(aM>0||aB){aN()}if(aF===0){al(1)}else{aM=1}var a7=arguments[0],a6=arguments[1],a5=(typeof arguments[2]!==z)?arguments[2]:a,ba=(typeof arguments[3]!==z)?arguments[3]:g,a9=(typeof arguments[4]!==z)?arguments[4]:g;try{aV.autoNoCacheHeader(au);aV.open(a7,a6,a5,ba,a9)}catch(a8){aP(r.CALL_ERROR,"flXHR::open(): Failed","The open() call failed to complete.")}}}function az(){ax();if(aM<=1&&!aB){var a1=(typeof arguments[0]!==z)?arguments[0]:g;if(aF===1){al(2)}else{aM=2}try{aV.autoNoCacheHeader(au);aV.send(a1)}catch(a2){aP(r.CALL_ERROR,"flXHR::send(): Failed","The send() call failed to complete.")}}else{aP(r.CALL_ERROR,"flXHR::send(): Failed","The send() call cannot be made at this time.")}}function aj(){ax();if(typeof arguments[0]===z||typeof arguments[1]===z){aP(r.CALL_ERROR,"flXHR::setRequestHeader(): Failed","The setRequestHeader() call requires 'name' and 'value' parameters.")}else{if(!aB){var a3=(typeof arguments[0]!==z)?arguments[0]:g,a2=(typeof arguments[1]!==z)?arguments[1]:g;try{aV.setRequestHeader(a3,a2)}catch(a4){aP(r.CALL_ERROR,"flXHR::setRequestHeader(): Failed","The setRequestHeader() call failed to complete.")}}}}function an(){ax();return g}function ar(){ax();return[]}ak={readyState:aF,responseBody:aa,responseText:ac,responseXML:ao,status:aE,statusText:aw,timeout:aH,open:function(){ax();if(ak[J]===0){ad(1)}if(!Z||aM<0){aZ(av,"open",arguments);return}av.apply({},arguments)},send:function(){ax();if(ak[J]===1){ad(2)}if(!Z||aM<0){aZ(az,"send",arguments);return}az.apply({},arguments)},abort:am,setRequestHeader:function(){ax();if(!Z||aM<0){aZ(aj,"setRequestHeader",arguments);return}aj.apply({},arguments)},getResponseHeader:an,getAllResponseHeaders:ar,onreadystatechange:aK,ontimeout:aO,instanceId:aY,loadPolicyURL:T,noCacheHeader:au,binaryResponseBody:aC,xmlResponseText:aA,onerror:aD,Configure:function(a0){if(typeof a0===o&&a0!==null){if((typeof a0[O]!==z)&&(a0[O]!==null)&&(a0[O]!==g)){aY=a0[O]}if(typeof a0[b]!==z){au=!(!a0[b]);if(aM>=0){aV.autoNoCacheHeader(au)}}if(typeof a0[d]!==z){aC=!(!a0[d]);if(aM>=0){aV.returnBinaryResponseBody(aC)}}if(typeof a0[F]!==z){aA=!(!a0[F])}if((typeof a0[D]!==z)&&(a0[D]!==null)){aK=a0[D]}if((typeof a0[C]!==z)&&(a0[C]!==null)){aD=a0[C]}if((typeof a0[M]!==z)&&(a0[M]!==null)){aO=a0[M]}if((typeof a0[p]!==z)&&((H=u(a0[p],10))>0)){aH=H}if((typeof a0[I]!==z)&&(a0[I]!==null)&&(a0[I]!==g)&&(a0[I]!==T)){T=a0[I];if(aM>=0){aV.loadPolicy(T)}}aX()}},Reset:aN,Destroy:aI};if(ab){i[i.length]=ak}return ak};r=y.flXHR;r.HANDLER_ERROR=10;r.CALL_ERROR=11;r.TIMEOUT_ERROR=12;r.DEPENDENCY_ERROR=13;r.PLAYER_VERSION_ERROR=14;r.SECURITY_ERROR=15;r.COMMUNICATION_ERROR=16;r.MIN_PLAYER_VERSION="9.0.124";r.module_ready=function(){}})(window);
 // This code was written by Tyler Akins and has been placed in the
 // public domain.  It would be nice if you left this header intact.
@@ -2042,19 +1883,19 @@ Strophe = {
 
     /** Function: addNamespace 
      *  This function is used to extend the current namespaces in
-     *	Strophe.NS.  It takes a key and a value with the key being the
-     *	name of the new namespace, with its actual value.
-     *	For example:
-     *	Strophe.addNamespace('PUBSUB', "http://jabber.org/protocol/pubsub");
+     *  Strophe.NS.  It takes a key and a value with the key being the
+     *  name of the new namespace, with its actual value.
+     *  For example:
+     *  Strophe.addNamespace('PUBSUB', "http://jabber.org/protocol/pubsub");
      *
      *  Parameters:
      *    (String) name - The name under which the namespace will be
      *      referenced under Strophe.NS
-     *    (String) value - The actual namespace.	
+     *    (String) value - The actual namespace.    
      */
     addNamespace: function (name, value)
     {
-	Strophe.NS[name] = value;
+    Strophe.NS[name] = value;
     },
 
     /** Constants: Connection Status Constants
@@ -2260,12 +2101,12 @@ Strophe = {
      *  Parameters:
      *     (String) text - text to escape.
      *
-     *	Returns:
+     *  Returns:
      *      Escaped text.
      */
     xmlescape: function(text) 
     {
-	text = text.replace(/\&/g, "&amp;");
+    text = text.replace(/\&/g, "&amp;");
         text = text.replace(/</g,  "&lt;");
         text = text.replace(/>/g,  "&gt;");
         return text;    
@@ -2284,8 +2125,8 @@ Strophe = {
      */
     xmlTextNode: function (text)
     {
-	//ensure text is escaped
-	text = Strophe.xmlescape(text);
+    //ensure text is escaped
+    text = Strophe.xmlescape(text);
 
         if (!Strophe._xmlGenerator) {
             Strophe._xmlGenerator = Strophe._makeGenerator();
@@ -3241,12 +3082,12 @@ Strophe.Connection = function (service)
     // initialize plugins
     for (var k in Strophe._connectionPlugins) {
         if (Strophe._connectionPlugins.hasOwnProperty(k)) {
-	    var ptype = Strophe._connectionPlugins[k];
+        var ptype = Strophe._connectionPlugins[k];
             // jslint complaints about the below line, but this is fine
             var F = function () {};
             F.prototype = ptype;
             this[k] = new F();
-	    this[k].init(this);
+        this[k].init(this);
         }
     }
 };
@@ -3585,54 +3426,54 @@ Strophe.Connection.prototype = {
         if (typeof(elem.tree) === "function") {
             elem = elem.tree();
         }
-	var id = elem.getAttribute('id');
+    var id = elem.getAttribute('id');
 
-	// inject id if not found
-	if (!id) {
-	    id = this.getUniqueId("sendIQ");
-	    elem.setAttribute("id", id);
-	}
+    // inject id if not found
+    if (!id) {
+        id = this.getUniqueId("sendIQ");
+        elem.setAttribute("id", id);
+    }
 
-	var handler = this.addHandler(function (stanza) {
-	    // remove timeout handler if there is one
+    var handler = this.addHandler(function (stanza) {
+        // remove timeout handler if there is one
             if (timeoutHandler) {
                 that.deleteTimedHandler(timeoutHandler);
             }
 
             var iqtype = stanza.getAttribute('type');
-	    if (iqtype === 'result') {
-		if (callback) {
+        if (iqtype === 'result') {
+        if (callback) {
                     callback(stanza);
                 }
-	    } else if (iqtype === 'error') {
-		if (errback) {
+        } else if (iqtype === 'error') {
+        if (errback) {
                     errback(stanza);
                 }
-	    } else {
+        } else {
                 throw {
                     name: "StropheError",
                     message: "Got bad IQ type of " + iqtype
                 };
             }
-	}, null, 'iq', null, id);
+    }, null, 'iq', null, id);
 
-	// if timeout specified, setup timeout handler.
-	if (timeout) {
-	    timeoutHandler = this.addTimedHandler(timeout, function () {
+    // if timeout specified, setup timeout handler.
+    if (timeout) {
+        timeoutHandler = this.addTimedHandler(timeout, function () {
                 // get rid of normal handler
                 that.deleteHandler(handler);
 
-	        // call errback on timeout with null stanza
+            // call errback on timeout with null stanza
                 if (errback) {
-		    errback(null);
+            errback(null);
                 }
-		return false;
-	    });
-	}
+        return false;
+        });
+    }
 
-	this.send(elem);
+    this.send(elem);
 
-	return id;
+    return id;
     },
 
     /** PrivateFunction: _queueData
@@ -3798,10 +3639,10 @@ Strophe.Connection.prototype = {
                 
             // remove all of the requests
             if (this._requests.length > 0) {
-            	for (var i=0; i<this._requests.length; i++) {
-        			this._removeRequest(this._requests[i]);
-            	}
-        	}
+                for (var i=0; i<this._requests.length; i++) {
+                    this._removeRequest(this._requests[i]);
+                }
+            }
                 
             this._sendTerminate();
         }
@@ -3976,13 +3817,7 @@ Strophe.Connection.prototype = {
             // Fires the XHR request -- may be invoked immediately
             // or on a gradually expanding retry window for reconnects
             var sendFunc = function () {
-                try {
-                    req.xhr.send(req.data);
-                } catch (e) {
-                    Strophe.error("send func caught an error in _requests[" + i +
-                          "], reqStatus: " + req.xhr.status);
-                    Strophe.error("exception was "+e);  
-                }
+                req.xhr.send(req.data);
             };
 
             // Implement progressive backoff for reconnects --
@@ -5001,27 +4836,27 @@ Strophe.Connection.prototype = {
 if (callback) {
     callback(Strophe, $build, $msg, $iq, $pres);
 }
-// notice that this exposes our strophe as PhonoStrophe, protecting the any
-// user supplied strophe for collisions. 
+
 })(function () {
-  window.PhonoStrophe = arguments[0];
-  window.PhonoStrophe.build = arguments[1];
-  window.PhonoStrophe.msg = arguments[2];
-  window.PhonoStrophe.iq = arguments[3];
-  window.PhonoStrophe.pres = arguments[4];
+    window.Strophe = arguments[0];
+    window.$build = arguments[1];
+    window.$msg = arguments[2];
+    window.$iq = arguments[3];
+    window.$pres = arguments[4];
 });
+
 /* CORS plugin
 **
 ** flXHR.js should be loaded before this plugin if flXHR support is required.
 */
 
-PhonoStrophe.addConnectionPlugin('cors', {
+Strophe.addConnectionPlugin('cors', {
     init: function () {
         // replace Strophe.Request._newXHR with new CORS version
         if (window.XDomainRequest) {
             // We are in IE with CORS support
-            PhonoStrophe.debug("CORS with IE");
-            PhonoStrophe.Request.prototype._newXHR = function () {
+            Strophe.debug("CORS with IE");
+            Strophe.Request.prototype._newXHR = function () {
                 var stateChange = function(xhr, state) {
                     // Fudge the calling of onreadystatechange()
                     xhr.status = state;
@@ -5060,16 +4895,16 @@ PhonoStrophe.addConnectionPlugin('cors', {
             };
         } else if (new XMLHttpRequest().withCredentials !== undefined) {
             // We are in a sane browser with CROS support - no need to do anything
-            PhonoStrophe.debug("CORS with Firefox/Safari/Chome");
+            Strophe.debug("CORS with Firefox/Safari/Chome");
         } else if (flensed && flensed.flXHR) {
             // We don't have CORS support, so include flXHR
-            PhonoStrophe.debug("CORS not supported, using flXHR");
+            Strophe.debug("CORS not supported, using flXHR");
             var poolingSetting = true;
             if (navigator.userAgent.indexOf('MSIE') !=-1) {
                 // IE 7 has an issue with instance pooling and flash 10.1
                 poolingSetting = false;
             }
-            PhonoStrophe.Request.prototype._newXHR = function () {
+            Strophe.Request.prototype._newXHR = function () {
                 var xhr = new flensed.flXHR({
                     autoUpdatePlayer: true,
                     instancePooling: poolingSetting,
@@ -5078,7 +4913,7 @@ PhonoStrophe.addConnectionPlugin('cors', {
                 return xhr;
             };
         } else {
-            PhonoStrophe.error("No CORS and no flXHR. You may experience cross domain turbulence.");
+            Strophe.error("No CORS and no flXHR. You may experience cross domain turbulence.");
         }
     }
 });
@@ -5186,7 +5021,6 @@ function FlashAudio(phono, config, callback) {
         swf: "//" + MD5.hexdigest(window.location.host+phono.config.apiKey) + ".u.phono.com/releases/" + Phono.version + "/plugins/audio/phono.audio.swf",
         cirrus: "rtmfp://phono-fms1-ext.voxeolabs.net/phono",
         bridged: false,
-        reliable: false,
         media: {audio:true,video:true},
         watchdog: 25000
     }, config);
@@ -5198,7 +5032,7 @@ function FlashAudio(phono, config, callback) {
     
     // Create flash continer is user did not specify one
     if(!containerId) {
-	this.config.containerId = containerId = this.createContainer();
+    this.config.containerId = containerId = this.createContainer();
     }
     
     // OMG! Fix position of flash movie to be integer pixel
@@ -5208,7 +5042,7 @@ function FlashAudio(phono, config, callback) {
             $("#"+containerId).css("left",parseInt(p.left));
             $("#"+containerId).css("top",parseInt(p.top));
         } 
-    });		
+    });     
     
     var plugin = this;
     
@@ -5317,12 +5151,12 @@ FlashAudio.prototype.play = function(transport, autoPlay) {
             player.release();
         },
         volume: function(value) {
-   	    if(arguments.length === 0) {
-   		return player.getVolume();
-   	    }
-   	    else {
-   		player.setVolume(value);
-   	    }
+        if(arguments.length === 0) {
+        return player.getVolume();
+        }
+        else {
+        player.setVolume(value);
+        }
         }
     }
 };
@@ -5336,7 +5170,7 @@ FlashAudio.prototype.share = function(transport, autoPlay, codec) {
         Phono.log.info("Direct media share with peer " + transport.peerID);
     }
     var isSecure = false;
-    var share = this.$flash.share(url, autoPlay, codec.id, codec.name, codec.rate, true, peerID, this.config.video, this.config.reliable);
+    var share = this.$flash.share(url, autoPlay, codec.id, codec.name, codec.rate, true, peerID, this.config.video);
     if (url.indexOf("rtmfp://") == 0) isSecure = true;
 
     var s = {
@@ -5366,28 +5200,28 @@ FlashAudio.prototype.share = function(transport, autoPlay, codec) {
         },
         // Properties
         gain: function(value) {
-   	    if(arguments.length === 0) {
-   		return share.getGain();
-   	    }
-   	    else {
-   		share.setGain(value);
-   	    }
+        if(arguments.length === 0) {
+        return share.getGain();
+        }
+        else {
+        share.setGain(value);
+        }
         },
         mute: function(value) {
-   	    if(arguments.length === 0) {
-   		return share.getMute();
-   	    }
-   	    else {
-   		share.setMute(value);
-   	    }
+        if(arguments.length === 0) {
+        return share.getMute();
+        }
+        else {
+        share.setMute(value);
+        }
         },
         suppress: function(value) {
-   	    if(arguments.length === 0) {
-   		return share.getSuppress();
-   	    }
-   	    else {
-   		share.setSuppress(value);
-   	    }
+        if(arguments.length === 0) {
+        return share.getSuppress();
+        }
+        else {
+        share.setSuppress(value);
+        }
         },
         energy: function() {
             return {
@@ -5502,37 +5336,37 @@ FlashAudio.prototype.codecs = function() {
 FlashAudio.prototype.createContainer = function(phono) {
     
     var flashDiv = $("<div>")
-      	.attr("id","_phono-audio-flash" + (FlashAudio.count++))
-      	.addClass("phono_FlashHolder")
-      	.appendTo("body");
+        .attr("id","_phono-audio-flash" + (FlashAudio.count++))
+        .addClass("phono_FlashHolder")
+        .appendTo("body");
     
     flashDiv.css({
-   	"width":"1px",
-   	"height":"1px",
-   	"position":"absolute",
-   	"top":"50%",
-   	"left":"50%",
-   	"margin-top":"-69px",
-   	"margin-left":"-107px",
-   	"z-index":"10001",
-   	"visibility":"visible"
+    "width":"1px",
+    "height":"1px",
+    "position":"absolute",
+    "top":"50%",
+    "left":"50%",
+    "margin-top":"-69px",
+    "margin-left":"-107px",
+    "z-index":"10001",
+    "visibility":"visible"
     });
     
     var containerId = $(flashDiv).attr("id");
     
     Phono.events.bind(this, {
-      	onPermissionBoxShow: function() {
-	    $("#"+containerId).css({
-		"width":"240px",
-   		"height":"160px"
-	    });
-      	},
-      	onPermissionBoxHide: function() {
-	    $("#"+containerId).css({
-		"width":"1px",
-   		"height":"1px"
-	    });
-      	}
+        onPermissionBoxShow: function() {
+        $("#"+containerId).css({
+        "width":"240px",
+        "height":"160px"
+        });
+        },
+        onPermissionBoxHide: function() {
+        $("#"+containerId).css({
+        "width":"1px",
+        "height":"1px"
+        });
+        }
     });
     
     return containerId;
@@ -5568,7 +5402,7 @@ function JavaAudio(phono, config, callback) {
         try { 
          var json = plugin.$applet[0].getJSONStatus();
          if (json){
-	   var statusO = eval('(' +json+ ')');
+       var statusO = eval('(' +json+ ')');
            if (!statusO.userTrust){
              Phono.events.trigger(phono, "error", {
                 reason: "Java Applet not trusted by user - cannot continue"
@@ -5650,11 +5484,11 @@ JavaAudio.prototype.play = function(transport, autoPlay) {
         },
         volume: function() { 
             if(arguments.length === 0) {
-   		return player.volume();
-   	    }
-   	    else {
-   		player.volume(value);
-   	    }
+        return player.volume();
+        }
+        else {
+        player.volume(value);
+        }
         }
     }
 };
@@ -5700,28 +5534,28 @@ JavaAudio.prototype.share = function(transport, autoPlay, codec, srtpPropsl, srt
         },
         // Properties
         gain: function(value) {
-   	    if(arguments.length === 0) {
-   		return share.gain();
-   	    }
-   	    else {
-   		share.gain(value);
-   	    }
+        if(arguments.length === 0) {
+        return share.gain();
+        }
+        else {
+        share.gain(value);
+        }
         },
         mute: function(value) {
-   	    if(arguments.length === 0) {
-   		return share.mute();
-   	    }
-   	    else {
-   		share.mute(value);
-   	    }
+        if(arguments.length === 0) {
+        return share.mute();
+        }
+        else {
+        share.mute(value);
+        }
         },
         suppress: function(value) {
-   	    if(arguments.length === 0) {
-   		return share.doES();
-   	    }
-   	    else {
-   		share.doES(value);
-   	    }
+        if(arguments.length === 0) {
+        return share.doES();
+        }
+        else {
+        share.doES(value);
+        }
         },
         energy: function() {
             var en = share.energy();
@@ -5830,8 +5664,8 @@ _createContainer = function() {
         "position":"absolute",
         "top":"50%",
         "left":"50%",
-   	"margin-top":"-69px",
-   	"margin-left":"-107px",
+    "margin-top":"-69px",
+    "margin-left":"-107px",
         "z-index":"10001",
         "visibility":"visible"
     });
@@ -5986,9 +5820,9 @@ PhonegapIOSAudio.prototype.play = function(transport, autoPlay) {
         volume: function() { 
             if(arguments.length === 0) {
                 
-   	    }
-   	    else {
-   	    }
+        }
+        else {
+        }
         }
     }
 };
@@ -6007,7 +5841,7 @@ PhonegapIOSAudio.prototype.share = function(transport, autoPlay, codec, srtpProp
                       'autoplay': autoPlay == true ? "YES":"NO",
                       'codec':codecD,
                       'srtpPropsl':srtpPropsl,
-		      'srtpPropsr':srtpPropsr
+              'srtpPropsr':srtpPropsr
                   }];
        isSecure = true;
     } else {
@@ -6077,10 +5911,10 @@ PhonegapIOSAudio.prototype.share = function(transport, autoPlay, codec, srtpProp
         },
         // Properties
         gain: function(value) {
-   	    if(arguments.length === 0) {
+        if(arguments.length === 0) {
                 return gainValue;
-   	    }
-   	    else {
+        }
+        else {
                 PhoneGap.exec( 
                               function(result) {
                                   console.log("gain success: " + result + " " + value);
@@ -6093,13 +5927,13 @@ PhonegapIOSAudio.prototype.share = function(transport, autoPlay, codec, srtpProp
                                   'value':value
                               }]
                              );
-   	    }
+        }
         },
         mute: function(value) {
-   	    if(arguments.length === 0) {
+        if(arguments.length === 0) {
                 return muteStatus;
-   	    }
-   	    else {
+        }
+        else {
                 PhoneGap.exec( 
                               function(result) {
                                   console.log("mute success: " + result + " " + value);
@@ -6112,13 +5946,13 @@ PhonegapIOSAudio.prototype.share = function(transport, autoPlay, codec, srtpProp
                                   'value':value == true ? "YES":"NO"
                               }]
                              );
-   	    }
+        }
         },
         suppress: function(value) {
-   	    if(arguments.length === 0) {
-   	    }
-   	    else {
-   	    }
+        if(arguments.length === 0) {
+        }
+        else {
+        }
         },
         energy: function(){
             PhoneGap.exec(
@@ -6318,9 +6152,9 @@ PhonegapAndroidAudio.prototype.play = function(transport, autoPlay) {
         volume: function() { 
             if(arguments.length === 0) {
                 
-   	    }
-   	    else {
-   	    }
+        }
+        else {
+        }
         }
     }
 };
@@ -6413,10 +6247,10 @@ PhonegapAndroidAudio.prototype.share = function(transport, autoPlay, codec, srtp
         },
         // Properties
         gain: function(value) {
-   	    if(arguments.length === 0) {
+        if(arguments.length === 0) {
                 return gainValue;
-   	    }
-   	    else {
+        }
+        else {
                 console.log("share.gain " + luri);
                 PhoneGap.exec(function(result) {console.log("gain: success");},
                               function(result) {console.log("gain: fail");},
@@ -6426,13 +6260,13 @@ PhonegapAndroidAudio.prototype.share = function(transport, autoPlay, codec, srtp
                                   'uri':luri,
                                   'value':value
                               }]);   
-   	    }
+        }
         },
         mute: function(value) {
-   	    if(arguments.length === 0) {
+        if(arguments.length === 0) {
                 return muteStatus;
-   	    }
-   	    else {
+        }
+        else {
                 console.log("share.mute " + luri);
                 PhoneGap.exec(function(result) {console.log("mute: success");},
                               function(result) {console.log("mute: fail");},
@@ -6442,13 +6276,13 @@ PhonegapAndroidAudio.prototype.share = function(transport, autoPlay, codec, srtp
                                   'uri':luri,
                                   'value':value == true ? "YES":"NO"
                               }]);   
-   	    }
+        }
         },
         suppress: function(value) {
-   	    if(arguments.length === 0) {
-   	    }
-   	    else {
-   	    }
+        if(arguments.length === 0) {
+        }
+        else {
+        }
         },
         energy: function(){
             PhoneGap.exec(
@@ -6458,7 +6292,7 @@ PhonegapAndroidAudio.prototype.share = function(transport, autoPlay, codec, srtp
                             if(en != null) {
                               micEnergy = Math.floor(Math.max((Math.LOG2E * Math.log(en.mic)-4.0),0.0));
                               spkEnergy = Math.floor(Math.max((Math.LOG2E * Math.log(en.spk)-4.0),0.0)); 
-			    }
+                }
                           },
                         function(result) {console.log("energy fail:" + result);},
                         "PhonogapAudio","energy",
@@ -6518,93 +6352,18 @@ PhonegapAndroidAudio.prototype.codecs = function() {
 };
 
 
-function JSEPAudio(phono, config, callback) {
-    this.type = "jsep";
+function WebRTCAudio(phono, config, callback) {
 
-    Phono.log.info("Initialize JSEP");
-    if (typeof(webkitAudioContext) !== 'undefined'){
-        Phono.log.info("Have webkitAudio def");
-        JSEPAudio.webAudioContext = new webkitAudioContext();
-    }  else if (typeof(AudioContext) !== 'undefined'){
-        Phono.log.info("Have AudioContext def");
-        JSEPAudio.webAudioContext = new AudioContext();
-    }  else if (typeof(mozAudioContext) !== 'undefined'){
-        Phono.log.info("Have mozAudio def");
-        JSEPAudio.webAudioContext = new mozAudioContext();
+    console.log("Initialize WebRTC");
+
+    if (typeof webkitDeprecatedPeerConnection == "function") {
+        WebRTCAudio.peerConnection = webkitDeprecatedPeerConnection;
     } else {
-	Phono.log.info("No webAudio available - so no freep");
+        WebRTCAudio.peerConnection = webkitPeerConnection;
     }
 
-    if (typeof webkitRTCPeerConnection== "function") {
-        JSEPAudio.GUM = function(p,s,f) {
-            navigator.webkitGetUserMedia(p,s,f)
-        };
-        JSEPAudio.mkPeerConnection = function (a,b) {
-            return new webkitRTCPeerConnection(a,b);
-        };
-        JSEPAudio.mkSessionDescription = function(a){
-            return new RTCSessionDescription(a);
-        };
-        JSEPAudio.createObjectURL = function (s){
-            return webkitURL.createObjectURL(s);
-        };
-        JSEPAudio.stun = "stun:stun.l.google.com:19302";
-        JSEPAudio.attachMediaStream = function(element, stream) {
-            element.src = webkitURL.createObjectURL(stream);
-        };
-        JSEPAudio.stripCrypto = function(sdpObj){
-	    return sdpObj;
-        };
-	JSEPAudio.AudioUrl = function(url){
-		return url;
-	};
-	JSEPAudio.addCreateConstraint = function(constraint){
-		return constraint;
-	};
-    } else if (typeof mozRTCPeerConnection == "function") {
-        JSEPAudio.GUM = function(p,s,f) {
-            navigator.mozGetUserMedia(p,s,f)
-        };
-        JSEPAudio.mkPeerConnection = function (a,b) {
-            return new mozRTCPeerConnection(a,b);
-        };
-        JSEPAudio.mkSessionDescription = function(a){
-            return new mozRTCSessionDescription(a);
-        };
-        JSEPAudio.createObjectURL = function (s){
-            return URL.createObjectURL(s);
-        };
-        JSEPAudio.stun = "stun:23.21.150.121";
-        JSEPAudio.attachMediaStream = function(element, stream) {
-            element.mozSrcObject = stream;
-            element.play();
-        };
-        JSEPAudio.stripCrypto = function(sdpObj){
-	   Phono.util.each(sdpObj.contents, function() {
-              //if(this.rtcp) {delete this.rtcp;};
-              //if(this['rtcp-mux']) {delete this['rtcp-mux'];};
-              if(this.crypto) {delete this.crypto;};
-	      //if(this.ssrc) { delete this.ssrc;};
-	      //if(this.mid) { delete this.mid;};
-           }); 
-           //if (sdpObj.group) {delete sdpObj.group;};
-	   return sdpObj;
-        };
-	JSEPAudio.AudioUrl = function(url){
-		return url.replace(".mp3",".ogg");
-	};
-	JSEPAudio.addCreateConstraint = function(constraint){
-		constraint.mandatory.MozDontOfferDataChannel=true;
-		return constraint;
-	};
-    }
-    JSEPAudio.spk = 0.0;
-    JSEPAudio.mic = 0.0;
     this.config = Phono.util.extend({
-        media: {
-            audio:true,
-            video:false
-        }
+        media: {audio:true,video:true}
     }, config);
     
     var plugin = this;
@@ -6613,7 +6372,359 @@ function JSEPAudio(phono, config, callback) {
 
     // Create audio continer if user did not specify one
     if(!localContainerId) {
-        this.config.localContainerId = this.createContainer();
+    this.config.localContainerId = this.createContainer();
+    }
+
+    WebRTCAudio.localVideo = document.getElementById(this.config.localContainerId);
+
+    try { 
+        console.log("Request access to local media, use new syntax");
+        navigator.webkitGetUserMedia(this.config.media, 
+                                     function(stream) {
+                                         WebRTCAudio.localStream = stream;
+                                         console.log("We have a stream");
+                                         var url = webkitURL.createObjectURL(stream);
+                                         WebRTCAudio.localVideo.style.opacity = 1;
+                                         WebRTCAudio.localVideo.src = url;
+                                         callback(plugin);
+                                     },
+                                     function(error) {
+                                         console.log("Failed to get access to local media. Error code was " + error.code);
+                                         alert("Failed to get access to local media. Error code was " + error.code + ".");   
+                                     });
+    } catch (e) {
+        console.log("getUserMedia error, try old syntax");
+        navigator.webkitGetUserMedia("video,audio", 
+                                     function(stream) {
+                                         WebRTCAudio.localStream = stream;
+                                         console.log("We have a stream");
+                                         var url = webkitURL.createObjectURL(stream);
+                                         WebRTCAudio.localVideo.style.opacity = 1;
+                                         WebRTCAudio.localVideo.src = url;
+                                         callback(plugin);
+                                     },
+                                     function(error) {
+                                         console.log("Failed to get access to local media. Error code was " + error.code);
+                                         alert("Failed to get access to local media. Error code was " + error.code + ".");   
+                                     });    
+    }
+}
+
+WebRTCAudio.exists = function() {
+    return (typeof webkitDeprecatedPeerConnection == "function")|| (typeof webkitPeerConnection == "function");
+}
+
+WebRTCAudio.stun = "STUN stun.l.google.com:19302";
+WebRTCAudio.count = 0;
+
+// WebRTCAudio Functions
+//
+// =============================================================================================
+
+// Creates a new Player and will optionally begin playing
+WebRTCAudio.prototype.play = function(transport, autoPlay) {
+    var url = transport.uri;
+    var luri = url;
+    var audioPlayer = null;
+    
+    return {
+        url: function() {
+            return luri;
+        },
+        start: function() {
+            if (audioPlayer != null) {
+                $(audioPlayer).remove();
+            }
+            audioPlayer = $("<audio>")
+                .attr("id","_phono-audioplayer-webrtc" + (WebRTCAudio.count++))
+                .attr("autoplay","autoplay")
+                .attr("src",url)
+                .attr("loop","loop")
+                .appendTo("body");
+        },
+        stop: function() {
+            $(audioPlayer).remove();
+            audioPlayer = null;
+        },
+        volume: function() { 
+        }
+    }
+};
+
+// Creates a new audio Share and will optionally begin playing
+WebRTCAudio.prototype.share = function(transport, autoPlay, codec) {
+    var url = transport.uri;
+    var share;
+    var localStream;  
+
+    return {
+        // Readonly
+        url: function() {
+            return null;
+        },
+        codec: function() {
+            return null;
+        },
+        // Control
+        start: function() {
+            // Start - we already have done...
+        },
+        stop: function() {
+            // Stop
+            console.log("Closing PeerConnection");
+            if (transport.getPC() != null) {
+                transport.getPC().close();
+                console.log("closed");
+            } 
+//            WebRTCAudio.remoteVideo.style.opacity = 0;
+        },
+        digit: function(value, duration, audible) {
+            // No idea how to do this yet
+        },
+        // Properties
+        gain: function(value) {
+            return null;
+        },
+        mute: function(value) {
+            return null;
+        },
+        suppress: function(value) {
+            return null;
+        },
+        energy: function(){        
+            return {
+               mic: 0.0,
+               spk: 0.0
+            }
+        },
+        secure: function() {
+            return true;
+        }
+    }
+};   
+
+// Do we have WebRTC permission? 
+WebRTCAudio.prototype.permission = function() {
+    return true;
+};
+
+// Returns an object containg JINGLE transport information
+WebRTCAudio.prototype.transport = function(config) {
+    var pc, offer, answer, ok, remoteContainerId;
+
+    if(!config || !config.remoteContainerId) {
+        if (this.config.remoteContainerId) {
+            remoteContainerId = this.config.remoteContainerId;
+        } else {
+        remoteContainerId = this.createContainer();
+        }
+    } else {
+        remoteContainerId = config.remoteContainerId;
+    }
+
+    var remoteVideo = document.getElementById(remoteContainerId);    
+    
+    return {
+        name: "http://phono.com/webrtc/transport",
+        description: "http://phono.com/webrtc/description",
+        buildTransport: function(direction, j, callback, u, updateCallback) {
+            if (direction == "answer") {
+                // We are the result of an inbound call, so provide answer
+                if (pc != null) {
+                    pc.close();
+                    pc = null;
+                }
+                pc = new WebRTCAudio.peerConnection(WebRTCAudio.stun,
+                                                          function(message) {
+                                                              console.log("C->S SDP: " + message);
+                                                              var roap = $.parseJSON(message.substring(4,message.length));
+                                                              if (roap['messageType'] == "ANSWER") {
+                                                                  console.log("Received ANSWER from PeerConnection: " + message);
+                                                                  // Canary is giving a null s= line, so 
+                                                                  // we replace it with something useful
+                                                                  message = message.replace("s=", "s=Canary");
+                                                                  answer = message;
+                                                                  j.c('transport',{xmlns:"http://phono.com/webrtc/transport"})
+                                                                      .c('roap',Base64.encode(answer));
+                                                                  ok = "SDP\n{\n\"answererSessionId\":\"" +
+                                                                      roap['offererSessionId'] + "\",\n" +
+                                                                      "\"messageType\":\"OK\",\n" +
+                                                                      "\"offererSessionId\":\"" +
+                                                                      roap['answererSessionId'] + "\",\n" +
+                                                                      "\"seq\":1\n}"
+                                                                  
+                                                                  setTimeout(function() {
+                                                                      // Auto OK it
+                                                                      console.log("H->C SDP: " + ok);
+                                                                      pc.processSignalingMessage(ok);
+                                                                  }, 1);
+                                                                  // Invoke the callback to finish 
+                                                                  callback();
+                                                              } else if (roap['messageType'] == "OFFER") {
+                                                                  // Oh no, here we go
+                                                                  if (offer.indexOf("video") != -1) {
+                                                                      offer = message;
+                                                                      u.c('transport',{xmlns:"http://phono.com/webrtc/transport"})
+                                                                          .c('roap',Base64.encode(offer));
+                                                                      updateCallback();
+                                                                  } else {
+                                                                      // This is an audio only call, lets lie
+                                                                      roapAnswer = $.parseJSON(WebRTCAudio.offer.substring(4,message.length));
+                                                                      fakeAnswer = "SDP\n{\n\"answererSessionId\":\"" +
+                                                                      roap['answererSessionId'] + "\",\n" +
+                                                                      "\"messageType\":\"ANSWER\",\n" +
+                                                                      "\"offererSessionId\":\"" +
+                                                                      roap['offererSessionId'] + "\",\n" +
+                                                                          "\"seq\":2,\n" +
+                                                                          "\"sdp\":\"" + roapAnswer['sdp']
+                                                                          + "\"}";
+                                                                      console.log("H->C SDP: " + fakeAnswer);
+                                                                      pc.processSignalingMessage(fakeAnswer);
+                                                                  }
+                                                              } else {
+                                                                  console.log("Recieved unexpected ROAP: " + message);
+                                                              }
+                                                          }
+                                                         );
+                
+                pc.onaddstream = function(event) {
+                    console.log("Remote stream added.");
+                    console.log("Local stream is: " + WebRTCAudio.localStream);
+                    var url = webkitURL.createObjectURL(event.stream);
+                    remoteVideo.style.opacity = 1;
+                    remoteVideo.src = url;
+                };
+                pc.onremovestream = function(event) {
+                    conole.log("Remote stream removed.");
+                };
+                console.log("Created new PeerConnection, passing it :" + offer);
+                pc.addStream(WebRTCAudio.localStream); 
+                pc.processSignalingMessage(offer);
+            } else {
+                // We are creating an outbound call
+                if (pc != null) {
+                    pc.close();
+                    pc = null;
+                }
+                pc = new WebRTCAudio.peerConnection(WebRTCAudio.stun,
+                                                          function(message) {
+                                                              console.log("C->S SDP: " + message);
+                                                              // Canary is giving a null s= line, so 
+                                                              // we replace it with something useful
+                                                              message = message.replace("s=", "s=Canary");
+                                                              //message = message.replace("a=group:BUNDLE audio video", "a=group:BUNDLE 2 1");
+                                                              //message = message.replace("a=mid:audio", "a=mid:2");
+                                                              //message = message.replace("a=mid:video", "a=mid:1");
+                                                              var roap = $.parseJSON(message.substring(4,message.length));
+                                                              if (roap['messageType'] == "OFFER") {
+                                                                  j.c('transport',{xmlns:"http://phono.com/webrtc/transport"})
+                                                                      .c('roap',Base64.encode(message));  
+                                                                  offer = message;
+                                                                  callback();
+                                                              } else if (roap['messageType'] == "OK") {
+                                                                  // Ignore, we autogenerate on remote side
+                                                              }
+                                                              else if (roap['messageType'] == "ANSWER") {
+                                                                  // Oh no, here we go
+                                                                  answer = message;
+                                                                  u.c('transport',{xmlns:"http://phono.com/webrtc/transport"})
+                                                                      .c('roap',Base64.encode(answer));
+                                                                  updateCallback();
+                                                              } else {
+                                                                  console.log("Recieved unexpected ROAP: " + message);
+                                                              }
+                                                          }
+                                                         );
+                pc.onaddstream = function(event) {
+                    console.log("Remote stream added.");
+                    console.log("Local stream is: " + WebRTCAudio.localStream);
+                    var url = webkitURL.createObjectURL(event.stream);
+                    remoteVideo.style.opacity = 1;
+                    remoteVideo.src = url;
+                };
+                pc.addStream(WebRTCAudio.localStream);
+                console.log("Created PeerConnection for new OUTBOUND CALL");
+            }
+        },
+        processTransport: function(t, update) {
+            var roap;
+            var message;
+            t.find('roap').each(function () {
+                var encoded = this.textContent;
+                message = Base64.decode(encoded);
+                console.log("S->C SDP: " + message);
+                roap = $.parseJSON(message.substring(4,message.length));
+            });
+            if (roap['messageType'] == "OFFER") {
+                // We are receiving an inbound call
+                // Store the offer so we can use it to create an answer
+                //  when the user decides to do so
+                offer = message;
+                // Or we are getting an update...
+                if (pc != null && update == true) pc.processSignalingMessage(message);
+            } else if (roap['messageType'] == "ANSWER") {
+
+                // We are having an outbound call answered (must already have a PeerConnection)
+                pc.processSignalingMessage(message);
+            }
+            return {input:{uri:"webrtc"}, output:{getPC: function() {return pc;}}};
+        }
+    }
+};
+
+// Returns an array of codecs supported by this plugin
+// Hack until we get capabilities support
+WebRTCAudio.prototype.codecs = function() {
+    var result = new Array();
+    result.push({
+        id: 1,
+        name: "webrtc",
+        rate: 16000,
+        p: 20
+    });
+    return result;
+};
+
+WebRTCAudio.prototype.audioInDevices = function(){
+    var result = new Array();
+    return result;
+}
+
+// Creates a DIV to hold the video element if not specified by the user
+WebRTCAudio.prototype.createContainer = function() {
+    var webRTC = $("<video>")
+        .attr("id","_phono-audio-webrtc" + (WebRTCAudio.count++))
+        .attr("autoplay","autoplay")
+        .appendTo("body");
+
+    var containerId = $(webRTC).attr("id");       
+    return containerId;
+};      
+
+function JSEPAudio(phono, config, callback) {
+    this.type = "jsep";
+
+    Phono.log.info("Initialize JSEP");
+    if (webkitAudioContext){
+        JSEPAudio.webAudioContext = new webkitAudioContext();
+    } 
+
+    if (typeof webkitRTCPeerConnection== "function") {
+        JSEPAudio.GUM = function(p,s,f) {navigator.webkitGetUserMedia(p,s,f)};
+        JSEPAudio.mkPeerConnection = function (a,b) { return new webkitRTCPeerConnection(a,b);};
+    }
+
+    this.config = Phono.util.extend({
+        media: {audio:true, video:false}
+    }, config);
+    
+    var plugin = this;
+    
+    var localContainerId = this.config.localContainerId;
+
+    // Create audio continer if user did not specify one
+    if(!localContainerId) {
+    this.config.localContainerId = this.createContainer();
     }
 
     JSEPAudio.localVideo = document.getElementById(this.config.localContainerId);
@@ -6622,36 +6733,29 @@ function JSEPAudio(phono, config, callback) {
 }
 
 JSEPAudio.exists = function() {
-    if (typeof webkitRTCPeerConnection == "function") return true;
-    if (typeof mozRTCPeerConnection == "function") {
-        try {
-            mozRTCPeerConnection();
-        } catch (err) {
-            return false;
-        }
-        return true;
-    }
+    return (typeof webkitRTCPeerConnection == "function");
 }
 
 JSEPAudio.prototype.getCaps = function(c) {
     return c.c(this.type).up();
 };
 
+JSEPAudio.stun = "STUN stun.l.google.com:19302";
 JSEPAudio.count = 0;
 JSEPAudio.toneMap = {
-    '0':[1336,941],
-    '1':[1209,697],
-    '2':[1336,697],
-    '3':[1477,696],
-    '4':[1209,770],
-    '5':[1336,770],
-    '6':[1477,770],
-    '7':[1209,852],
-    '8':[1336,852],
-    '9':[1447,852],
-    '*':[1209,941],
-    '#':[1477,941]
-};
+                '0':[1336,941],
+                '1':[1209,697],
+                '2':[1336,697],
+                '3':[1477,696],
+                '4':[1209,770],
+                '5':[1336,770],
+                '6':[1477,770],
+                '7':[1209,852],
+                '8':[1336,852],
+                '9':[1447,852],
+                '*':[1209,941],
+                '#':[1477,941]
+            };
 
 // JSEPAudio Functions
 //
@@ -6662,7 +6766,7 @@ JSEPAudio.prototype.play = function(transport, autoPlay) {
     var url = null;
     var audioPlayer = null;
     if (transport.uri) {
-        url = JSEPAudio.AudioUrl(transport.uri);
+        url = transport.uri;
     }
     
     return {
@@ -6685,12 +6789,12 @@ JSEPAudio.prototype.play = function(transport, autoPlay) {
             audioPlayer = null;
         },
         volume: function(value) {
-            if(arguments.length === 0) {
-                return transport.volume * 100;
-            }
-            else {
-                transport.volume = (value / 100);
-            }
+        if(arguments.length === 0) {
+        return transport.volume * 100;
+        }
+        else {
+        transport.volume = (value / 100);
+        }
         }
     }
 };
@@ -6724,23 +6828,19 @@ JSEPAudio.prototype.share = function(transport, autoPlay, codec) {
             return null;
         },
         mute: function(value) {
-            var tracks = [];
-            if (JSEPAudio.localStream.getAudioTracks) {
-                tracks = JSEPAudio.localStream.getAudioTracks();
-            }
             if(arguments.length === 0) {
                 var muted = true;
-                Phono.util.each(tracks, function() {
+                Phono.util.each(JSEPAudio.localStream.getAudioTracks(), function() {
                     if (this.enabled == true) muted = false;
                 });
-                return muted;
-            }
+        return muted;
+        }
             if (value == true) {
-                Phono.util.each(tracks, function() {
+                Phono.util.each(JSEPAudio.localStream.getAudioTracks(), function() {
                     this.enabled = false;
                 });
             } else {
-                Phono.util.each(tracks, function() {
+                Phono.util.each(JSEPAudio.localStream.getAudioTracks(), function() {
                     this.enabled = true;
                 });
             }
@@ -6749,36 +6849,11 @@ JSEPAudio.prototype.share = function(transport, autoPlay, codec) {
             // Echo canceller is on always
             return null;
         },
-        energy: function(){
-            if ((JSEPAudio.pc) && (JSEPAudio.pc.getStats)) {
-                JSEPAudio.pc.getStats(function(stats){
-                    var sr = stats.result();
-                    for (var i=0;i< sr.length; i++){
-                        var obj = sr[i].remote;
-                        if (obj){
-                            var nspk = 0.0;
-			    var nmic = 0.0;
-                            if (obj.stat('audioInputLevel')){
-                                nmic = obj.stat('audioInputLevel');
-                            }
-                            if (nmic > 0.0){
-                                JSEPAudio.mic = Math.floor(Math.max((Math.LOG2E * Math.log(nmic)-4.0),0.0));
-                            }
-                            if (obj.stat('audioOutputLevel')){
-                                nspk = obj.stat('audioOutputLevel');
-                            }
-                            if (nspk > 0.0){
-                                JSEPAudio.spk = Math.floor(Math.max((Math.LOG2E * Math.log(nspk)-4.0),0.0));
-                            }
-                        }
-                    }
-                });
-            } 
+        energy: function(){        
             return {
-                mic: JSEPAudio.mic,
-                spk: JSEPAudio.spk
-            };
-            
+                mic: 0.0,
+                spk: 0.0
+            }
         },
         secure: function() {
             return true;
@@ -6801,35 +6876,34 @@ JSEPAudio.prototype.share = function(transport, autoPlay, codec) {
                     note1.noteOn(0.0);
                     note2.noteOn(0.0);
                     window.setTimeout(
-                    function(){
+                      function(){
                         note1.noteOff(0.0);
                         note2.noteOff(0.0);
-                    }, duration);
-                }
-            }
-        }
-    };
+                        }, duration);
+               } 
+          }
+      }
+   };
 };   
 
 JSEPAudio.prototype.showPermissionBox = function(callback) {
     Phono.log.info("Requesting access to local media");
 
-    JSEPAudio.GUM({
-        'audio':this.config.media['audio'],
-        'video':this.config.media['video']
-    },
-    function(stream) {
-        JSEPAudio.localStream = stream;
-        JSEPAudio.localVideo.style.opacity = 1;
-        JSEPAudio.attachMediaStream(JSEPAudio.localVideo,stream);
-        JSEPAudio.localVideo.muted = "muted";
-        if (typeof callback == 'function') callback(true);
-    },
-    function(error) {
-        Phono.log.info("Failed to get access to local media. Error code was " + error.code);
-        alert("Failed to get access to local media. Error code was " + error.code + ".");
-        if (typeof callback == 'function') callback(false);
-    });
+    JSEPAudio.GUM({'audio':this.config.media['audio'], 'video':this.config.media['video']}, 
+                  function(stream) {
+                      JSEPAudio.localStream = stream;
+                      var url = webkitURL.createObjectURL(stream);
+                      JSEPAudio.localVideo.style.opacity = 1;
+                      JSEPAudio.localVideo.style.display = 'none';
+                      JSEPAudio.localVideo.src = url;
+                      JSEPAudio.localVideo.muted = "muted";
+                      if (typeof callback == 'function') callback(true);
+                  },
+                  function(error) {
+                      Phono.log.info("Failed to get access to local media. Error code was " + error.code);
+                      alert("Failed to get access to local media. Error code was " + error.code + ".");   
+                      if (typeof callback == 'function') callback(false);
+                  });
 
 };
 
@@ -6842,30 +6916,14 @@ JSEPAudio.prototype.permission = function() {
 JSEPAudio.prototype.transport = function(config) {
     var pc;
     var inboundOffer;
-    var configuration = {
-        iceServers:[ {
-                url:JSEPAudio.stun
-            } ]
-    };
-    var offerconstraints;
-    var peerconstraints;
+    var configuration = {iceServers:[ { url:"stun:stun.l.google.com:19302" } ]};
+    var constraints;
     var remoteContainerId;
     var complete = false;
     var audio = this;
     var candidateCount = 0;
 
-
-
-    offerconstraints =  {
-        'mandatory': {
-            'OfferToReceiveAudio':this.config.media['audio'],
-            'OfferToReceiveVideo':this.config.media['video']
-        }
-    };
-    offerconstraints = JSEPAudio.addCreateConstraint(offerconstraints);
-    peerconstraints = {
-        'optional': [{'DtlsSrtpKeyAgreement': 'true'}]
-    };
+    constraints =  {'mandatory': {'OfferToReceiveAudio':this.config.media['audio'], 'OfferToReceiveVideo':this.config.media['video']}};
 
     if(!config || !config.remoteContainerId) {
         if (this.config.remoteContainerId) {
@@ -6877,90 +6935,73 @@ JSEPAudio.prototype.transport = function(config) {
         remoteContainerId = config.remoteContainerId;
     }
 
-    var remoteVideo = document.getElementById(remoteContainerId);
+    var remoteVideo = document.getElementById(remoteContainerId);   
 
     return {
         name: "urn:xmpp:jingle:transports:ice-udp:1",
         buildTransport: function(direction, j, callback, u, updateCallback) {
             
-            pc = JSEPAudio.mkPeerConnection(configuration,peerconstraints);
-            JSEPAudio.pc = pc;
-	    var oic = function(evt) {
+            pc = JSEPAudio.mkPeerConnection(configuration,constraints);
+            
+        pc.onicecandidate = function(evt) {
                 if (!complete) {
                     if ((evt.candidate == null) || 
                         (candidateCount >= 1 && !audio.config.media['video'] && direction == "answer")) {
-                        Phono.log.info("All Ice candidates in ");
+                //Phono.log.info("All Ice candidates in description is now: "+JSON.stringify(pc.localDescription));
                         complete = true;
-			var sdp = pc.localDescription.sdp;
-			Phono.log.info('SDP ' + JSON.stringify(sdp));
-                        var sdpObj = Phono.sdp.parseSDP(sdp);
-                        Phono.log.info('SdpObj ' + JSON.stringify(sdpObj));
+                        var sdpObj = Phono.sdp.parseSDP(pc.localDescription.sdp);
+                        //Phono.log.info("sdpObj = " + JSON.stringify(sdpObj));
                         Phono.sdp.buildJingle(j, sdpObj);
                         var codecId = 0;
                         if (sdpObj.contents[0].codecs[0].name == "telephone-event") codecId = 1;
                         var codec = 
                             {
-                            id: sdpObj.contents[0].codecs[codecId].id,
-                            name: sdpObj.contents[0].codecs[codecId].name,
-                            rate: sdpObj.contents[0].codecs[codecId].clockrate
-                        };
-                        callback(codec);
+                                id: sdpObj.contents[0].codecs[codecId].id,
+                                name: sdpObj.contents[0].codecs[codecId].name,
+                                rate: sdpObj.contents[0].codecs[codecId].clockrate
+                            };
+                callback(codec);
                     } else {
-                        Phono.log.info("An Ice candidate ");
+                    //Phono.log.info("An Ice candidate "+JSON.stringify(evt.candidate));
                         candidateCount += 1;
                     }
                 }
-            };
-	    pc.onicecandidate = oic;
+            }
             //pc.onconnecting = function(message) {Phono.log.info("onSessionConnecting.");};
-            //pc.onopen = function(message) {Phono.log.info("onSessionOpened.");};
+        //pc.onopen = function(message) {Phono.log.info("onSessionOpened.");};
             pc.onaddstream = function (event) {
-                Phono.log.info("onAddStream. Attaching");
-		JSEPAudio.attachMediaStream(remoteVideo,event.stream);
+                //Phono.log.info("onAddStream."); 
+                var url = webkitURL.createObjectURL(event.stream);
                 remoteVideo.style.opacity = 1;
+                remoteVideo.src = url;
             };
             //pc.onremovestream = function (event) {Phono.log.info("onRemoveStream."); };
-            //pc.onicechange= function (event) {Phono.log.info("onIceChange: "+pc.iceState); };
-            //pc.onnegotiationneeded = function (event) {Phono.log.info("onNegotiationNeeded."); };
+        //pc.onicechange= function (event) {Phono.log.info("onIceChange: "+pc.iceState); };
+        //pc.onnegotiationneeded = function (event) {Phono.log.info("onNegotiationNeeded."); };
             //pc.onstatechange = function (event) {Phono.log.info("onStateChange: "+pc.readyState); };
 
             Phono.log.debug("Adding localStream");
 
             var cb2 = function() {
                 pc.addStream(JSEPAudio.localStream);
-		var setlfail = function(er){
-                    Phono.log.error('failed to setlocal '+er);
-                };
-		var setlok = function(){
-                    Phono.log.info('setlocal ok');
-                };
                 
-                var cb = function(localDesc) {
-                    var sd = JSEPAudio.mkSessionDescription(localDesc);
-                    pc.setLocalDescription(sd,setlok,setlfail);
-		    window.setTimeout(function() {oic({})},1000);
-                    Phono.log.info('Set local description ' + JSON.stringify(localDesc));
-                };
-		var offerfail = function(){
-                    Phono.log.error('failed to create offer');
-                };
-		var ansfail = function(){
-                    Phono.log.error('failed to create answer');
-                };
+            var cb = function(localDesc) {
+                    var sd = new RTCSessionDescription(localDesc);
+            pc.setLocalDescription(sd);
+            var msgString = JSON.stringify(sd,null," ");
+                    Phono.log.info('Set local description ' + msgString);
+                    //Phono.log.info("Pc now: "+JSON.stringify(pc,null," "));
+            };
                 
                 if (direction == "answer") {
-                    Phono.log.info('Set remote description ' + JSON.stringify(inboundOffer));
                     pc.setRemoteDescription(inboundOffer,
-                    function(){
-                        Phono.log.debug("remoteDescription happy");
-                        pc.createAnswer(cb ,ansfail);
-                    },
-                    function(){
-                        Phono.log.error("remoteDescription error")
-                    });
+                                            function(){Phono.log.debug("remoteDescription happy");
+                                       //Phono.log.info("Pc now: "+JSON.stringify(pc,null," "));
+                                                       pc.createAnswer(cb , null, constraints);
+                                          },
+                                function(){Phono.log.error("remoteDescription error")});
                 } else {
-                    Phono.log.info('create offer with  '+ JSON.stringify(offerconstraints) );
-                    pc.createOffer(cb , offerfail, offerconstraints);
+            pc.createOffer(cb , null, constraints);
                 }
             }
             
@@ -6972,56 +7013,38 @@ JSEPAudio.prototype.transport = function(config) {
         },
         processTransport: function(t, update, iq) {
             var sdpObj = Phono.sdp.parseJingle(iq);
-	    Phono.log.info('Made remote sdp Obj' + JSON.stringify(sdpObj));
-            sdpObj = JSEPAudio.stripCrypto(sdpObj);
             var sdp = Phono.sdp.buildSDP(sdpObj);
-            Phono.log.info('constructed remote sdp ' + JSON.stringify(sdp));
             var codecId = 0;
             if (sdpObj.contents[0].codecs[0].name == "telephone-event") codecId = 1;
             var codec = 
                 {
-                id: sdpObj.contents[0].codecs[codecId].id,
-                name: sdpObj.contents[0].codecs[codecId].name,
-                rate: sdpObj.contents[0].codecs[codecId].clockrate
-            };
+                    id: sdpObj.contents[0].codecs[codecId].id,
+                    name: sdpObj.contents[0].codecs[codecId].name,
+                    rate: sdpObj.contents[0].codecs[codecId].clockrate
+                };
 
             if (pc) {
                 // We are an answer to an outbound call
-                Phono.log.info('Got remote sdp ' + JSON.stringify(sdp));
-                var sd = JSEPAudio.mkSessionDescription({
-                    'sdp':sdp,
-                    'type':"answer"
-                } );
-                Phono.log.info('Set remote description ' + JSON.stringify(sd));
-                pc.setRemoteDescription(sd,
-                function(){
-                    Phono.log.debug("remoteDescription happy");
-                },
-                function(){
-                    Phono.log.error("remoteDescription sad")
-                });
+                var sd = new RTCSessionDescription({'sdp':sdp, 'type':"answer"} );
+        Phono.log.info("Set remote description: "+JSON.stringify(sd,null," "));
+        pc.setRemoteDescription(sd,
+                            function(){Phono.log.debug("remoteDescription happy");
+                                   //Phono.log.debug("Pc now: "+JSON.stringify(pc,null," "));
+                                      },
+                            function(){Phono.log.error("remoteDescription sad")});
                 
             } else {
                 // We are an offer for an inbound call
-	        Phono.log.info('Got remote description ' + JSON.stringify(sdp));
-                var sd = JSEPAudio.mkSessionDescription({
-                    'sdp':sdp,
-                    'type':"offer"
-                } );
+                var sd = new RTCSessionDescription({'sdp':sdp, 'type':"offer"} );
+                Phono.log.info("Set remote description: "+JSON.stringify(sd,null," "));
                 inboundOffer = sd;
             }
-            return {
-                codec:codec,
-                input:remoteVideo
-            };
+            return {codec:codec, input:remoteVideo};
         },
         destroyTransport: function() {
             // Destroy any transport state we have created
             if (pc) {
                 pc.close();
-		if (($(remoteVideo).attr("id")).indexOf("_phono-audio-webrtc") == 0){
-                     remoteVideo.parentNode.removeChild(remoteVideo);
-		}
             }
 
             if (JSEPAudio.localStream) {
@@ -7046,9 +7069,9 @@ JSEPAudio.prototype.audioInDevices = function(){
 // Creates a DIV to hold the video element if not specified by the user
 JSEPAudio.prototype.createContainer = function() {
     var webRTC = $("<video>")
-    .attr("id","_phono-audio-webrtc" + (JSEPAudio.count++))
-    .attr("autoplay","autoplay")
-    .appendTo("body");
+        .attr("id","_phono-audio-webrtc" + (JSEPAudio.count++))
+        .attr("autoplay","autoplay")
+        .appendTo("body");
 
     var containerId = $(webRTC).attr("id");       
     return containerId;
@@ -7074,6 +7097,9 @@ JSEPAudio.prototype.createContainer = function() {
                 
             } else if (config.type === "flash") {
                 return Phono.util.loggify("FlashAudio", new FlashAudio(phono, config, callback));
+
+            } else if (config.type === "webrtc") {
+                return Phono.util.loggify("WebRTCAudio", new WebRTCAudio(phono, config, callback));
 
             } else if (config.type === "jsep") {
                 return Phono.util.loggify("JSEPAudio", new JSEPAudio(phono, config, callback));
@@ -7114,7 +7140,7 @@ JSEPAudio.prototype.createContainer = function() {
    };
    
    Message.prototype.reply = function(body) {
-      this.connection.send(Strophe.msg({to:this.from, type:"chat"}).c("body").t(body));
+      this.connection.send($msg({to:this.from, type:"chat"}).c("body").t(body));
    };
 
    function StropheMessaging(phono, config, callback) {
@@ -7132,7 +7158,7 @@ JSEPAudio.prototype.createContainer = function() {
    };
    
    StropheMessaging.prototype.send = function(to, body) {
-      this.connection.send(Strophe.msg({to:to, type:"chat"}).c("body").t(body));
+      this.connection.send($msg({to:to, type:"chat"}).c("body").t(body));
    };
 
    StropheMessaging.prototype.handleMessage = function(msg) {
@@ -7276,25 +7302,13 @@ JSEPAudio.prototype.createContainer = function() {
         }
         return crypto;
     }
-    _parseFingerprint = function(params) {
-        var finger = {
-            'hash':params[0],
-            'print':params[1],
-            'required':'1'
-        }
-        return finger;
-    }
 
     //a=rtpmap:101 telephone-event/8000"
     _parseRtpmap = function(params) {
-        var bits = params[1].split("/");
         var codec = {
             id: params[0],
-            name: bits[0],
-            clockrate: bits[1]
-        }
-        if (bits.length >2){
-            codec.channels = bits[2];
+            name: params[1].split("/")[0],
+            clockrate: params[1].split("/")[1]
         }
         return codec;
     }
@@ -7332,11 +7346,11 @@ JSEPAudio.prototype.createContainer = function() {
         var c = candidateObj;
         var sdp = "a=candidate:" + c.foundation + " " +
             c.component + " " + 
-            c.protocol.toUpperCase() + " " +
+            c.protocol + " " +
             c.priority + " " +
             c.ip + " " +
             c.port;
-        if (c.type) sdp = sdp + " typ host"; //+ c.type;
+        if (c.type) sdp = sdp + " typ " + c.type;
         if (c.component == 1) sdp = sdp + " name rtp";
         if (c.component == 2) sdp = sdp + " name rtcp";
         sdp = sdp + " network_name en0";
@@ -7357,20 +7371,7 @@ JSEPAudio.prototype.createContainer = function() {
     }
 
     _buildCodec = function(codecObj) {
-        var sdp = "a=rtpmap:" + codecObj.id + " " + codecObj.name + "/" + codecObj.clockrate 
-        if (codecObj.channels){
-            sdp+="/"+codecObj.channels;
-        }
-        sdp += "\r\n";
-	if (codecObj.ptime){
-	    sdp+="a=ptime:"+codecObj.ptime;
-	    sdp += "\r\n";
-        } else if (codecObj.name.toLowerCase().indexOf("opus")==0){
-	    sdp+="a=ptime:20\r\n";
-	}
-	if (codecObj.name.toLowerCase().indexOf("telephone-event")==0){
-	    sdp+="a=fmtp:"+codecObj.id+" 0-15\r\n";
-	}
+        var sdp = "a=rtpmap:" + codecObj.id + " " + codecObj.name + "/" + codecObj.clockrate + "\r\n";
         return sdp;
     }
 
@@ -7380,39 +7381,8 @@ JSEPAudio.prototype.createContainer = function() {
         return sdp;
     }
 
-    _buildFingerprint = function(fingerObj) {
-        var sdp = "a=fingerprint:" + fingerObj.hash + " " + fingerObj.print + "\r\n";
-        return sdp;
-    }
-
-    _buildIce= function(ice) {
-	var sdp="";
-        if (ice.ufrag) {
-            if (!ice.filterLines) {
-                sdp = sdp + "a=ice-ufrag:" + ice.ufrag + "\r\n";
-                sdp = sdp + "a=ice-pwd:" + ice.pwd + "\r\n";
-            }
-            if (ice.options) {
-                sdp = sdp + "a=ice-options:" + ice.options + "\r\n";
-	    }
-	}
-	return sdp;
-    }
-
-    _buildSessProps = function(sdpObj) {
-        var sdp ="";
-        if (sdpObj.fingerprint) {
-            sdp = sdp + _buildFingerprint(sdpObj.fingerprint);
-        }
-        if (sdpObj.ice) {
-	    sdp= sdp + _buildIce(sdpObj.ice);
-        }
-        return sdp;
-    }
-
-    _buildMedia =function(sdpObj) {
-        var sdp ="";
-        sdp += "m=" + sdpObj.media.type + " " + sdpObj.media.port + " " + sdpObj.media.proto;
+    _buildMedia = function(sdpObj) {
+        var sdp = "m=" + sdpObj.media.type + " " + sdpObj.media.port + " " + sdpObj.media.proto;
         var mi = 0;
         while (mi + 1 <= sdpObj.media.pts.length) {
             sdp = sdp + " " + sdpObj.media.pts[mi];
@@ -7434,9 +7404,6 @@ JSEPAudio.prototype.createContainer = function() {
                 sdpObj.rtcp.addrtype + " " +
                 sdpObj.rtcp.address + "\r\n";
         }
-        if (sdpObj.ice) {
-	    sdp= sdp + _buildIce(sdpObj.ice);
-        }
 
         var ci = 0;
         while (ci + 1 <= sdpObj.candidates.length) {
@@ -7444,20 +7411,26 @@ JSEPAudio.prototype.createContainer = function() {
             ci = ci + 1;
         }
 
-
-        if (sdpObj.direction) {
-            if (sdpObj.direction == "recvonly") {
-                sdp = sdp + "a=recvonly\r\n";
-            } else if (sdpObj.direction == "sendonly") {
-                sdp = sdp + "a=sendonly\r\n";
-            } else if (sdpObj.direction == "none") {
-                sdp = sdp;
-            } else {
-               sdp = sdp + "a=sendrecv\r\n";
+        if (sdpObj.ice) {
+            var ice = sdpObj.ice;
+            if (!ice.filterLines) {
+                sdp = sdp + "a=ice-ufrag:" + ice.ufrag + "\r\n";
+                sdp = sdp + "a=ice-pwd:" + ice.pwd + "\r\n";
             }
-	} else {
-            sdp = sdp + "a=sendrecv\r\n";
-	}
+            if (ice.options) {
+                sdp = sdp + "a=ice-options:" + ice.options + "\r\n";
+            }
+        }
+
+        if (sdpObj.direction == "recvonly") {
+            sdp = sdp + "a=recvonly\r\n";
+        } else if (sdpObj.direction == "sendonly") {
+            sdp = sdp + "a=sendonly\r\n";
+        } else if (sdpObj.direction == "none") {
+            sdp = sdp;
+        } else {
+           sdp = sdp + "a=sendrecv\r\n";
+        }
 
 
 
@@ -7467,9 +7440,6 @@ JSEPAudio.prototype.createContainer = function() {
  
         if (sdpObj.crypto) {
             sdp = sdp + _buildCrypto(sdpObj.crypto);
-        }
-        if (sdpObj.fingerprint) {
-            sdp = sdp + _buildFingerprint(sdpObj.fingerprint);
         }
  
         var cdi = 0;
@@ -7492,10 +7462,7 @@ JSEPAudio.prototype.createContainer = function() {
 
     // Fake Phono for node.js
     if (typeof Phono == 'undefined') {
-        Phono = {
-        log:{debug:function(mess){print(mess);}}
-        };
-	load("phono.util.js");
+        Phono = {};
     }
 
     Phono.sdp = {
@@ -7545,56 +7512,28 @@ JSEPAudio.prototype.createContainer = function() {
                 }
 
                 // Raw candidates
-	        c = c.up().c('transport',{xmlns:"urn:xmpp:jingle:transports:raw-udp:1"});
+            c = c.up().c('transport',{xmlns:"urn:xmpp:jingle:transports:raw-udp:1"});
                 c = c.c('candidate', {component:'1',
                                       ip: sdpObj.connection.address,
                                       port: sdpObj.media.port}).up();
-                if(sdpObj.rtcp) {
-                    c = c.c('candidate', {component:'2',
+                c = c.c('candidate', {component:'2',
                                       ip: sdpObj.rtcp.address,
-                                      port: sdpObj.rtcp.port}).up();
-                }
-                c = c.up();
+                                      port: sdpObj.rtcp.port});
+                c.up().up();
 
-		// 3 places we might find ice creds - in order of priority:
-		// candidate username
-		// media level icefrag
-		// session level icefrag
-		var iceObj = {};
-		if (sdpObj.candidates[0].username ){
-			iceObj = {ufrag:sdpObj.candidates[0].username,pwd:sdpObj.candidates[0].password};
-		} else if ((sdpObj.ice) && (sdpObj.ice.ufrag)){
-			iceObj = sdpObj.ice;
-		} else if ((blob.session.ice) && (blob.session.ice.ufrag)){
-			iceObj = blob.session.ice;
-		}
+                if (!sdpObj.ice.pwd) sdpObj.ice.pwd = sdpObj.candidates[0].password;
+                if (!sdpObj.ice.ufrag) sdpObj.ice.ufrag = dpObj.candidates[0].username;
                 // Ice candidates
                 var transp = {xmlns:"urn:xmpp:jingle:transports:ice-udp:1",
-                             pwd: iceObj.pwd,
-                             ufrag: iceObj.ufrag};
-                if (iceObj.options) {
-                    transp.options = iceObj.options;
+                             pwd: sdpObj.ice.pwd,
+                             ufrag: sdpObj.ice.ufrag};
+                if (sdpObj.ice.options) {
+                    transp.options = sdpObj.ice.options;
                 }
-	        c = c.c('transport',transp);
+            c = c.c('transport',transp);
                 Phono.util.each(sdpObj.candidates, function() {
                     c = c.c('candidate', this).up();           
                 });
-		// two places to find the fingerprint
-		// media 
-		// session
-		var fp = null;
-		if (sdpObj.fingerprint) {
-		    fp= sdpObj.fingerprint;
-		}else if(blob.session.fingerprint){
-		    fp = blob.session.fingerprint;
-		}
-                if (fp){
-                    c = c.c('fingerprint',{xmlns:"urn:xmpp:tmp:jingle:apps:dtls:0",
-				hash:fp.hash,
-                                required:fp.required});
-                    c.t(fp.print);
-                    c.up();
-		}
                 c = c.up().up();
             });
             return c;
@@ -7618,12 +7557,9 @@ JSEPAudio.prototype.createContainer = function() {
                 mediaObj.pts = [];
                 
                 blobObj.contents.push(sdpObj);
-                sdpObj.candidates = [];
-                sdpObj.codecs = [];
 
                 $(this).find('description').each(function () {
-                  if($(this).attr('xmlns') == "urn:xmpp:jingle:apps:rtp:1"){
-		    var mediaType = $(this).attr('media');
+                    var mediaType = $(this).attr('media');
                     mediaObj.type = mediaType;
                     mediaObj.proto = "RTP/SAVPF"; // HACK
                     mediaObj.port = 1000;
@@ -7642,27 +7578,20 @@ JSEPAudio.prototype.createContainer = function() {
                         sdpObj['mid'] = $(this).attr('mid');
                     }
                     sdpObj.media = mediaObj;
-		    $(this).find('payload-type').each(function () {
-                        var codec = Phono.util.getAttributes(this);
-                        Phono.log.debug("codec: "+JSON.stringify(codec,null," "));
-                        sdpObj.codecs.push(codec);
-                        mediaObj.pts.push(codec.id);
-                    });
-		  } else {
-	            Phono.log.debug("skip description with wrong xmlns: "+$(this).attr('xmlns'));
-		  }
                 });
 
+                sdpObj.candidates = [];
+                sdpObj.codecs = [];
+                $(this).find('payload-type').each(function () {
+                    var codec = Phono.util.getAttributes(this);
+                    //Phono.log.debug("codec: "+JSON.stringify(codec,null," "));
+                    sdpObj.codecs.push(codec);
+                    mediaObj.pts.push(codec.id);
+                });
                 $(this).find('crypto').each(function () {
                     var crypto = Phono.util.getAttributes(this);
                     //Phono.log.debug("crypto: "+JSON.stringify(crypto,null," "));
                     sdpObj.crypto = crypto;
-                });
-                $(this).find('fingerprint').each(function () {
-                    var fingerprint = Phono.util.getAttributes(this);
-                    fingerprint.print = Strophe.getText(this);
-                    Phono.log.debug("fingerprint: "+JSON.stringify(fingerprint,null," "));
-                    sdpObj.fingerprint = fingerprint;
                 });
                 sdpObj.ice = {};
                 $(this).find('transport').each(function () {
@@ -7720,26 +7649,21 @@ JSEPAudio.prototype.createContainer = function() {
             // Iterate the lines
             var sdpLines = sdpString.split("\r\n");
             for (var sdpLine in sdpLines) {
-                Phono.log.debug(sdpLines[sdpLine]);
+                //Phono.log.debug(sdpLines[sdpLine]);
                 var line = _parseLine(sdpLines[sdpLine]);
 
                 if (line.type == "o") {
                     contentsObj.session = _parseO(line.contents);
-		    contentsObj.session.ice = {};
-		    sdpObj = contentsObj.session;
                 }
                 if (line.type == "m") {
-                    // New m-line, 
-                    // create a new content
+                    // New m-line, create a new content
                     var media = _parseM(line.contents);
                     sdpObj = {};
+                    sdpObj.media = media;
                     sdpObj.candidates = [];
                     sdpObj.codecs = [];
                     sdpObj.ice = {};
-                    if (contentsObj.session.fingerprint != null){
-                        sdpObj.fingerprint = contentsObj.session.fingerprint;
-                    }
-                    sdpObj.media = media;
+                    
                     contentsObj.contents.push(sdpObj);
                 }
                 if (line.type == "c") {
@@ -7786,10 +7710,6 @@ JSEPAudio.prototype.createContainer = function() {
                         break;
                     case "ssrc":
                         sdpObj.ssrc = _parseSsrc(a.params, sdpObj.ssrc);
-                        break;
-                    case "fingerprint":
-                        var print = _parseFingerprint(a.params);
-                        sdpObj.fingerprint = print;
                         break;
                     case "crypto":
                         var crypto = _parseCrypto(a.params);
@@ -7847,9 +7767,6 @@ JSEPAudio.prototype.createContainer = function() {
                 sdp = sdp + "\r\n";
             }
 
-	    if (contentsObj.session){
-	        sdp = sdp + _buildSessProps(contentsObj.session);
-	    }
             var contents = contentsObj.contents;
             var ic = 0;
             while (ic + 1 <= contents.length) {
@@ -7877,40 +7794,24 @@ JSEPAudio.prototype.createContainer = function() {
     if (typeof window === 'undefined') {
         // Unit tests under node.js
 
-        var SDP ={
-		chromeVideo:"v=0\r\no=- 466604799 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=msid-semantic: WMS 0c2n3jRwGhjfwzKzLxMER8lpRIHMQaZiIw7k\r\nm=audio 51233 RTP/SAVPF 109 0 8 101\r\nc=IN IP4 192.67.4.10\r\na=rtcp:62387 IN IP4 192.67.4.10\r\na=candidate:2812693356 1 udp 2113937151 192.67.4.10 51233 typ host generation 0\r\na=candidate:2812693356 2 udp 2113937150 192.67.4.10 62387 typ host generation 0\r\na=ice-ufrag:A7xRf5m5sDv8Qnda\r\na=ice-pwd:sIxXUQ1R5euE6QY/ntMS9xpu\r\na=fingerprint:sha-256 A4:06:4B:AC:92:8B:FA:A0:CE:56:78:A4:B9:A4:2A:41:16:DD:D7:6C:E9:D2:71:81:20:99:F1:3A:4E:C7:71:8D\r\na=sendrecv\r\na=mid:audio\r\na=rtpmap:109 opus/48000/2\r\na=fmtp:109 minptime=10\r\na=rtpmap:0 PCMU/8000\r\na=rtpmap:8 PCMA/8000\r\na=rtpmap:101 telephone-event/8000\r\na=maxptime:60\r\na=ssrc:3307173785 cname:3iNNp5tCCbH8QdE8\r\na=ssrc:3307173785 msid:0c2n3jRwGhjfwzKzLxMER8lpRIHMQaZiIw7k 0c2n3jRwGhjfwzKzLxMER8lpRIHMQaZiIw7ka0\r\na=ssrc:3307173785 mslabel:0c2n3jRwGhjfwzKzLxMER8lpRIHMQaZiIw7k\r\na=ssrc:3307173785 label:0c2n3jRwGhjfwzKzLxMER8lpRIHMQaZiIw7ka0\r\nm=video 51841 RTP/SAVPF 120\r\nc=IN IP4 192.67.4.10\r\na=rtcp:58612 IN IP4 192.67.4.10\r\na=candidate:2812693356 1 udp 2113937151 192.67.4.10 51841 typ host generation 0\r\na=candidate:2812693356 2 udp 2113937150 192.67.4.10 58612 typ host generation 0\r\na=ice-ufrag:vYDcPP0KgdP9VHjY\r\na=ice-pwd:JEkYOiuKuiny1sJNZlBHZyZ5\r\na=fingerprint:sha-256 A4:06:4B:AC:92:8B:FA:A0:CE:56:78:A4:B9:A4:2A:41:16:DD:D7:6C:E9:D2:71:81:20:99:F1:3A:4E:C7:71:8D\r\na=sendrecv\r\na=mid:video\r\na=rtpmap:120 VP8/90000\r\na=ssrc:1230164494 cname:3iNNp5tCCbH8QdE8\r\na=ssrc:1230164494 msid:0c2n3jRwGhjfwzKzLxMER8lpRIHMQaZiIw7k 0c2n3jRwGhjfwzKzLxMER8lpRIHMQaZiIw7kv0\r\na=ssrc:1230164494 mslabel:0c2n3jRwGhjfwzKzLxMER8lpRIHMQaZiIw7k\r\na=ssrc:1230164494 label:0c2n3jRwGhjfwzKzLxMER8lpRIHMQaZiIw7kv0\r\n",
-
-	chromeAudio:"v=0\r\no=- 2751679977 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE audio\r\na=msid-semantic: WMS YyMaveYaWtkfdWeZtSHs3AHFuH4TEYh4MZDh\r\nm=audio 63231 RTP/SAVPF 111 103 104 0 8 107 106 105 13 126\r\nc=IN IP4 192.67.4.11\r\na=rtcp:63231 IN IP4 192.67.4.11\r\na=candidate:521808905 1 udp 2113937151 192.67.4.11 63231 typ host generation 0\r\na=candidate:521808905 2 udp 2113937151 192.67.4.11 63231 typ host generation 0\r\na=ice-ufrag:1VZUXywcfSTmvPBK\r\na=ice-pwd:NHrjWPuvIlyBQD7UVw4zi/4F\r\na=ice-options:google-ice\r\na=fingerprint:sha-256 49:1E:A3:EB:78:C2:89:55:5D:0D:6E:F2:B7:41:50:DB:10:C4:B2:54:8F:D8:24:A5:E8:56:0A:56:F4:BA:3A:ED\r\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\r\na=sendrecv\r\na=mid:audio\r\na=rtcp-mux\r\na=crypto:0 AES_CM_128_HMAC_SHA1_32 inline:MpqMpDpEDjNDfpquFL8jIkO9oLp2Dp4NOYiSmrea\r\na=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:/yAvMdC0p1e/4c/Jc6ljepmHpIuHV9jO3FyrrTX4\r\na=rtpmap:111 opus/48000/2\r\na=fmtp:111 minptime=10\r\na=rtpmap:103 ISAC/16000\r\na=rtpmap:104 ISAC/32000\r\na=rtpmap:0 PCMU/8000\r\na=rtpmap:8 PCMA/8000\r\na=rtpmap:107 CN/48000\r\na=rtpmap:106 CN/32000\r\na=rtpmap:105 CN/16000\r\na=rtpmap:13 CN/8000\r\na=rtpmap:126 telephone-event/8000\r\na=maxptime:60\r\na=ssrc:3334051080 cname:ECpt57S24HzaX1WY\r\na=ssrc:3334051080 msid:YyMaveYaWtkfdWeZtSHs3AHFuH4TEYh4MZDh YyMaveYaWtkfdWeZtSHs3AHFuH4TEYh4MZDha0\r\na=ssrc:3334051080 mslabel:YyMaveYaWtkfdWeZtSHs3AHFuH4TEYh4MZDh\r\na=ssrc:3334051080 label:YyMaveYaWtkfdWeZtSHs3AHFuH4TEYh4MZDha0\r\n",
-
-	firefoxVideo:"v=0\r\no=Mozilla-SIPUA-24.0a1 12643 0 IN IP4 0.0.0.0\r\ns=SIP Call\r\nt=0 0\r\na=ice-ufrag:1a870bf3\r\na=ice-pwd:948d30c7fe15b95a7bd63743ae84ac2e\r\na=fingerprint:sha-256 1C:D2:EC:A0:51:89:35:BE:84:4B:BC:11:F3:D4:D6:C7:F7:39:52:C5:2D:55:88:1D:61:24:7A:54:20:8A:AE:C2\r\nm=audio 50859 RTP/SAVPF 109 0 8 101\r\nc=IN IP4 192.67.4.11\r\na=rtpmap:109 opus/48000/2\r\na=ptime:20\r\na=rtpmap:0 PCMU/8000\r\na=rtpmap:8 PCMA/8000\r\na=rtpmap:101 telephone-event/8000\r\na=fmtp:101 0-15\r\na=sendrecv\r\na=candidate:0 1 UDP 2113601791 192.67.4.11 50859 typ host\r\na=candidate:0 2 UDP 2113601790 192.67.4.11 53847 typ host\r\nm=video 62311 RTP/SAVPF 120\r\nc=IN IP4 192.67.4.11\r\na=rtpmap:120 VP8/90000\r\na=sendrecv\r\na=candidate:0 1 UDP 2113601791 192.67.4.11 62311 typ host\r\na=candidate:0 2 UDP 2113601790 192.67.4.11 54437 typ host\r\n",
+        var testSDP = "v=0\r\no=- 1825865780 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE audio video\r\nm=audio 51937 RTP/SAVPF 103 104 0 8 106 105 13 126\r\nc=IN IP4 92.20.224.185\r\na=rtcp:51937 IN IP4 92.20.224.185\r\na=candidate:257138899 1 udp 2113937151 192.168.0.151 54066 typ host generation 0\r\na=candidate:257138899 2 udp 2113937151 192.168.0.151 54066 typ host generation 0\r\na=candidate:2384176743 1 udp 1677729535 92.20.224.185 51937 typ srflx generation 0\r\na=candidate:2384176743 2 udp 1677729535 92.20.224.185 51937 typ srflx generation 0\r\na=candidate:1104174115 1 tcp 1509957375 192.168.0.151 49878 typ host generation 0\r\na=candidate:1104174115 2 tcp 1509957375 192.168.0.151 49878 typ host generation 0\r\na=ice-ufrag:2hm6kQUKfYZcwx0Q\r\na=ice-pwd:BFTSrs0UhQfGi2dS3XiPoJ3b\r\na=ice-options:google-ice\r\na=sendrecv\r\na=mid:audio\r\na=rtcp-mux\r\na=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:F8KwGDYU0lGx39pduFGhysbmcPLLNwIvGdYBSgNK\r\na=rtpmap:103 ISAC/16000\r\na=rtpmap:104 ISAC/32000\r\na=rtpmap:0 PCMU/8000\r\na=rtpmap:8 PCMA/8000\r\na=rtpmap:106 CN/32000\r\na=rtpmap:105 CN/16000\r\na=rtpmap:13 CN/8000\r\na=rtpmap:126 telephone-event/8000\r\na=ssrc:414494470 cname:mCuCMzMwfauXes6i\r\na=ssrc:414494470 mslabel:FlTQmWsZfu8BKQjMHYBkFSLNWthbpQE0e3HP\r\na=ssrc:414494470 label:FlTQmWsZfu8BKQjMHYBkFSLNWthbpQE0e3HP00\r\nm=video 51937 RTP/SAVPF 100 101 102\r\nc=IN IP4 92.20.224.185\r\na=rtcp:51937 IN IP4 92.20.224.185\r\na=candidate:257138899 1 udp 2113937151 192.168.0.151 54066 typ host generation 0\r\na=candidate:257138899 2 udp 2113937151 192.168.0.151 54066 typ host generation 0\r\na=candidate:2384176743 1 udp 1677729535 92.20.224.185 51937 typ srflx generation 0\r\na=candidate:2384176743 2 udp 1677729535 92.20.224.185 51937 typ srflx generation 0\r\na=candidate:1104174115 1 tcp 1509957375 192.168.0.151 49878 typ host generation 0\r\na=candidate:1104174115 2 tcp 1509957375 192.168.0.151 49878 typ host generation 0\r\na=ice-ufrag:2hm6kQUKfYZcwx0Q\r\na=ice-pwd:BFTSrs0UhQfGi2dS3XiPoJ3b\r\na=ice-options:google-ice\r\na=sendrecv\r\na=mid:video\r\na=rtcp-mux\r\na=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:F8KwGDYU0lGx39pduFGhysbmcPLLNwIvGdYBSgNK\r\na=rtpmap:100 VP8/90000\r\na=rtpmap:101 red/90000\r\na=rtpmap:102 ulpfec/90000\r\n";
         
+        var sdpObj = Phono.sdp.parseSDP(testSDP);
+        console.log("SDP Object:");
+        console.log(JSON.stringify(sdpObj));
 
-	firefoxAudio:"v=0\r\no=Mozilla-SIPUA-24.0a1 20557 0 IN IP4 0.0.0.0\r\ns=SIP Call\r\nt=0 0\r\na=ice-ufrag:66600851\r\na=ice-pwd:aab7c3c8d881f6406eff1f1ff2e3bc5e\r\na=fingerprint:sha-256 C3:C4:98:95:D0:58:B1:D2:F9:72:A0:44:EB:C7:C4:49:95:8F:EE:00:05:10:82:A8:6E:F6:4A:DF:43:A3:2A:16\r\nm=audio 56026 RTP/SAVPF 109 0 8 101\r\nc=IN IP4 192.67.4.11\r\na=rtpmap:109 opus/48000/2\r\na=ptime:20\r\na=rtpmap:0 PCMU/8000\r\na=rtpmap:8 PCMA/8000\r\na=rtpmap:101 telephone-event/8000\r\na=fmtp:101 0-15\r\na=sendrecv\r\na=candidate:0 1 UDP 2113601791 192.67.4.11 56026 typ host\r\na=candidate:0 2 UDP 2113601790 192.67.4.11 56833 typ host\r\n",
-
-};
-
-        for (s in SDP){
-		var bro = s;
-                var bs = SDP[s];	
-		Phono.log.debug("testing "+ s);
-		var sdpObj = Phono.sdp.parseSDP(bs);
-		Phono.log.debug(JSON.stringify(sdpObj,null," "));
-
-		var resultSDP = Phono.sdp.buildSDP(sdpObj);
-		Phono.log.debug(s+ " Resulting SDP:");
-		Phono.log.debug(resultSDP);
-        }
-
+        var resultSDP = Phono.sdp.buildSDP(sdpObj);
+        console.log("Resulting SDP:");
+        console.log(resultSDP);
+        
     }
     
 }()); 
-
 ;(function() {
 
-   var NS = {};
-   NS.JINGLE = "urn:xmpp:jingle:1";
-   NS.JINGLE_SESSION_INFO = "urn:xmpp:jingle:apps:rtp:1:info";
-   NS.JINGLE_DTMF = "urn:xmpp:jingle:dtmf:0";
+   Strophe.addNamespace('JINGLE', "urn:xmpp:jingle:1");
+   Strophe.addNamespace('JINGLE_SESSION_INFO',"urn:xmpp:jingle:apps:rtp:1:info");
+   Strophe.addNamespace('JINGLE_DTMF',"urn:xmpp:jingle:dtmf:0");
 
    var CallState = {
        CONNECTED: 0,
@@ -8024,10 +7925,10 @@ JSEPAudio.prototype.createContainer = function() {
 
       if (call.state != CallState.INITIAL) return;
        
-      var initiateIq = Strophe.iq({type:"set", to:call.remoteJid});
+      var initiateIq = $iq({type:"set", to:call.remoteJid});
       
       var initiate = initiateIq.c('jingle', {
-         xmlns: NS.JINGLE,
+         xmlns: Strophe.NS.JINGLE,
          action: "session-initiate",
          initiator: call.initiator,
          sid: call.id
@@ -8037,10 +7938,10 @@ JSEPAudio.prototype.createContainer = function() {
          initiate.c("custom-header", {name:this.name, data:this.value}).up();
       });
              
-       var updateIq = Strophe.iq({type:"set", to:call.remoteJid});
+       var updateIq = $iq({type:"set", to:call.remoteJid});
        
        var update = updateIq.c('jingle', {
-           xmlns: NS.JINGLE,
+           xmlns: Strophe.NS.JINGLE,
            action: "transport-accept",
            initiator: call.initiator,
            sid: call.id
@@ -8079,20 +7980,14 @@ JSEPAudio.prototype.createContainer = function() {
        
        this.transport.buildTransport("offer", initiate, 
                                      function() {
-                                         // Check that we still mean to
-                                         if (call.state != CallState.DISCONNECTED) {
-                                             call.connection.sendIQ(initiateIq, function (iq) {
-                                                 call.state = CallState.PROGRESS;
-                                             });
-                                         }
+                                         call.connection.sendIQ(initiateIq, function (iq) {
+                                             call.state = CallState.PROGRESS;
+                                         });
                                      },
                                      partialUpdate.up(),
                                      function() {
-                                         // Check that we still mean to
-                                         if (call.state != CallState.DISCONNECTED) {
-                                             call.connection.sendIQ(updateIq, function (iq) {
-                                             });   
-                                         }
+                                         call.connection.sendIQ(updateIq, function (iq) {
+                                         });   
                                      }
                                     );
 
@@ -8104,16 +7999,16 @@ JSEPAudio.prototype.createContainer = function() {
 
       if (call.state != CallState.PROGRESS) return;
       
-      var jingleIq = Strophe.iq({
+      var jingleIq = $iq({
          type: "set", 
          to: call.remoteJid})
          .c('jingle', {
-            xmlns: NS.JINGLE,
+            xmlns: Strophe.NS.JINGLE,
             action: "session-info",
             initiator: call.initiator,
             sid: call.id})
          .c('ringing', {
-            xmlns:NS.JINGLE_SESSION_INFO}
+            xmlns:Strophe.NS.JINGLE_SESSION_INFO}
       );
          
       this.connection.sendIQ(jingleIq, function (iq) {
@@ -8130,10 +8025,10 @@ JSEPAudio.prototype.createContainer = function() {
       if (call.state != CallState.RINGING 
       && call.state != CallState.PROGRESS) return;
 
-       var acceptIq = Strophe.iq({type:"set", to:call.remoteJid});
+       var acceptIq = $iq({type:"set", to:call.remoteJid});
       
        var accept = acceptIq.c('jingle', {
-           xmlns: NS.JINGLE,
+           xmlns: Strophe.NS.JINGLE,
            action: "session-accept",
            initiator: call.initiator,
            sid: call.id
@@ -8141,10 +8036,10 @@ JSEPAudio.prototype.createContainer = function() {
        
        
        
-       var updateIq = Strophe.iq({type:"set", to:call.remoteJid});
+       var updateIq = $iq({type:"set", to:call.remoteJid});
       
        var update = updateIq.c('jingle', {
-           xmlns: NS.JINGLE,
+           xmlns: Strophe.NS.JINGLE,
            action: "transport-replace",
            initiator: call.initiator,
            sid: call.id
@@ -8225,7 +8120,7 @@ JSEPAudio.prototype.createContainer = function() {
       this.pushToTalkStateChanged();
 
       Phono.events.bind(this.output, {
-      	  onMediaReady: function() {
+          onMediaReady: function() {
               Phono.events.trigger(call, "mediaReady");
           }});
    };
@@ -8233,21 +8128,16 @@ JSEPAudio.prototype.createContainer = function() {
    Call.prototype.hangup = function() {
 
       var call = this;
-
-      if (call.state == CallState.INITIAL) {
-          call.state = CallState.DISCONNECTED;
-          return;
-      }
       
       if (call.state != CallState.CONNECTED 
        && call.state != CallState.RINGING 
        && call.state != CallState.PROGRESS) return;
       
-      var jingleIq = Strophe.iq({
+      var jingleIq = $iq({
          type:"set", 
          to:call.remoteJid})
          .c('jingle', {
-            xmlns: NS.JINGLE,
+            xmlns: Strophe.NS.JINGLE,
             action: "session-terminate",
             initiator: call.initiator,
             sid: call.id}
@@ -8273,16 +8163,16 @@ JSEPAudio.prototype.createContainer = function() {
           this.output.digit(value, duration, this._tones);
       } else {
           // Send as Jingle
-          var jingleIq = Strophe.iq({
+          var jingleIq = $iq({
               type: "set", 
               to: this.remoteJid})
               .c('jingle', {
-                  xmlns: NS.JINGLE,
+                  xmlns: Strophe.NS.JINGLE,
                   action: "session-info",
                   initiator: this.initiator,
                   sid: this.id})
               .c('dtmf', {
-                  xmlns: NS.JINGLE_DTMF,
+                  xmlns: Strophe.NS.JINGLE_DTMF,
                   code: value,
                   duration: duration,
                   volume: "42"});
@@ -8298,29 +8188,29 @@ JSEPAudio.prototype.createContainer = function() {
    };
    
    Call.prototype.pushToTalk = function(value) {
-   	if(arguments.length === 0) {
-   	    return this._pushToTalk;
-   	}
-   	this._pushToTalk = value;
-   	this.pushToTalkStateChanged();
+    if(arguments.length === 0) {
+        return this._pushToTalk;
+    }
+    this._pushToTalk = value;
+    this.pushToTalkStateChanged();
    };
 
    Call.prototype.talking = function(value) {
-   	if(arguments.length === 0) {
-   	    return this._talking;
-   	}
-   	this._talking = value;
-   	this.pushToTalkStateChanged();
+    if(arguments.length === 0) {
+        return this._talking;
+    }
+    this._talking = value;
+    this.pushToTalkStateChanged();
    };
 
    Call.prototype.mute = function(value) {
-   	if(arguments.length === 0) {
-   	    return this._mute;
-   	}
-   	this._mute = value;
-   	if(this.output) {
-      	this.output.mute(value);
-   	}
+    if(arguments.length === 0) {
+        return this._mute;
+    }
+    this._mute = value;
+    if(this.output) {
+        this.output.mute(value);
+    }
    };
 
    // TODO: hold should be implemented in JINGLE
@@ -8329,37 +8219,37 @@ JSEPAudio.prototype.createContainer = function() {
    };
 
    Call.prototype.volume = function(value) {
-   	if(arguments.length === 0) {
-   	    return this._volume;
-   	}
-   	this._volume = value;
-   	if(this.input) {
-   	   this.input.volume(value);
-   	}
+    if(arguments.length === 0) {
+        return this._volume;
+    }
+    this._volume = value;
+    if(this.input) {
+       this.input.volume(value);
+    }
    };
 
    Call.prototype.tones = function(value) {
-   	if(arguments.length === 0) {
-   	    return this._tones;
-   	}
-	   this._tones = value;
+    if(arguments.length === 0) {
+        return this._tones;
+    }
+       this._tones = value;
    };
 
    Call.prototype.gain = function(value) {
-   	if(arguments.length === 0) {
-   	    return this._gain;
-   	}
-   	this._gain = value;
-   	if(this.output) {
-   	   this.output.gain(value);
-   	}
+    if(arguments.length === 0) {
+        return this._gain;
+    }
+    this._gain = value;
+    if(this.output) {
+       this.output.gain(value);
+    }
    };
 
    Call.prototype.energy = function() {
-   	if(this.output) {
-   	   ret = this.output.energy();
-   	}
-	return ret;
+    if(this.output) {
+       ret = this.output.energy();
+    }
+    return ret;
    };
 
    Call.prototype.secure = function() {
@@ -8371,38 +8261,38 @@ JSEPAudio.prototype.createContainer = function() {
    };
 
    Call.prototype.security = function(value) {
-   	if(arguments.length === 0) {
-   	    return this._security;
-   	}
-   	this._security = value;
+    if(arguments.length === 0) {
+        return this._security;
+    }
+    this._security = value;
    };
    
    Call.prototype.headset = function(value) {
-   	if(arguments.length === 0) {
-   	    return this._headset;
-   	}
-   	this._headset = value;
-   	if(this.output) {
-   	   this.output.suppress(!value);
-   	}
+    if(arguments.length === 0) {
+        return this._headset;
+    }
+    this._headset = value;
+    if(this.output) {
+       this.output.suppress(!value);
+    }
    };
    
-	Call.prototype.pushToTalkStateChanged = function() {
-	   if(this.input && this.output) {
-   		if (this._pushToTalk) {
-   			if (this._talking) {
-   				this.input.volume(20);
-   				this.output.mute(false);
-   			} else {
-   				this.input.volume(this._volume);
-   				this.output.mute(true);
-   			}
-   		} else {
-   			this.input.volume(this._volume);
-   			this.output.mute(false);
-   		}
-	   }
-	};
+    Call.prototype.pushToTalkStateChanged = function() {
+       if(this.input && this.output) {
+        if (this._pushToTalk) {
+            if (this._talking) {
+                this.input.volume(20);
+                this.output.mute(false);
+            } else {
+                this.input.volume(this._volume);
+                this.output.mute(true);
+            }
+        } else {
+            this.input.volume(this._volume);
+            this.output.mute(false);
+        }
+       }
+    };
    
    Call.prototype.negotiate = function(iq) {
 
@@ -8529,7 +8419,7 @@ JSEPAudio.prototype.createContainer = function() {
       // Register Strophe handler for JINGLE messages
       this.connection.addHandler(
          this.doJingle.bind(this), 
-         NS.JINGLE, "iq", "set"
+         Strophe.NS.JINGLE, "iq", "set"
       );
       
       callback(this);
@@ -8664,7 +8554,7 @@ JSEPAudio.prototype.createContainer = function() {
 
       // Send Reply
       this.connection.send(
-         Strophe.iq({
+         $iq({
             type: "result", 
              id: $(iq).attr('id'),
              to:call.remoteJid
@@ -8803,59 +8693,59 @@ JSEPAudio.prototype.createContainer = function() {
 })();
 
 
-    // ======================================================================
+   // ======================================================================
 
-    PhonoStrophe.log = function(level, msg) {
-        Phono.log.debug("[PSTROPHE] " + msg);
-    };
+   Strophe.log = function(level, msg) {
+       Phono.log.debug("[STROPHE] " + msg);
+   };
 
-    // Register Loggign Callback
-    Phono.events.add(Phono.log, "log", function(event) {
-        var date = event.timeStamp;
-        var formattedDate = 
-        Phono.util.padWithZeroes(date.getHours(), 2) + ":" + 
-        Phono.util.padWithZeroes(date.getMinutes(), 2) + ":" + 
-        Phono.util.padWithZeroes(date.getSeconds(), 2) + "." +
-        Phono.util.padWithZeroes(date.getMilliseconds(), 3);
-        var formattedMessage = formattedDate + " " + Phono.util.padWithSpaces(event.level.name, 5) + " - " + event.getCombinedMessages();
-        var throwableStringRep = event.getThrowableStrRep();
-        if (throwableStringRep) {
-            formattedMessage += newLine + throwableStringRep;
-        }
-        console.log(formattedMessage);
-    });
+   // Register Loggign Callback
+   Phono.events.add(Phono.log, "log", function(event) {
+      var date = event.timeStamp;
+      var formattedDate = 
+            Phono.util.padWithZeroes(date.getHours(), 2) + ":" + 
+            Phono.util.padWithZeroes(date.getMinutes(), 2) + ":" + 
+            Phono.util.padWithZeroes(date.getSeconds(), 2) + "." +
+            Phono.util.padWithZeroes(date.getMilliseconds(), 3);
+      var formattedMessage = formattedDate + " " + Phono.util.padWithSpaces(event.level.name, 5) + " - " + event.getCombinedMessages();
+      var throwableStringRep = event.getThrowableStrRep();
+      if (throwableStringRep) {
+        formattedMessage += newLine + throwableStringRep;
+      }
+      console.log(formattedMessage);
+   });
 
-    // PluginManager is responsible for initializing plugins an 
-    // notifying when all plugins are initialized
-    function PluginManager(phono, config, readyHandler) {
-        this.index = 0;
-        this.readyHandler = readyHandler;
-        this.config = config;
-        this.phono = phono;
-        this.pluginNames = new Array();
-        for(pluginName in Phono.plugins) {
-            this.pluginNames.push(pluginName);
-        }
-    };
+   // PluginManager is responsible for initializing plugins an 
+   // notifying when all plugins are initialized
+   function PluginManager(phono, config, readyHandler) {
+      this.index = 0;
+      this.readyHandler = readyHandler;
+      this.config = config;
+      this.phono = phono;
+      this.pluginNames = new Array();
+      for(pluginName in Phono.plugins) {
+         this.pluginNames.push(pluginName);
+      }
+   };
 
-    PluginManager.prototype.init = function(phono, config, readyHandler) {
-        this.chain();
-    };
+   PluginManager.prototype.init = function(phono, config, readyHandler) {
+      this.chain();
+   };
 
-    PluginManager.prototype.chain = function() {
-        var manager = this;
-        var pluginName = manager.pluginNames[this.index];
-        Phono.plugins[pluginName].create(manager.phono, manager.config[pluginName], function(plugin) {
-            manager.phono[pluginName] = plugin;
-            manager.index++;
-            if(manager.index === manager.pluginNames.length) {
-                manager.readyHandler.apply(manager.phono);
-            }
-            else {
-                manager.chain();
-            }
-        });
-    };
+   PluginManager.prototype.chain = function() {
+      var manager = this;
+      var pluginName = manager.pluginNames[this.index];
+      Phono.plugins[pluginName].create(manager.phono, manager.config[pluginName], function(plugin) {
+         manager.phono[pluginName] = plugin;
+         manager.index++;
+         if(manager.index === manager.pluginNames.length) {
+            manager.readyHandler.apply(manager.phono);
+         }
+         else {
+            manager.chain();
+         }
+      });
+   };
    
 })();
 
