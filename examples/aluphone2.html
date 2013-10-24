@@ -1,0 +1,87 @@
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Make WebRTC Video Call</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+
+        <!-- Latest compiled and minified JavaScript -->
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.0/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" href="css/jumbotron-narrow.css">
+        <link rel="stylesheet" href="css/dialpad.css">
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="header">
+                <h3><i class="fa fa-phone"></i> WebRTC Phone</h3>
+            </div>
+
+            <div class="login-box jumbotron" style="display: none; background-image: url(img/body-bg.png);">
+                <img src="img/api-program.png">
+                <button class="btn btn-lg login"> Login to APIMatrix </button>
+            </div>
+
+            <div class="dialpad-box" style="display: none;">
+            </div>
+
+            <div class="nudge-box" style="display: none;">
+                <p>
+                    <i class="icon-hand-up icon-5x"></i> Give permission to use camera
+                </p>
+            </div>
+
+            <div class="local-video-box jumbotron" style="display: none;">
+                <video class="localVideo" style="height: 400px; width: 400px;" autoplay="autoplay" muted="muted" src=""></video>
+            </div>
+
+            <div class="incall-video-box jumbotron" style="display: none;">
+                <!-- video call windows-->  
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6 col-md-8">
+                        <div class="videoContainer call0" style="height: 400px; width: 400px;">
+                            <video class="remoteVideo" style="height: 400px; width: 400px;" autoplay="autoplay" src=""></video>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-6 col-sm-6 col-md-4">
+                        <div class="videoContainer call0">
+                            <video class="localVideo" style="height: 130px; width: 130px;" autoplay="autoplay" muted="muted" src=""></video>
+                        </div>
+                    </div>
+                </div>  
+            </div>
+            
+            <div class="call-actions-box" style="display: none; text-align: center;">
+                <button class="btn btn-lg btn-primary hangup">Hang up</button>
+            </div>
+            
+            <div class="incoming-call-actions-box" style="display: none; text-align: center;">
+                <div class="incoming-number"></div>
+                <button class="btn btn-lg btn-primary answer">Answer</button>
+                <button class="btn btn-lg btn-primary hangup">Hang up</button>
+            </div>
+            
+            <div id = "alert-msg" style="margin-top: 20px;"></div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+
+        <script src="../src/att.js"></script>
+        <script src="../src/att.me.js"></script>
+        <script src="../src/att.oauth2.js"></script>
+        <script src="../src/att.phonenumber.js"></script>
+        <script src="../vendor/alu/orca.js"></script>
+        <script src="../vendor/alu/orcaALU.js"></script>
+        <script src="../vendor/alu/sip.js"></script>
+        <script src="../vendor/alu/att.phone.alu.js"></script>
+        <script src="js/dialpad.js"></script>
+        <script src="js/aluphone.js"></script>
+    </body>
+</html>
