@@ -6,6 +6,9 @@
  *  Copyright (c) 2013 Alcatel-Lucent
  */
 
+/* $Id$ */
+/*jslint devel: true */
+
 if (typeof sip == "undefined") {
     sip = {};
 }
@@ -753,7 +756,17 @@ if (typeof sip == "undefined") {
     Header.prototype._parseParams = function(params, unquote) {
         try {
             var length = params.length, index = 0;
+            // do not parse digest authorization format
+            if (params.toLowerCase().indexOf('digest ') === 0) {
+                return;
+            }
+            var loops = 0;
             while (index < length) {
+                loops += 1;
+                if (loops > 60) {
+                    console.warn('sip.Header._parseParams: Breaking out of possibly infinite loop');
+                    break;
+                }
                 var sep1 = params.indexOf('=', index);
                 var sep2 = params.indexOf(';', index);
                 if (sep2 < 0) {
@@ -761,7 +774,7 @@ if (typeof sip == "undefined") {
                 }
                 var n = "", v = "";
                 if (sep1 >= 0 && sep1 < sep2) {
-                    var n = sip.str_strip(params.substring(index, sep1).toLowerCase());
+                    n = sip.str_strip(params.substring(index, sep1).toLowerCase());
                     if (params.charAt(sep1+1) == '"') {
                         sep1 += 1;
                         sep2 = params.indexOf('"', sep1+2);
@@ -769,7 +782,7 @@ if (typeof sip == "undefined") {
                     v = sip.str_strip(params.substring(sep1+1, sep2));
                     index = sep2 + 1;
                 }
-                else if (sep1 < 0 || sep1 >= 0 && sep1 > sep2) {
+                else if (sep1 < 0 || (sep1 >= 0 && sep1 > sep2)) {
                     n = sip.str_strip(params.substring(index, sep2).toLowerCase());
                     index = sep2 + 1;
                 }
@@ -3681,3 +3694,7 @@ if (typeof sip == "undefined") {
     };
     
 })(sip);
+
+
+    
+

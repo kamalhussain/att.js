@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-/* $Id: orca.js 256 2013-10-01 22:34:13Z skapauan $ */
+/* $Id: orca.js 265 2013-10-14 09:50:52Z xiangcwa $ */
 /*jslint browser: true, sloppy: true, undef: true */
 
 (function () {
@@ -24,7 +24,8 @@
     * @summary Provides access to media control functions during a call
     * @classdesc ManagedStream objects are obtained by calling the
     * {@Link orca.createManagedStream} method or handling the onAddStream event of a
-    * {@Link orca.Call} ({@Link orca.Call#event:onAddStream})
+    * {@Link orca.Call} ({@Link orca.Call#event:onAddStream}). They are also created
+    * implicitly when passing a raw RTCMediaStream to the {@Link orca.Call#addStream} method.
     * @constructor
     * @memberOf orca
     * @param {RTCMediaStream} rtcMediaStream the underlying WebRTC runtime MediaStream instance  
@@ -329,8 +330,8 @@
         * "audio,video". (Orca ALU feature, not in standard Orca.)
         * @returns {string}
         */
-        this.mediaTypes = function () {
-            return callImp.mediaTypes();
+        this.getMediaTypes = function () {
+            return callImp.getMediaTypes();
         };
 
         /**
@@ -562,14 +563,16 @@
     CallStatus.ADDSTREAM = 'call_status_add_stream';
 
     /**
-    * @summary Provides information about an event
+    * @summary Provides information about an event. (This describes a data type. It is not
+    * accessible as a global object.)
     * @typedef Event
     * @type object 
     * @property {(CallStatus|SessionStatus)} name Gets the name/type indicator of the event
     */
 
     /**
-    * @summary Provides information about the identity of a communications peer
+    * @summary Provides information about the identity of a communications peer. (This describes a
+    * data type. It is not accessible as a global object.)
     * @typedef PeerIdentity
     * @type object 
     * @property {string} id the unique identifier or address string of the associated user
@@ -603,7 +606,8 @@
     SessionStatus.INCOMINGCALL = 'session_status_incoming_call';
 
     /**
-    * @summary Configuration properties for an orca.Session
+    * @summary Configuration properties for an orca.Session. (This describes a data type. It is
+    * not accessible as a global object.)
     * @typedef SessionConfig
     * @type object 
     * @property {string} uri The address of the gateway server
@@ -614,7 +618,8 @@
     */
 
     /**
-    * @summary Provider-specific configuration properties for an orca.Session
+    * @summary Provider-specific configuration properties for an orca.Session. (This
+    * describes a data type. It is not accessible as a global object.)
     * @typedef ProviderConfig
     * @type object 
     * @property {(string|number)} expires Value for the Expires header in the initial SIP
@@ -636,17 +641,23 @@
     * no special behavior is made. Default is false.
     * @property {string} dtmf Specify the DTMF method to use. Set as 'sip' for SIP INFO, 'inband'
     * for inband, or 'both' for both. Default is both.
+    * @property {(string|number)} audioBandwidth The target bandwidth for audio in kilobits per
+    * second. Default is unconstrained.
+    * @property {(string|number)} videoBandwidth The target bandwidth for video in kilobits per
+    * second. Default is unconstrained.
     */
 
     /**
-    * @summary A user's unique identifier. In Orca ALU, this is the user's public ID.
+    * @summary A user's unique identifier. In Orca ALU, this is the user's public ID. (This
+    * describes a data type. It is not accessible as a global object.)
     * @typedef userid
     * @type string
     */
 
     /**
     * @summary An authorization token associated with the provided userid. In Orca ALU, this is
-    * an object containing authorization information for the SIP registration.
+    * an object containing authorization information for the SIP registration. (This describes a
+    * data type. It is not accessible as a global object.)
     * @typedef token
     * @type object
     * @property {string} id The user's private ID
