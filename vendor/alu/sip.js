@@ -6,6 +6,9 @@
  *  Copyright (c) 2013 Alcatel-Lucent
  */
 
+/* $Id$ */
+/*jslint devel: true */
+
 if (typeof sip == "undefined") {
     sip = {};
 }
@@ -753,7 +756,17 @@ if (typeof sip == "undefined") {
     Header.prototype._parseParams = function(params, unquote) {
         try {
             var length = params.length, index = 0;
+            // do not parse digest authorization format
+            if (params.toLowerCase().indexOf('digest ') === 0) {
+                return;
+            }
+            var loops = 0;
             while (index < length) {
+                loops += 1;
+                if (loops > 60) {
+                    console.warn('sip.Header._parseParams: Breaking out of possibly infinite loop');
+                    break;
+                }
                 var sep1 = params.indexOf('=', index);
                 var sep2 = params.indexOf(';', index);
                 if (sep2 < 0) {
@@ -761,7 +774,7 @@ if (typeof sip == "undefined") {
                 }
                 var n = "", v = "";
                 if (sep1 >= 0 && sep1 < sep2) {
-                    var n = sip.str_strip(params.substring(index, sep1).toLowerCase());
+                    n = sip.str_strip(params.substring(index, sep1).toLowerCase());
                     if (params.charAt(sep1+1) == '"') {
                         sep1 += 1;
                         sep2 = params.indexOf('"', sep1+2);
@@ -769,7 +782,7 @@ if (typeof sip == "undefined") {
                     v = sip.str_strip(params.substring(sep1+1, sep2));
                     index = sep2 + 1;
                 }
-                else if (sep1 < 0 || sep1 >= 0 && sep1 > sep2) {
+                else if (sep1 < 0 || (sep1 >= 0 && sep1 > sep2)) {
                     n = sip.str_strip(params.substring(index, sep2).toLowerCase());
                     index = sep2 + 1;
                 }
@@ -1925,8 +1938,9 @@ if (typeof sip == "undefined") {
     // UserAgent
     //--------------------------------------------------------------------------
     
-    function UserAgent(stack, request, server) {
+    function UserAgent(stack, request, server, breaker) {
         if (stack !== undefined) {
+            this.breaker = breaker;
             this.stack = stack;
             this.request = (request === undefined ? null : request);
             this.server = (server === undefined ? (request !== null) : server);
@@ -2018,6 +2032,10 @@ if (typeof sip == "undefined") {
         
         if (method != 'MESSAGE') {
             var Contact = new sip.Header(this.localTarget.toString(), 'Contact');
+            if (this.breaker && this.remoteParty.toString().indexOf('ALU_CONF') === -1 && method != 'REGISTER') {
+                Contact.value.uri.param.transport = 'ws';
+                Contact.value.uri.param['rtcweb-breaker'] = 'yes';
+            }
             Contact.value.uri.secure = this.secure;
             var headers = [To, From, CSeq, CallId, MaxForwards, Via, Contact];
         } else {
@@ -2139,7 +2157,7 @@ if (typeof sip == "undefined") {
             }
         }
         if (response.all('Via').length > 1) {
-            throw new String('More than one Via header in response');
+            // throw new String('More than one Via header in response');
         }
         if (response.is1xx()) {
             if (this.cancelRequest) {
@@ -3681,3 +3699,7 @@ if (typeof sip == "undefined") {
     };
     
 })(sip);
+
+
+    
+
