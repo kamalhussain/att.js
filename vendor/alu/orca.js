@@ -14,7 +14,11 @@
  *  limitations under the License.
  */
 
+<<<<<<< HEAD
 /* $Id: orca.js 299 2013-12-10 08:49:31Z xiangcwa $ */
+=======
+/* $Id: orca.js 265 2013-10-14 09:50:52Z xiangcwa $ */
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 /*jslint browser: true, sloppy: true, undef: true */
 
 (function () {
@@ -674,9 +678,12 @@
     * second. Default is unconstrained.
     * @property {(string|number)} videoBandwidth The target bandwidth for video in kilobits per
     * second. Default is unconstrained.
+<<<<<<< HEAD
     * @property {boolean} persistentPC If set to false, then a new PeerConnection will be used any
     * time a new local MediaStream is attached. If true, the same PeerConnection will be reused.
     * Default is true.
+=======
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
     */
 
     /**

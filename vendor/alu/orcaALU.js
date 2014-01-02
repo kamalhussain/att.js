@@ -14,7 +14,11 @@
  *  limitations under the License.
  */
 
+<<<<<<< HEAD
 /* $Id: orcaALU.js 299 2013-12-10 08:49:31Z xiangcwa $ */
+=======
+/* $Id: orcaALU.js 274 2013-10-25 14:13:39Z skapauan $ */
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 /*jslint devel: true */
 
 console.trace = function (data) {
@@ -26,6 +30,7 @@ console.trace = function (data) {
 	 webkitRTCPeerConnection, RTCSessionDescription, SessionDescription, window, DOMParser,
 	 XMLSerializer, ActiveXObject, document, ResourceList, Multipart*/
 
+<<<<<<< HEAD
 	 // adapting for Firefox
 	console.debug('ORCA/$Rev: 299 $; ' + navigator.userAgent);
 	if (navigator.mozGetUserMedia) {
@@ -71,6 +76,8 @@ console.trace = function (data) {
 		console.warn("Browser does not appear to be WebRTC-capable");
 	}
 
+=======
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 	var previousCall = null;
 
 	// ManagedStream is implemented in orca.js
@@ -194,7 +201,11 @@ console.trace = function (data) {
 		 * @type string
 		 * @private
 		 */
+<<<<<<< HEAD
 		this.userAgent = "ALU ORCA Agent $Revision: 299 $";
+=======
+		this.userAgent = "ALU ORCA Agent $Revision: 274 $";
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 
 		/**
 		 * Listen IP.
@@ -261,7 +272,10 @@ console.trace = function (data) {
 
 			console.debug("connect to " + uri);
 			this.ws = new WebSocket(uri, ["sip"]);
+<<<<<<< HEAD
 			this.ws.binaryType = 'arraybuffer';
+=======
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			this.socketStatus = this.WebSocketStatus.CONNECTING;
 
 			this.ws.onopen = function (evt) {
@@ -373,6 +387,7 @@ console.trace = function (data) {
 		* @private
 		*/
 		this.onWebSocketMessage = function (evt) {
+<<<<<<< HEAD
             var data = evt.data;
 
             // CRLF Keep Alive response from server. Ignore it.
@@ -396,6 +411,10 @@ console.trace = function (data) {
             }
 			console.debug("[" + new Date().toUTCString() + "] " + "Session.onWebSocketMessage() message:\n" + data);
 			this.stack.received(data, ["127.0.0.1", 0]);
+=======
+            console.debug("[" + new Date().toUTCString() + "] " + "Session.onWebSocketMessage() message:\n" + evt.data);
+            this.stack.received(evt.data, ["127.0.0.1", 0]);
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 		};
 
 		/**
@@ -416,13 +435,21 @@ console.trace = function (data) {
 			var outboundProxy, request, event;
 
 			console.debug("Session.register()");
+<<<<<<< HEAD
 			this.uaReg = new sip.UserAgent(this.stack, undefined, undefined, this.config.providerConfig.breaker);
+=======
+			this.uaReg = new sip.UserAgent(this.stack);
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			this.uaReg.localParty = new sip.Address(this.localAOR);
 			this.uaReg.remoteParty = new sip.Address(this.localAOR);
 
 			outboundProxy = this.getRouteHeader();
 			outboundProxy.value.uri.param.transport = this.transport;
+<<<<<<< HEAD
 			//this.uaReg.routeSet = [outboundProxy];
+=======
+			this.uaReg.routeSet = [outboundProxy];
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 
 			request = this.createRegister();
 			request.setItem('Expires', new sip.Header(this.sessionExpires.toString(), 'Expires'));
@@ -631,10 +658,14 @@ console.trace = function (data) {
 		this.resolve = function (host, type, callback, stack) {
 				console.debug("Entered resolve() host = " + host + " type = " + type);
 
+<<<<<<< HEAD
 				var slash_position = this.config.uri.lastIndexOf("//");
 				if (slash_position > -1) {
 					slash_position += 1;
 				}
+=======
+				var slash_position = this.config.uri.lastIndexOf("/");
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 				var colon_position = this.config.uri.lastIndexOf(":");
 				var ip_address = this.config.uri.substring(slash_position + 1, colon_position);
 				console.debug("resolve() ip_address = " + ip_address);
@@ -1041,7 +1072,11 @@ console.trace = function (data) {
 		 * @private
 		 */
 		this.mediaTypes = mediatypes;
+<<<<<<< HEAD
 		this.oldMediaTypes = mediatypes;
+=======
+		this.oldMediaTypes = undefined;
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 
 		/**
 		 * Audio media direction.
@@ -1106,6 +1141,7 @@ console.trace = function (data) {
 		this.holdPending = false;
 		this.resumePending = false;
 
+<<<<<<< HEAD
 		this.telephoneEvent = null;
 		this.crypto = null;
 
@@ -1116,6 +1152,8 @@ console.trace = function (data) {
 		 */		
 		 this.dataChannel = null;
 
+=======
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 		var self = this;
 
 
@@ -1141,6 +1179,7 @@ console.trace = function (data) {
 		*/
 		this.addStream = function (managed) {
 			var streams, audioTracks;
+<<<<<<< HEAD
 			if ((this.callStatus === this.CallStatus.CONFIRMED) || (this.callStatus === this.CallStatus.ACCEPTED) || (this.callStatus === this.CallStatus.HOLD) || (this.callStatus === this.CallStatus.REMOTE_HOLD)) {
 				this.callDirection = this.CallDirection.OUTGOING;
 			}
@@ -1177,6 +1216,34 @@ console.trace = function (data) {
 						console.warn('Call.connect() inband DTMF not supported by browser');
 					}
 				}
+=======
+			if (this.pc) {
+				streams = this.pc.getLocalStreams();
+				if ((this.callStatus === this.CallStatus.CONFIRMED) || (this.callStatus === this.CallStatus.ACCEPTED) || (this.callStatus === this.CallStatus.HOLD) || (this.callStatus === this.CallStatus.REMOTE_HOLD)) {
+					this.callDirection = this.CallDirection.OUTGOING;
+				}
+				if (streams.length > 0) {
+					this.pc.removeStream(streams[0]);
+					console.debug('addStream() removeStream: '+streams[0].id);
+				}
+				this.pc.addStream(managed.stream());
+				this.mediaTypes = managed.type();
+
+				this.dtmfSender = null;
+				if (this.dtmfInband) {
+					audioTracks = managed.stream().getAudioTracks();
+					if (audioTracks.length > 0) {
+						try {
+							this.dtmfSender = this.pc.createDTMFSender(audioTracks[0]);
+						} catch (e) {
+							this.dtmfSender = null;
+							console.warn('Call.connect() inband DTMF not supported by browser');
+						}
+					}
+				}
+			} else {
+				console.warn("Call.connect() Peer connexion is not created");
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			}
 			// if (this.callStatus === this.CallStatus.CONFIRMED) {
 			//     var localStreams = this.callback.streams('local');
@@ -1556,9 +1623,17 @@ console.trace = function (data) {
 
 
 	this.determineWaitingIce = function (sdp) {
+<<<<<<< HEAD
 		var mLines = sdp.sdp.split("\r\nm=") ;
 		var i ;
 		if(mLines.length >=2) {
+=======
+		console.debug("determineWaitingIce()\n")
+		var mLines = sdp.sdp.split("\r\nm=") ;
+		var i ;
+		if(mLines.length >=2) {
+			console.debug("mLines.length=" + mLines.length + "\n") ;
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			for(i=1; i <mLines.length; i++) {
 				if (mLines[i].indexOf(" 0 RTP/") === -1 && mLines[i].indexOf("\r\na=candidate:") === -1) {
 					console.trace("m= line " + i + " do not have ice-candidates.. setting self.waitingIce to true") ; 
@@ -1585,12 +1660,21 @@ console.trace = function (data) {
 			} else {
 				mediatypes = 'audio';
 			}
+<<<<<<< HEAD
 		} else if (sdpString.search("m=video") !== -1) {
 				mediatypes = 'video';
 		} else if (sdpString.search("m=application") !== -1) {
 				mediatypes = 'data';
 		} else {
 			mediatypes = undefined;
+=======
+		} else {
+			if (sdpString.search("m=video") !== -1) {
+				mediatypes = 'video';
+			} else {
+				mediatypes = undefined;
+			}
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 		}
 		this.mediaTypes = mediatypes;
 		this.oldMediaTypes = mediatypes;
@@ -1633,8 +1717,13 @@ console.trace = function (data) {
 							this.sdpOffer = this.updateSDPMediaIceOption(this.sdpOffer, "offer", "google-ice");
 						}
 
+<<<<<<< HEAD
 						var remoteSdpOffer = this.sdpOffer;
 						remoteSdpOffer = remoteSdpOffer.replace(/\r\na=setup:passive/g,''); //Chrome does not like this. It will cause setLocalDescription error
+=======
+						this.callStatus = this.CallStatus.PREPARING_ANSWER;
+						var remoteSdpOffer = this.sdpOffer;
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 						// var idx = this.sdpOffer.indexOf('m=video 0');
 						// if (idx !== -1) {
 						//     remoteSdpOffer = this.sdpOffer.substring(0, idx);
@@ -1668,8 +1757,15 @@ console.trace = function (data) {
 						try {
 							self = this;
 							this.pc.createAnswer(function (sessionDescription) {
+<<<<<<< HEAD
 								console.debug("unmodified local SDP from createAnswer:\n" + sessionDescription.sdp);
 								sessionDescription = self.updateSDPCrypto(sessionDescription);
+=======
+								console.debug("unmodified local SDP from createAnswer:\n" + sessionDescription.sdp) ;
+								if (self.session.config.providerConfig.crypto === "sdes-sbc") {
+									sessionDescription = self.updateSDPRemoveCrypto(sessionDescription);
+								}
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 								if (self.session.config.providerConfig.bundle === false) {
 									sessionDescription = self.updateSDPOfferMediaBundle(sessionDescription);
 								}
@@ -1677,18 +1773,27 @@ console.trace = function (data) {
 									sessionDescription = self.updateSDPMediaIceOption(sessionDescription, "answer", "google-ice");
 								}
 								sessionDescription = self.updateSDPBandwidth(sessionDescription, 'answer');
+<<<<<<< HEAD
+=======
+								self.determineWaitingIce(sessionDescription) ;
+								console.trace("onStableStatus() setLocalDescription sdp = " + sessionDescription.sdp);
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 								self.pc.setLocalDescription(sessionDescription,
 									function() {console.debug('setLocalDescription success');},
 									function(error) {console.error('setLocalDescription failure: ' + error); self.errorCallback(error);}
 								);
+<<<<<<< HEAD
 								console.trace("onStableStatus() setLocalDescription sdp = " + sessionDescription.sdp);
 								self.determineWaitingIce(sessionDescription);
 								self.callStatus = self.CallStatus.PREPARING_ANSWER;
 								self.markActionNeeded();
+=======
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 							}, function (error) {
 								console.error('createAnswer failure: ' + error);
 								self.callStatus = self.CallStatus.FAILED;
 								self.errorCallback(error);
+<<<<<<< HEAD
 								self.markActionNeeded();
 							});
 						} catch (e) {
@@ -1698,6 +1803,14 @@ console.trace = function (data) {
 						}
 
 						//this.markActionNeeded(); //TODO: might need to move the call into callback if callStatus is not set in time
+=======
+							});
+						} catch (e) {
+							console.error('Call.onStableStatus() webkitRTCPeerConnection can not create a SDP answer, exception = ' + e);
+						}
+
+						this.markActionNeeded(); //TODO: might need to move the call into callback if callStatus is not set in time
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 					} else {
 						this.createSDPOffer();
 					}
@@ -1810,6 +1923,18 @@ console.trace = function (data) {
 	};
 
 	/**
+<<<<<<< HEAD
+=======
+	 * @summary Function called when RTCPeerConnection onicechange event is fired.
+	 * @param {Event} evt
+	 * @private
+	 */
+	this.onRTCPeerConnectionOnIceChange = function (evt) {
+		console.debug("Call.onRTCPeerConnectionIceChange()");
+	};
+
+	/**
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 	 * @summary Function called when RTCPeerConnection onnegotiatoinneeded event is fired.
 	 * @param {Event} evt
 	 * @private
@@ -1846,6 +1971,7 @@ console.trace = function (data) {
 	};
 
 	/**
+<<<<<<< HEAD
 	 * @summary Function called when RTCPeerConnection DataChannel onopen event is fired.
 	 * @param {Event} evt
 	 * @private
@@ -1876,6 +2002,8 @@ console.trace = function (data) {
 	};
 
 	/**
+=======
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 	 * @summary Creates and sends a SIP INVITE request.
 	 * @param {string} sdp SDP offer
 	 * @private
@@ -1891,7 +2019,11 @@ console.trace = function (data) {
 				this.uaCall.remoteParty = new sip.Address(this.session.config.providerConfig.conferenceFactoryURI);
 			}
 			this.uaCall.localParty = new sip.Address(this.localAOR);
+<<<<<<< HEAD
 			//this.uaCall.routeSet = [this.getRouteHeader()];
+=======
+			this.uaCall.routeSet = [this.getRouteHeader()];
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			for (idx=0; idx < this.targetAOR.length; idx+=1) {
 				this.remotePeerIds.push({id:this.targetAOR[idx]});
 			}
@@ -1904,9 +2036,12 @@ console.trace = function (data) {
 		request.setItem('User-Agent', new sip.Header(this.session.userAgent, 'User-Agent'));
 
 		if (sdp !== undefined) {
+<<<<<<< HEAD
 			// convert between sdes and dtls
 			sdp = this.updateSDPForDTLS(sdp, 'outgoing');
 
+=======
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			if (this.targetAOR.length === 1) {
 				// we have a unique callee
 				request.setItem('Content-Type', new sip.Header("application/sdp", 'Content-Type'));
@@ -1947,8 +2082,11 @@ console.trace = function (data) {
 		response.setItem('Content-Type', new sip.Header("application/sdp", 'Content-Type'));
 		response.setItem('User-Agent', new sip.Header(this.session.userAgent, 'User-Agent'));
 		if (sdp !== undefined) {
+<<<<<<< HEAD
 			// convert between sdes and dtls
 			sdp = this.updateSDPForDTLS(sdp, 'outgoing');
+=======
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			response.setItem('Content-Type', new sip.Header("application/sdp", 'Content-Type'));
 			response.setBody(sdp);
 		}
@@ -1962,8 +2100,14 @@ console.trace = function (data) {
 	 */
 	this.createSDPOffer = function () {
 		console.debug("Call.createSDPOffer()");
+<<<<<<< HEAD
 		if (this.pc === null) {
 			this.createPeerConnection();
+=======
+		if (webkitRTCPeerConnection === undefined) {
+			console.error('webkitRTCPeerConnection is undefined!');
+			return;
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 		}
 		var constraint, constraint1, constraint2, audio=false, video=false, sdpOffer;
 
@@ -2004,7 +2148,13 @@ console.trace = function (data) {
 		try {
 			this.pc.createOffer(function (sdp) {
 				sdpOffer = self.updateSDPOfferMediaDirection(sdp, {audio:self.audioMediaDirection, video:self.videoMediaDirection});
+<<<<<<< HEAD
 				sdpOffer = self.updateSDPCrypto(sdpOffer, 'outgoing');
+=======
+				if (self.session.config.providerConfig.crypto === "sdes-sbc") {
+					sdpOffer = self.updateSDPRemoveCrypto(sdpOffer);
+				}
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 				if (self.session.config.providerConfig.bundle === false) {
 					sdpOffer = self.updateSDPOfferMediaBundle(sdpOffer);
 				}
@@ -2042,7 +2192,13 @@ console.trace = function (data) {
 				this.pc.createOffer(function (sdp) {
 					console.debug("unmodified local SDP from createOffer:\n" + sdp.sdp) ;
 					sdpOffer = self.updateSDPOfferMediaDirection(sdp, {audio:self.audioMediaDirection, video:self.videoMediaDirection});
+<<<<<<< HEAD
 					sdpOffer = self.updateSDPCrypto(sdpOffer, 'outgoing');
+=======
+					if (self.session.config.providerConfig.crypto === "sdes-sbc") {
+						sdpOffer = self.updateSDPRemoveCrypto(sdpOffer);
+					}
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 					if (self.session.config.providerConfig.bundle === false) {
 						sdpOffer = self.updateSDPOfferMediaBundle(sdpOffer);
 					}
@@ -2053,7 +2209,12 @@ console.trace = function (data) {
 					if (sdpOffer.sdp !== self.sdpOffer) {
 						console.debug('createOffer: ' + self.oldMediaTypes + ',' + self.mediaTypes);
 
+<<<<<<< HEAD
 						if (self.oldMediaTypes && self.oldMediaTypes.indexOf('video') !== -1) {
+=======
+						//if (self.oldMediaTypes !== undefined && self.oldMediaTypes.indexOf('video') !== -1) {
+						if (self.mediaTypes.indexOf('video') == -1) { // no video
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 							if (self.mediaTypes.indexOf('video') === -1) {
 								//downgrading. sdp should have no a=ssrc for video
 								var temp = sdpOffer.sdp.indexOf('m=video');
@@ -2063,12 +2224,21 @@ console.trace = function (data) {
 									// in such a case this code will not work.
 									// rewrite this code to replace 'm=video <port>\r\n' line with 'm=video RTP/SAVPF 0'
 									sdpOffer.sdp = sdpOffer.sdp.substring(0, temp);
+<<<<<<< HEAD
 
 								}
 								sdpOffer.sdp += 'm=video 0 RTP/SAVPF 0\nc=IN IP4 0.0.0.0\n';
 							}
 						}
 						self.determineWaitingIce(sdpOffer);
+=======
+									sdpOffer.sdp += 'm=video 0 RTP/SAVPF 0\nc=IN IP4 0.0.0.0\n';
+
+								}
+							}
+						}
+						self.determineWaitingIce(sdpOffer) ;
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 
 						console.trace("createSDPOffer() setLocalDescription sdp = " + sdpOffer.sdp);
 						self.pc.setLocalDescription(sdpOffer, function() {
@@ -2099,7 +2269,11 @@ console.trace = function (data) {
 	this.updateSDPOfferMediaDirection = function (sdpoffer, medias) {
 		var sdp, sdpstr1, sdpstr2, idx, changed;
 
+<<<<<<< HEAD
 		if (RTCSessionDescription && sdpoffer instanceof RTCSessionDescription) {
+=======
+		if (window.RTCSessionDescription && sdpoffer instanceof RTCSessionDescription) {
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			sdp = sdpoffer.sdp;
 		} else if (window.SessionDescription && sdp instanceof SessionDescription) {
 			sdp = sdpoffer.toSdp();
@@ -2156,10 +2330,17 @@ console.trace = function (data) {
 
 		if (changed === true) {
 			//console.debug("Call.updateSDPOfferMediaDirection() medias = " + medias, ", SDP has been updated:= " + sdpstr2);
+<<<<<<< HEAD
 			if (RTCSessionDescription && sdpoffer instanceof RTCSessionDescription) {
 				return new RTCSessionDescription({type:'offer', sdp:sdpstr2});
 			}
 			else if (window.SessionDescription && sdp instanceof SessionDescription) {
+=======
+			if (window.RTCSessionDescription && sdpoffer instanceof RTCSessionDescription) {
+				return new RTCSessionDescription({type:'offer', sdp:sdpstr2});
+			}
+			if (window.SessionDescription && sdp instanceof SessionDescription) {
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 				return new SessionDescription(sdpstr2);
 			}
 			return sdpstr2;
@@ -2176,7 +2357,11 @@ console.trace = function (data) {
 	this.updateSDPOfferMediaBundle = function (sdpoffer) {
 		console.debug('updateSDPOfferMediaBundle()');
 		var sdp, changed, idx;
+<<<<<<< HEAD
 		if (RTCSessionDescription && sdpoffer instanceof RTCSessionDescription) {
+=======
+		if (window.RTCSessionDescription && sdpoffer instanceof RTCSessionDescription) {
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			sdp = sdpoffer.sdp;
 		} else if (window.SessionDescription && sdpoffer instanceof SessionDescription) {
 			sdp = sdpoffer.toSdp();
@@ -2204,12 +2389,29 @@ console.trace = function (data) {
 			}
 		}
 
+<<<<<<< HEAD
 		if (changed === true) {
 			//console.debug("updateSDPOfferMediaBundle() SDP has been updated:" + sdp);
 			if (RTCSessionDescription && sdpoffer instanceof RTCSessionDescription) {
 				return new RTCSessionDescription({type:'offer', sdp:sdp});
 			}
 			else if (window.SessionDescription && sdpoffer instanceof SessionDescription) {
+=======
+		/* Raju: call transfer HACK.
+		   change payload for telephone-event as 101 instead of default 126
+		   Chrome seems to be fialing 126 to 101 payload transition.
+		 */
+		console.debug("Changing DTMF payload to 101") ;
+		sdp = sdp.replace("SAVPF 111 103 104 0 8 107 106 105 13 126\r\n", "SAVPF 111 103 104 0 8 107 106 105 13 101\r\n")
+		sdp = sdp.replace("a=rtpmap:126 telephone-event/8000\r\n", "a=rtpmap:101 telephone-event/8000\r\n");
+
+		if (changed === true) {
+			//console.debug("updateSDPOfferMediaBundle() SDP has been updated:" + sdp);
+			if (window.RTCSessionDescription && sdpoffer instanceof RTCSessionDescription) {
+				return new RTCSessionDescription({type:'offer', sdp:sdp});
+			}
+			if (window.SessionDescription && sdpoffer instanceof SessionDescription) {
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 				return new SessionDescription(sdp);
 			}
 			return sdp;
@@ -2223,10 +2425,17 @@ console.trace = function (data) {
 	 * @param {string} sdp SDP
 	 * @private
 	 */
+<<<<<<< HEAD
 	this.updateSDPCrypto = function (sdpoffer, direction) {
 		console.debug('updateSDPCrypto()');
 		var sdp, changed, idx;
 		if (RTCSessionDescription && sdpoffer instanceof RTCSessionDescription) {
+=======
+	this.updateSDPRemoveCrypto = function (sdpoffer) {
+		console.debug('updateSDPRemoveCrypto()');
+		var sdp, changed, idx;
+		if (window.RTCSessionDescription && sdpoffer instanceof RTCSessionDescription) {
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			sdp = sdpoffer.sdp;
 		} else if (window.SessionDescription && sdpoffer instanceof SessionDescription) {
 			sdp = sdpoffer.toSdp();
@@ -2235,6 +2444,7 @@ console.trace = function (data) {
 		}
 
 		changed = false;
+<<<<<<< HEAD
 		if(this.session.config.providerConfig.crypto.toLowerCase() !== "dtls-srtp") {
 			idx = sdp.indexOf("a=crypto:0 ");
 			if (idx !== -1) {
@@ -2269,15 +2479,35 @@ console.trace = function (data) {
 				return new RTCSessionDescription({type:'offer', sdp:sdp});
 			}
 			else if (window.SessionDescription && sdpoffer instanceof SessionDescription) {
+=======
+
+		idx = sdp.indexOf("a=crypto:0 ");
+		if (idx !== -1) {
+			changed = true;
+			sdp = sdp.replace(/a=crypto:0.*\r\n/g, "");
+		}
+
+		if (changed === true) {
+			//console.debug("updateSDPRemoveCrypto() SDP has been updated:" + sdp);
+			if (window.RTCSessionDescription && sdpoffer instanceof RTCSessionDescription) {
+				return new RTCSessionDescription({type:'offer', sdp:sdp});
+			}
+			if (window.SessionDescription && sdpoffer instanceof SessionDescription) {
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 				return new SessionDescription(sdp);
 			}
 			return sdp;
 		}
+<<<<<<< HEAD
 		console.debug("updateSDPCrypto() SDP has not been updated)");
+=======
+		console.debug("updateSDPRemoveCrypto() SDP has not been updated)");
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 		return sdpoffer;
 	};
 
 	/**
+<<<<<<< HEAD
 	 * @summary Updates a SDP to support DTLS.
 	 * @param {string} type Type of SDP (offer or answer)
 	 * @private
@@ -2311,6 +2541,8 @@ console.trace = function (data) {
 	};
 
 	/**
+=======
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 	 * @summary Updates a SDP.
 	 * @param {string} sdp SDP
 	 * @private
@@ -2318,7 +2550,11 @@ console.trace = function (data) {
 	this.updateSDPAddCodecs = function (sdpoffer) {
 		console.debug('updateSDPAddCodecs()');
 		var sdp, changed, m;
+<<<<<<< HEAD
 		if (RTCSessionDescription && sdpoffer instanceof RTCSessionDescription) {
+=======
+		if (window.RTCSessionDescription && sdpoffer instanceof RTCSessionDescription) {
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			sdp = sdpoffer.sdp;
 		} else if (window.SessionDescription && sdpoffer instanceof SessionDescription) {
 			sdp = sdpoffer.toSdp();
@@ -2349,6 +2585,7 @@ console.trace = function (data) {
 				sdp = m.join('m=');
 			}
 		}
+<<<<<<< HEAD
 		if ((/m=audio .* RTP\/SAVPF/).test(sdp) && !(/a=rtpmap:.* opus\//).test(sdp)) {
 			m = sdp.split('m=');
 			for (var i = 0; i < m.length; i++) {
@@ -2373,6 +2610,15 @@ console.trace = function (data) {
 				return new RTCSessionDescription({type:'offer', sdp:sdp});
 			}
 			else if (window.SessionDescription && sdpoffer instanceof SessionDescription) {
+=======
+
+		if (changed === true) {
+			console.debug("updateSDPAddCodecs() SDP has been updated:" + sdp);
+			if (window.RTCSessionDescription && sdpoffer instanceof RTCSessionDescription) {
+				return new RTCSessionDescription({type:'offer', sdp:sdp});
+			}
+			if (window.SessionDescription && sdpoffer instanceof SessionDescription) {
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 				return new SessionDescription(sdp);
 			}
 			return sdp;
@@ -2390,7 +2636,11 @@ console.trace = function (data) {
 	this.updateSDPForTempWorkarounds = function (sdp, type) {
 		console.debug('updateSDPForTempWorkarounds()');
 		var outsdp, idx, changed ;
+<<<<<<< HEAD
 		if (RTCSessionDescription && sdp instanceof RTCSessionDescription) {
+=======
+		if (window.RTCSessionDescription && sdp instanceof RTCSessionDescription) {
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			outsdp = sdp.sdp;
 		} else if (window.SessionDescription && sdp instanceof SessionDescription) {
 			outsdp = sdp.toSdp();
@@ -2399,6 +2649,7 @@ console.trace = function (data) {
 		}
 
 		changed = false;
+<<<<<<< HEAD
 		idx = outsdp.indexOf("acap:");
 		if (idx !== -1) {
 			// remove acap in the crypto line
@@ -2414,12 +2665,15 @@ console.trace = function (data) {
 			console.debug('Convert RTP/AVP to RTP/SAVPF');
 			outsdp = outsdp.replace(/ RTP\/AVP /g, " RTP/SAVPF ");
 		}
+=======
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 		idx = sdp.indexOf("SAVP ");
 		if (idx !== -1) {
 			// Chrome26+ is strict about getting RTP/SAVPF in SDP answer. if RTP/SAVP is received
 			// replace it with RTP/SAVPF.
 			changed = true;
 			console.debug('Convert SAVP to SAVPF');
+<<<<<<< HEAD
 			outsdp = outsdp.replace(/SAVP /g, "SAVPF ");
 		}
 		//changing rtpmap number in re-INVITE seems causing Chrome error. Currently only for telephone-event
@@ -2443,14 +2697,24 @@ console.trace = function (data) {
 					this.telephoneEvent = rtpmap[1];
 				}
 			}
+=======
+			sdp = sdp.replace(/SAVP /g, "SAVPF ");
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 		}
 
 		if (changed) {
 			console.debug('updateSDPForTempWorkarounds() SDP has been updated:' + outsdp);
+<<<<<<< HEAD
 			if (RTCSessionDescription && sdp instanceof RTCSessionDescription) {
 				return new RTCSessionDescription({type:type, sdp:outsdp});
 			}
 			else if (window.SessionDescription && sdp instanceof SessionDescription) {
+=======
+			if (window.RTCSessionDescription && sdp instanceof RTCSessionDescription) {
+				return new RTCSessionDescription({type:type, sdp:outsdp});
+			}
+			if (window.SessionDescription && sdp instanceof SessionDescription) {
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 				return new SessionDescription(outsdp);
 			}
 			return outsdp ;
@@ -2467,7 +2731,11 @@ console.trace = function (data) {
 	this.updateSDPMediaIceOption = function (sdp, type, iceoption) {
 		console.debug('updateSDPMediaIceOption()');
 		var outsdp, idx;
+<<<<<<< HEAD
 		if (RTCSessionDescription && sdp instanceof RTCSessionDescription) {
+=======
+		if (window.RTCSessionDescription && sdp instanceof RTCSessionDescription) {
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			outsdp = sdp.sdp;
 		} else if (window.SessionDescription && sdp instanceof SessionDescription) {
 			outsdp = sdp.toSdp();
@@ -2484,10 +2752,17 @@ console.trace = function (data) {
 
 		//console.debug('updateSDPMediaIceOption() SDP has been updated:' + outsdp);
 
+<<<<<<< HEAD
 		if (RTCSessionDescription && sdp instanceof RTCSessionDescription) {
 			return new RTCSessionDescription({type:type, sdp:outsdp});
 		}
 		else if (window.SessionDescription && sdp instanceof SessionDescription) {
+=======
+		if (window.RTCSessionDescription && sdp instanceof RTCSessionDescription) {
+			return new RTCSessionDescription({type:type, sdp:outsdp});
+		}
+		if (window.SessionDescription && sdp instanceof SessionDescription) {
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			return new SessionDescription(outsdp);
 		}
 		return outsdp;
@@ -2517,7 +2792,11 @@ console.trace = function (data) {
 		}
 
 		console.debug('updateSDPBandwidth() audioB=' + audioB + ' videoB=' + videoB);
+<<<<<<< HEAD
 		if (RTCSessionDescription && sdp instanceof RTCSessionDescription) {
+=======
+		if (window.RTCSessionDescription && sdp instanceof RTCSessionDescription) {
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			outsdp = sdp.sdp;
 		} else if (window.SessionDescription && sdp instanceof SessionDescription) {
 			outsdp = sdp.toSdp();
@@ -2543,10 +2822,17 @@ console.trace = function (data) {
 		if (changed) {
 			outsdp = m.join('m=');
 			console.debug('updateSDPBandwidth() SDP has been updated:' + outsdp);
+<<<<<<< HEAD
 			if (RTCSessionDescription && sdp instanceof RTCSessionDescription) {
 				return new RTCSessionDescription({type:type, sdp:outsdp});
 			}
 			else if (window.SessionDescription && sdp instanceof SessionDescription) {
+=======
+			if (window.RTCSessionDescription && sdp instanceof RTCSessionDescription) {
+				return new RTCSessionDescription({type:type, sdp:outsdp});
+			}
+			if (window.SessionDescription && sdp instanceof SessionDescription) {
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 				return new SessionDescription(outsdp);
 			}
 			return outsdp;
@@ -2582,9 +2868,16 @@ console.trace = function (data) {
 	*/
 	this.receivedInvite = function (ua, request, callapi) {
 		console.debug("Call.receivedInvite");
+<<<<<<< HEAD
 		// if(this.pc === null){
 		// 	this.createPeerConnection();
 		// }
+=======
+		if(webkitRTCPeerConnection===undefined){
+			console.error('webkitRTCPeerConnection is undefined!');
+			return;
+		}
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 		var from, res, event, rls, resources, idx, isReinvite;
 		if ((this.callStatus === this.CallStatus.IDLE) || ((this.activeCall === true) && 
 			(this.callStatus === this.CallStatus.CONFIRMED || 
@@ -2600,7 +2893,11 @@ console.trace = function (data) {
 			from = request.first('From').value;
 			this.targetAOR = [from.uri.toString()];
 			this.callId = request.first("Call-ID").value;
+<<<<<<< HEAD
 			this.remotePeerIds = [{id:this.targetAOR[0]}];
+=======
+			this.remotePeerIds = [{id:this.targetAOR}];
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			//this.isCallUpdate = false;
 			//this.isConferenceCall = false;
 
@@ -2655,7 +2952,11 @@ console.trace = function (data) {
 			}
 
 			if (isReinvite) {
+<<<<<<< HEAD
 				if (this.oldMediaTypes) {
+=======
+				if (this.oldMediaTypes !== undefined) {
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 					if (this.oldMediaTypes.indexOf('video') === -1 && this.mediaTypes.indexOf('video') !== -1) {
 						console.debug('receivedInvite(): upgrade');
 						this.callStatus = this.CallStatus.UPGRADING;
@@ -2728,8 +3029,11 @@ console.trace = function (data) {
 	*/
 	this.parseSDP = function () {
 		var sdp, sdpstr, sdpstr2, idx;
+<<<<<<< HEAD
 		// convert between sdes and dtls
 		this.sdpOffer = this.updateSDPForDTLS(this.sdpOffer, 'incoming');
+=======
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 		if (this.sdpOffer.search("m=message") !== -1) {
 			if ((this.sdpOffer.search("TCP/MSRP") !== -1) || (this.sdpOffer.search("TCP/TLS/MSRP") !== -1)) {
 				return false;
@@ -2742,12 +3046,21 @@ console.trace = function (data) {
 			} else {
 				this.mediaTypes = 'audio';
 			}
+<<<<<<< HEAD
 		} else if (this.sdpOffer.search("m=video") !== -1) {
 				this.mediaTypes = 'video';
 		} else if (this.sdpOffer.search("m=application") !== -1) {
 				this.mediaTypes = 'data';
 		} else {
 			this.mediaTypes = undefined;
+=======
+		} else {
+			if (this.sdpOffer.search("m=video") !== -1) {
+				this.mediaTypes = 'video';
+			} else {
+				this.mediaTypes = undefined;
+			}
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 		}
 
 		sdp = this.sdpOffer;
@@ -2963,7 +3276,11 @@ console.trace = function (data) {
 			this.callStatus = this.CallStatus.IDLE;
 			//TODO onStatus() or onError()
 			//plugin.settings.onCallStatus.call(this, callParams);
+<<<<<<< HEAD
 			this.bye();
+=======
+			this.sendBye();
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			return;
 		}
 		if ((this.callDirection === this.CallDirection.OUTGOING) && ((this.callStatus === this.CallStatus.CALLING) || (this.callStatus === this.CallStatus.RINGING))) {
@@ -2980,11 +3297,18 @@ console.trace = function (data) {
 				if (this.pc.remoteStreams !== undefined) {
 					remoteStream = this.pc.remoteStreams[0];
 					if (remoteStream !== undefined) {
+<<<<<<< HEAD
 						//-ff this.pc.removeStream(remoteStream);
 						console.debug("Call.receivedInviteResponse() remove remote stream (label=)" + remoteStream.label + ")");
 					}
 				}
 				sdp = this.updateSDPForDTLS(sdp, 'incoming');
+=======
+						this.pc.removeStream(remoteStream);
+						console.debug("Call.receivedInviteResponse() remove remote stream (label=)" + remoteStream.label + ")");
+					}
+				}
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 				sdp = this.updateSDPForTempWorkarounds(sdp, "answer");
 				if (this.session.config.providerConfig.iceType === "google-ice") {
 					sdp = this.updateSDPMediaIceOption(sdp, "answer", "google-ice");
@@ -3121,7 +3445,11 @@ console.trace = function (data) {
 	* @summary Accept an incoming call.
 	* @private
 	*/
+<<<<<<< HEAD
 	this.accept = function () {
+=======
+	this.accept= function () {
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 		console.debug("Call.accept()");
 		// if (params) {
 			// // update call's audio stream
@@ -3201,6 +3529,7 @@ console.trace = function (data) {
 			}
 			this.uaCall = null;
 		}
+<<<<<<< HEAD
 
 		if (this.dataChannel) {
 			this.dataChannel.close();
@@ -3330,6 +3659,50 @@ console.trace = function (data) {
 
 }
 
+=======
+
+		if (this.pc) {
+			this.pc.close();
+			this.pc = null;
+		}
+	};
+
+	this.errorCallback = function(error) {
+		console.trace(error);
+		this.callback.onError(error);
+	};
+
+
+	try {
+		if (session.config.providerConfig && typeof session.config.providerConfig.stun == 'string') {
+			var s = session.config.providerConfig.stun.replace(/^\s+|\s+$/g, '');
+			if (s !== '') {
+				this.iceServers = [{"url": "stun:"+s}];
+			}
+		}
+		if (this.iceServers === null) {
+			this.pc = new webkitRTCPeerConnection(null);
+		} else {
+			this.pc = new webkitRTCPeerConnection({"iceServers": this.iceServers});
+		}
+
+		//var self = this;
+		this.pc.onaddstream = this.onRTCPeerConnectionOnAddStream;
+		this.pc.onconnecting = this.onRTCPeerConnectionOnConnecting;
+		//this.pc.ongatheringchange = onRTCPeerConnectionOnGatheringChange;
+		this.pc.onicecandidate = this.onRTCPeerConnectionOnIceCandidate;
+		this.pc.onicechange = this.onRTCPeerConnectionOnIceChange;
+		this.pc.onnegotiationneeded = this.onRTCPeerConnectionOnNegotiationNeeded;
+		this.pc.onopen = this.onRTCPeerConnectionOnOpen;
+		this.pc.onremovestream = this.onRTCPeerConnectionOnRemoveStream;
+		this.pc.onstatechange = this.onRTCPeerConnectionOnStatusChange;
+	} catch (exception) {
+		console.debug("Call() Can not create a RTCPeerConnection instance, exception = " + exception);
+		console.error("Call() Can not create a RTCPeerConnection instance");
+	}
+}
+
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 	/**
 	* @summary Manages a resources list for conference call.
 	* @constructor
@@ -3601,9 +3974,14 @@ console.trace = function (data) {
 				providerConfig: {}
 			};
 			var fields = ['stun', 'bundle', 'iceType', 'crypto', 'conferenceFactoryURI', 
+<<<<<<< HEAD
 					'expires', 'addCodecs', 'dtmf', 'refreshTiled', 'audioBandwidth', 'videoBandwidth',
                     'persistentPC', 'breaker'];
 			var values = ['', true, 'standard-ice', '', '', '600', false, 'both', false, '', '', true, false];
+=======
+					'expires', 'addCodecs', 'dtmf', 'refreshTiled', 'audioBandwidth', 'videoBandwidth'];
+			var values = ['', true, 'standard-ice', '', '', '600', false, 'both', false, '', ''];
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
 			for (var i=0; i < fields.length; i++) {
 				if (sessionConfig.providerConfig && sessionConfig.providerConfig.hasOwnProperty(fields[i])) {
 					config.providerConfig[fields[i]] = sessionConfig.providerConfig[fields[i]];
@@ -3620,4 +3998,8 @@ console.trace = function (data) {
 
 	this.orcaALU = orcaALU;
 
+<<<<<<< HEAD
 })();
+=======
+})();
+>>>>>>> 24f75b01404601add022a72edf46deb1bbdeed7f
